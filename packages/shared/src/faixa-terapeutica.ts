@@ -139,7 +139,9 @@ export function conferirDuracao(
 
   const limiteEmDias = faixa.duracaoMaximaEmDias;
 
-  return dias > limiteEmDias ? { situacao: 'acima', limiteEmDias } : { situacao: 'dentro', limiteEmDias };
+  return dias > limiteEmDias
+    ? { situacao: 'acima', limiteEmDias }
+    : { situacao: 'dentro', limiteEmDias };
 }
 
 /** Frase pronta. `null` quando não há o que avisar. */

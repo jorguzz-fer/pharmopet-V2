@@ -51,13 +51,7 @@ export const criarTutorSchema = z.object({
   complemento: textoOpcional(80),
   bairro: textoOpcional(80),
   cidade: textoOpcional(80),
-  uf: z
-    .string()
-    .trim()
-    .toUpperCase()
-    .length(2, 'UF tem duas letras.')
-    .nullable()
-    .optional(),
+  uf: z.string().trim().toUpperCase().length(2, 'UF tem duas letras.').nullable().optional(),
   observacoes: textoOpcional(1_000),
 });
 export class CriarTutorDto extends createZodDto(criarTutorSchema) {}

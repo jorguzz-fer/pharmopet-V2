@@ -173,10 +173,7 @@ describe('receituário (contra Postgres)', () => {
     it('recusa FARMACIA cadastrando tutor — quem cadastra é quem atende', async () => {
       const farmacia = autenticado(await entrarComo('FARMACIA'));
 
-      await farmacia
-        .post('/api/v1/receituario/tutores')
-        .send({ nome: 'Marina Prado' })
-        .expect(403);
+      await farmacia.post('/api/v1/receituario/tutores').send({ nome: 'Marina Prado' }).expect(403);
     });
 
     it.each(['ADMIN', 'FARMACIA'] as const)('recusa %s abrindo receita', async (papel) => {
@@ -702,7 +699,10 @@ describe('receituário (contra Postgres)', () => {
       const id = await emitida(vet);
 
       await vet.post(`/api/v1/receituario/receitas/${id}/cancelar`).send({}).expect(400);
-      await vet.post(`/api/v1/receituario/receitas/${id}/cancelar`).send({ motivo: 'x' }).expect(400);
+      await vet
+        .post(`/api/v1/receituario/receitas/${id}/cancelar`)
+        .send({ motivo: 'x' })
+        .expect(400);
     });
 
     it('cancela, guarda o motivo e registra', async () => {

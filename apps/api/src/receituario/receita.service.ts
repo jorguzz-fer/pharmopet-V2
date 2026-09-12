@@ -82,7 +82,9 @@ const COM_TUDO = {
       forma: { select: { id: true, nome: true } },
       itens: {
         orderBy: { ordem: 'asc' },
-        include: { insumo: { select: { id: true, codigo: true, descricao: true, listaDeControle: true } } },
+        include: {
+          insumo: { select: { id: true, codigo: true, descricao: true, listaDeControle: true } },
+        },
       },
     },
   },
@@ -186,9 +188,7 @@ export class ReceitaService {
     this.exigirRascunhoDoAutor(receita, ator);
 
     if (!ator.crmv) {
-      throw new BadRequestException(
-        'Receita exige CRMV. Complete o seu cadastro antes de emitir.',
-      );
+      throw new BadRequestException('Receita exige CRMV. Complete o seu cadastro antes de emitir.');
     }
 
     const peso = receita.paciente.pesoEmGramas;
@@ -435,7 +435,6 @@ export class ReceitaService {
       if (insumos.size !== formulacao.itens.length) {
         throw new BadRequestException('O mesmo insumo aparece duas vezes na mesma fórmula.');
       }
-
 
       return {
         forma: { connect: { id: formulacao.formaId } },

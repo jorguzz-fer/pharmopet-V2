@@ -14,7 +14,11 @@ describe('prazoDaReceita', () => {
   it('receita comum cai no prazo de operação', () => {
     const prazo = prazoDaReceita([null, null]);
 
-    expect(prazo).toEqual({ tipo: 'definido', dias: PRAZO_PADRAO_EM_DIAS, motivo: expect.any(String) });
+    expect(prazo).toEqual({
+      tipo: 'definido',
+      dias: PRAZO_PADRAO_EM_DIAS,
+      motivo: expect.any(String),
+    });
   });
 
   it.each([

@@ -98,7 +98,8 @@ export class ReceitaController {
   @ApiOperation({ summary: 'Emite a receita: numera, congela e passa a valer' })
   @ApiOkResponse({ type: ReceitaDto })
   @ApiBadRequestResponse({
-    description: 'Falta CRMV, falta peso do paciente, há impedimento na fórmula ou lista sem prazo.',
+    description:
+      'Falta CRMV, falta peso do paciente, há impedimento na fórmula ou lista sem prazo.',
   })
   async emitir(
     @Param('id') id: string,
@@ -119,9 +120,7 @@ export class ReceitaController {
     @Eu() eu: UsuarioAutenticado,
     @Req() requisicao: RequisicaoComUsuario,
   ): Promise<ReceitaDto> {
-    return this.montar(
-      await this.receitas.cancelar(id, corpo.motivo, eu, contextoDe(requisicao)),
-    );
+    return this.montar(await this.receitas.cancelar(id, corpo.motivo, eu, contextoDe(requisicao)));
   }
 
   private async montar(receita: ReceitaDoBanco): Promise<ReceitaDto> {
