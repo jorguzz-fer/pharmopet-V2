@@ -53,20 +53,25 @@ na revisão. O inverso — proteger uma a uma — depende de ninguém esquecer.
 - Escalar horizontalmente não exige sessão compartilhada em Redis, porque o
   estado já está no Postgres que todos os nós enxergam.
 
-## O que ficou de fora, e por quê
+## MFA: decidido não fazer
 
-O blueprint pede **MFA obrigatório para papéis sensíveis**. Não está aqui. TOTP
-com códigos de recuperação é um fluxo inteiro — inscrição, validação, recuperação
-de quem perdeu o telefone — e amarrá-lo ao mesmo PR da fundação de autenticação
-daria uma mudança difícil de revisar com atenção, justamente onde a atenção mais
-importa.
+O blueprint pede **MFA obrigatório para papéis sensíveis**. Aqui não haverá, e
+isso é uma decisão consciente do dono do produto, não uma pendência: um segundo
+fator a cada entrada é burocracia demais para o ganho, num sistema usado o dia
+inteiro por um punhado de pessoas conhecidas, dentro de uma farmácia.
 
-O modelo já comporta: falta um campo de segredo TOTP no usuário e um passo entre
-a conferência da senha e a abertura da sessão. Enquanto não existir, **a conta
-ADMIN está protegida só por senha** — o que é aceitável numa instalação com uma
-única farmácia e acesso restrito, e não seria se o sistema abrisse para o
-público.
+A consequência está aceita: **uma senha de ADMIN que vaze dá acesso total**, sem
+nenhum obstáculo a mais. O que resta no lugar é o que este PR trouxe — Argon2id,
+bloqueio progressivo por conta, limite por origem, revogação imediata, e a trilha
+de auditoria que registra toda entrada aceita e recusada.
 
-Também ficaram de fora, pelo mesmo motivo de escopo: login social OIDC,
-WebAuthn, verificação de e-mail e redefinição de senha por link. A redefinição
-hoje é a administração criar uma senha nova — que é seguro, embora manual.
+Isto se revisa se a premissa mudar: um segundo prescritor externo, acesso de fora
+da clínica, ou o sistema deixando de servir uma farmácia só. O modelo comporta
+sem migração destrutiva — falta um campo de segredo TOTP no usuário e um passo
+entre a conferência da senha e a abertura da sessão.
+
+## O que ficou de fora por escopo
+
+Login social OIDC, WebAuthn, verificação de e-mail e redefinição de senha por
+link. A redefinição hoje é a administração criar uma senha nova — seguro, ainda
+que manual, e sem depender de provedor de e-mail.
