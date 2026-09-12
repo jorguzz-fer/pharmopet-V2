@@ -52,21 +52,22 @@ remova as seções não aplicáveis e preencha os pontos marcados `‹decidir›
 Padrão **TypeScript end-to-end** (um só ecossistema de tipos do backend ao front,
 máximo reuso e contratação mais simples). Ajuste por contexto.
 
-| Camada | Recomendação padrão | Alternativas / quando |
-|--------|---------------------|------------------------|
-| Linguagem | **TypeScript** (Node.js LTS) | Go (core de alta performance/isolamento); Elixir (realtime intenso) |
-| Backend | **NestJS** (DI, guards/interceptors, modular) | Fastify puro (mais enxuto); Go + chi/echo |
-| API | **REST + OpenAPI 3.1** versionada | GraphQL só quando o cliente exigir (mais superfície/authz complexa) |
-| ORM/DB toolkit | **Drizzle** (schema em TS, SQL previsível) ou **Prisma** (DX) | Drizzle quando se quer controle fino de SQL |
-| Banco | **PostgreSQL** | SQLite (apps pequenos/edge); managed PG quando houver budget |
-| Cache/fila | **Redis** | NATS/RabbitMQ para mensageria robusta |
-| Object storage | **S3-compatível** (Cloudflare R2, sem egress) | MinIO self-hosted; S3/GCS gerenciado |
-| Front web | **React + TypeScript**, mobile-first, PWA | Vue/Svelte conforme time; Next.js se quiser SSR/BFF no front |
-| Estilo/UI | **Tailwind** + design system próprio | Component lib (MUI) quando velocidade > customização |
-| Mobile nativo | **React Native (Expo)** reusando contratos | Nativo puro (Swift/Kotlin) quando exigir performance/SDKs específicos |
-| Auth | **OAuth2/OIDC + MFA**, sessão server-side | Provedor gerenciado (Auth0/Clerk/Keycloak) vs. próprio |
+| Camada         | Recomendação padrão                                           | Alternativas / quando                                                 |
+| -------------- | ------------------------------------------------------------- | --------------------------------------------------------------------- |
+| Linguagem      | **TypeScript** (Node.js LTS)                                  | Go (core de alta performance/isolamento); Elixir (realtime intenso)   |
+| Backend        | **NestJS** (DI, guards/interceptors, modular)                 | Fastify puro (mais enxuto); Go + chi/echo                             |
+| API            | **REST + OpenAPI 3.1** versionada                             | GraphQL só quando o cliente exigir (mais superfície/authz complexa)   |
+| ORM/DB toolkit | **Drizzle** (schema em TS, SQL previsível) ou **Prisma** (DX) | Drizzle quando se quer controle fino de SQL                           |
+| Banco          | **PostgreSQL**                                                | SQLite (apps pequenos/edge); managed PG quando houver budget          |
+| Cache/fila     | **Redis**                                                     | NATS/RabbitMQ para mensageria robusta                                 |
+| Object storage | **S3-compatível** (Cloudflare R2, sem egress)                 | MinIO self-hosted; S3/GCS gerenciado                                  |
+| Front web      | **React + TypeScript**, mobile-first, PWA                     | Vue/Svelte conforme time; Next.js se quiser SSR/BFF no front          |
+| Estilo/UI      | **Tailwind** + design system próprio                          | Component lib (MUI) quando velocidade > customização                  |
+| Mobile nativo  | **React Native (Expo)** reusando contratos                    | Nativo puro (Swift/Kotlin) quando exigir performance/SDKs específicos |
+| Auth           | **OAuth2/OIDC + MFA**, sessão server-side                     | Provedor gerenciado (Auth0/Clerk/Keycloak) vs. próprio                |
 
 **Checklist**
+
 - [ ] Stack escolhida e justificada (1 linha por camada).
 - [ ] Versões LTS fixadas; `engines`/`.nvmrc`/`.tool-versions` no repo.
 - [ ] Alternativas relevantes registradas como ADR.
@@ -89,6 +90,7 @@ máximo reuso e contratação mais simples). Ajuste por contexto.
   justifique extração.
 
 **Checklist**
+
 - [ ] Domínios mapeados; um diagrama de topologia no repo.
 - [ ] Dependências apontam para o domínio (sem regra de negócio na borda).
 - [ ] Fluxos assíncronos com retry + dead-letter.
@@ -120,6 +122,7 @@ repo/
 - Convenção de imports por path alias; sem dependências circulares entre packages.
 
 **Checklist**
+
 - [ ] Monorepo com workspaces; build incremental.
 - [ ] `shared`/`api-client`/`design-tokens` isolam o que é reusado.
 
@@ -151,6 +154,7 @@ evoluindo para orquestração só quando necessário.
   observar custo por ambiente.
 
 **Checklist**
+
 - [ ] Build reprodutível em container; imagem escaneada (CVE).
 - [ ] Só 443 público; resto privado; firewall ativo.
 - [ ] CI/CD com rollback; staging espelha prod.
@@ -185,17 +189,18 @@ evoluindo para orquestração só quando necessário.
 
 **Modelo de ameaças (resumo)**
 
-| Ameaça | Mitigação |
-|--------|-----------|
-| Roubo de token (XSS) | Cookie httpOnly; CSP estrita; tokens fora do JS |
-| CSRF | SameSite + token anti-CSRF em mutações |
-| Força bruta / stuffing | Rate limit, lockout, MFA |
-| Acesso direto a arquivos | Bucket privado + URL assinada curta pós-authz |
-| Exposição de serviço interno | Tudo privado; só BFF público; mTLS interno |
-| Escalonamento de privilégio | RBAC server-side, menor privilégio, authz por objeto |
-| Dependência comprometida | SCA/secret scanning, lockfile, imagens escaneadas |
+| Ameaça                       | Mitigação                                            |
+| ---------------------------- | ---------------------------------------------------- |
+| Roubo de token (XSS)         | Cookie httpOnly; CSP estrita; tokens fora do JS      |
+| CSRF                         | SameSite + token anti-CSRF em mutações               |
+| Força bruta / stuffing       | Rate limit, lockout, MFA                             |
+| Acesso direto a arquivos     | Bucket privado + URL assinada curta pós-authz        |
+| Exposição de serviço interno | Tudo privado; só BFF público; mTLS interno           |
+| Escalonamento de privilégio  | RBAC server-side, menor privilégio, authz por objeto |
+| Dependência comprometida     | SCA/secret scanning, lockfile, imagens escaneadas    |
 
 **Checklist**
+
 - [ ] Auth/authz 100% server-side; MFA para papéis sensíveis.
 - [ ] Segredos em cofre; nada sensível no repo/bundle.
 - [ ] CI roda SAST/SCA/secret-scan; imagem escaneada.
@@ -203,7 +208,7 @@ evoluindo para orquestração só quando necessário.
 
 ---
 
-## 7. Multitenancy  *(OPCIONAL — quando solicitado)*
+## 7. Multitenancy _(OPCIONAL — quando solicitado)_
 
 Aplicar quando uma instalação serve **vários clientes/organizações** com
 isolamento de dados.
@@ -229,6 +234,7 @@ isolamento de dados.
   banco-por-tenant (isolamento máximo, custo alto) — para casos enterprise.
 
 **Checklist**
+
 - [ ] `tenant_id` em toda tabela de domínio + índices compostos.
 - [ ] RLS ativo; app sem BYPASSRLS.
 - [ ] Teste automatizado: tenant A nunca lê tenant B.
@@ -236,7 +242,7 @@ isolamento de dados.
 
 ---
 
-## 8. API-first  *(OPCIONAL — quando solicitado)*
+## 8. API-first _(OPCIONAL — quando solicitado)_
 
 Aplicar quando a API for consumida por **terceiros/outras aplicações** (não só
 pelo próprio front).
@@ -246,8 +252,8 @@ pelo próprio front).
 - **Exposta, porém nunca aberta**: todo endpoint exige **credencial + escopo +
   tenant**. Não existe rota de negócio anônima.
 - **Dois planos de acesso**:
-  - *First-party* (web/mobile próprios) → sessão/OIDC.
-  - *Third-party/M2M* (integrações) → **OAuth2 Client Credentials**; **Authorization
+  - _First-party_ (web/mobile próprios) → sessão/OIDC.
+  - _Third-party/M2M_ (integrações) → **OAuth2 Client Credentials**; **Authorization
     Code + PKCE** quando age em nome de um usuário (consentimento + revogação).
 - **Escopos granulares** (`recurso:ação`) + RBAC + (se multitenant) RLS por tenant.
 - **Webhooks de saída**: eventos de domínio assinados com **HMAC**, com retries,
@@ -260,6 +266,7 @@ pelo próprio front).
   auditoria de todo acesso; sem acesso direto a banco/storage.
 
 **Checklist**
+
 - [ ] OpenAPI como fonte de verdade; cliente gerado.
 - [ ] M2M via OAuth2 + escopos; nada anônimo.
 - [ ] Webhooks assinados (HMAC) com retry/dead-letter.
@@ -283,6 +290,7 @@ pelo próprio front).
 - **White-label leve** por tenant (logo/cor primária) quando multitenant.
 
 **Checklist**
+
 - [ ] Tokens + componentes base isolam a lib visual.
 - [ ] Acessibilidade e i18n previstas.
 - [ ] Licença da base de UI compatível com o uso (ex.: SaaS pago → licença adequada).
@@ -302,6 +310,7 @@ pelo próprio front).
 - **Backups/DR**: ver seção 5.
 
 **Checklist**
+
 - [ ] Migrations no repo, aplicadas por CI/CD.
 - [ ] Índices e constraints revisados.
 - [ ] Estratégia de retenção/descarte definida.
@@ -319,6 +328,7 @@ pelo próprio front).
 - Painéis acessíveis só por rede interna/VPN.
 
 **Checklist**
+
 - [ ] Correlação por `request_id` ponta a ponta.
 - [ ] Alertas acionáveis (não ruído).
 - [ ] Erros capturados com contexto.
@@ -338,6 +348,7 @@ pelo próprio front).
 - **Feature flags** para entregar incremental e desligar rápido.
 
 **Checklist**
+
 - [ ] CI bloqueia merge sem lint/types/test verdes.
 - [ ] Fluxos críticos cobertos por e2e.
 - [ ] DoD acordada pelo time.
@@ -358,6 +369,7 @@ pelo próprio front).
 - **Versionamento**: SemVer; releases tagueadas; changelog mantido.
 
 **Checklist**
+
 - [ ] Conventional commits + template de PR.
 - [ ] Review + CI obrigatórios para merge.
 - [ ] Decisões relevantes viram ADR.
@@ -376,6 +388,7 @@ pelo próprio front).
 - **Dados sensíveis**: classificação, criptografia, acesso auditado.
 
 **Checklist**
+
 - [ ] Mapa de dados pessoais + base legal.
 - [ ] Processo para direitos do titular.
 - [ ] DPAs com terceiros que processam dados.
@@ -391,6 +404,7 @@ pelo próprio front).
 - **Degradação graciosa**: se uma integração externa cair, o núcleo continua.
 
 **Checklist**
+
 - [ ] Orçamentos de performance definidos e medidos.
 - [ ] Auditoria de acessibilidade no fluxo principal.
 - [ ] i18n preparada mesmo que comece num idioma.
@@ -406,12 +420,12 @@ Ordem sugerida para tirar do zero:
 3. [ ] Criar **monorepo** (seção 4) com workspaces e CI básica.
 4. [ ] Subir **infra local** (Docker Compose: DB, cache, storage) e `.env.example`.
 5. [ ] Implementar **auth + RBAC server-side** (seção 6); MFA para admin.
-6. [ ] *(se multitenant)* Ativar `tenant_id` + **RLS** e teste de isolamento.
+6. [ ] _(se multitenant)_ Ativar `tenant_id` + **RLS** e teste de isolamento.
 7. [ ] Definir **contrato OpenAPI** e gerar cliente/tipos.
 8. [ ] Montar **design system** (tokens + componentes base) e shell de navegação.
 9. [ ] Pipeline **CI/CD** (lint, types, test, SAST/SCA/secret-scan, build, deploy).
 10. [ ] **Observabilidade** (logs/métricas/erros) e **backups** testados.
-11. [ ] *(se API-first)* Plano de acesso M2M (OAuth2 + escopos) e webhooks.
+11. [ ] _(se API-first)_ Plano de acesso M2M (OAuth2 + escopos) e webhooks.
 12. [ ] Documentar: README, ADRs, runbook de deploy/rollback.
 
 ---
@@ -425,16 +439,20 @@ Ordem sugerida para tirar do zero:
 - Data: AAAA-MM-DD
 
 ## Contexto
+
 <problema, forças, restrições>
 
 ## Opções consideradas
+
 1. <opção A> — prós/contras
 2. <opção B> — prós/contras
 
 ## Decisão
+
 <o que foi escolhido e por quê>
 
 ## Consequências
+
 <impactos positivos/negativos, dívidas assumidas, follow-ups>
 ```
 
