@@ -1,3 +1,3 @@
-export * from './tokens';
-export * from './contraste';
-export * from './css';
+export * from './tokens.js';
+export * from './contraste.js';
+export * from './css.js';

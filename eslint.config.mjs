@@ -4,7 +4,14 @@ import prettier from 'eslint-config-prettier';
 
 export default tseslint.config(
   {
-    ignores: ['**/dist/**', '**/node_modules/**', '**/coverage/**', '**/*.config.*'],
+    ignores: [
+      '**/dist/**',
+      '**/node_modules/**',
+      '**/coverage/**',
+      '**/*.config.*',
+      // Código de gerador: aqui a correção é mudar o contrato, não o arquivo.
+      'packages/api-client/src/gerado/**',
+    ],
   },
   js.configs.recommended,
   ...tseslint.configs.recommended,
@@ -16,6 +23,13 @@ export default tseslint.config(
       ],
       // O domínio é tipado ponta a ponta; `any` some a fronteira de tipos.
       '@typescript-eslint/no-explicit-any': 'error',
+    },
+  },
+  {
+    // Scripts de build rodam no Node, fora do navegador e fora do tsconfig.
+    files: ['**/scripts/**/*.mjs'],
+    languageOptions: {
+      globals: { process: 'readonly', console: 'readonly' },
     },
   },
   prettier,

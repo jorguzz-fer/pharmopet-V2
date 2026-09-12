@@ -10,7 +10,8 @@
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "jest",
     "prisma:generate": "prisma generate",
-    "prisma:migrate": "prisma migrate deploy"
+    "prisma:migrate": "prisma migrate deploy",
+    "openapi": "nest build && node dist/openapi/gerar.js"
   },
   "dependencies": {
     "@nestjs/common": "^11.1.6",

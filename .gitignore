@@ -14,3 +14,7 @@ npm-debug.log*
 
 .idea/
 .vscode/
+
+# Saída do gerador de tema. Nasce dos tokens a cada build, como o dist —
+# versioná-la criaria uma segunda cópia da paleta, livre para divergir.
+apps/web/src/estilos/tema.gerado.css

@@ -5,4 +5,4 @@
  * mais de um app. Utilitário de um app só mora no app.
  */
 
-export * from './posologia';
+export * from './posologia.js';

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { calcularPosologia, doseEmGramas } from './posologia';
+import { calcularPosologia, doseEmGramas } from './posologia.js';
 
 describe('calcularPosologia', () => {
   /**

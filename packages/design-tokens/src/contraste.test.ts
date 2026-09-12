@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { contraste, atendeAA, paraRgb, MINIMO_AA_TEXTO } from './contraste';
-import { cor, estado } from './tokens';
+import { contraste, atendeAA, paraRgb, MINIMO_AA_TEXTO } from './contraste.js';
+import { cor, estado } from './tokens.js';
 
 describe('contraste', () => {
   it('dá 21 entre preto e branco', () => {
@@ -36,8 +36,14 @@ describe('pares de cor da interface atendem WCAG AA', () => {
     ['ação turquesa sobre branco', cor.turquesa[700], branco],
     ['branco sobre ação turquesa', branco, cor.turquesa[700]],
     ['texto lilás sobre branco', cor.lilas[700], branco],
-    ['texto principal sobre fundo', cor.neutro[900], cor.neutro[50]],
+    ['texto lilás sobre fundo lilás', cor.lilas[700], cor.lilas[50]],
+    ['texto principal sobre branco', cor.neutro[900], branco],
+    ['texto principal sobre fundo da aplicação', cor.neutro[900], cor.neutro[50]],
     ['texto secundário sobre branco', cor.neutro[700], branco],
+    ['texto secundário sobre fundo da aplicação', cor.neutro[700], cor.neutro[50]],
+    ['texto de apoio sobre branco', cor.neutro[500], branco],
+    ['texto de apoio sobre fundo da aplicação', cor.neutro[500], cor.neutro[50]],
+    ['texto de apoio sobre superfície 100', cor.neutro[500], cor.neutro[100]],
     ['texto de controlado sobre seu fundo', estado.controlado.texto, estado.controlado.fundo],
     [
       'texto de antimicrobiano sobre seu fundo',
@@ -45,8 +51,20 @@ describe('pares de cor da interface atendem WCAG AA', () => {
       estado.antimicrobiano.fundo,
     ],
     ['texto de sucesso sobre seu fundo', estado.sucesso.texto, estado.sucesso.fundo],
+    ['marca sobre turquesa escuro', cor.sobreEscuro.marca, cor.turquesa[900]],
+    ['marca secundária sobre turquesa escuro', cor.sobreEscuro.marcaSecundaria, cor.turquesa[900]],
+    ['texto sobre turquesa escuro', cor.sobreEscuro.texto, cor.turquesa[900]],
+    ['branco sobre turquesa escuro', branco, cor.turquesa[900]],
   ])('%s', (_nome, frente, fundo) => {
     expect(contraste(frente, fundo)).toBeGreaterThanOrEqual(MINIMO_AA_TEXTO);
+  });
+
+  /**
+   * Neutros claros existem para borda, divisor e controle desabilitado. Se
+   * alguém usá-los como texto, a leitura quebra — o teste fixa a fronteira.
+   */
+  it('neutro 300 não serve como cor de texto', () => {
+    expect(atendeAA(cor.neutro[300], branco)).toBe(false);
   });
 
   /**

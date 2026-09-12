@@ -15,17 +15,26 @@
     "lint": "eslint .",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "verify": "pnpm lint && pnpm typecheck && pnpm test && pnpm build",
+    "//build:pacotes": "Os apps consomem os pacotes pelo dist. Num checkout limpo o dist não existe, e sem este passo o typecheck do web quebra antes de qualquer build.",
+    "build:pacotes": "pnpm --filter \"./packages/**\" build",
+    "contrato": "pnpm --filter @pharmopet/api openapi && pnpm --filter @pharmopet/api-client gerar",
+    "verify": "pnpm build:pacotes && pnpm lint && pnpm typecheck && pnpm test && pnpm build",
     "infra:up": "docker compose -f infra/docker-compose.yml up -d",
     "infra:down": "docker compose -f infra/docker-compose.yml down"
   },
   "pnpm": {
-    "//": "pnpm 10 bloqueia scripts de instalação por padrão. Só o Prisma precisa dos seus, para baixar os engines.",
+    "//": "pnpm 10 bloqueia scripts de instalação por padrão. Liberado só o que precisa colocar binário no lugar: os engines do Prisma e o do esbuild, que o Vite usa.",
     "onlyBuiltDependencies": [
+      "esbuild",
       "@prisma/client",
       "@prisma/engines",
       "prisma"
-    ]
+    ],
+    "//overrides": "Dois transitivos ficaram presos em versão vulnerável porque quem os traz os fixa com versão exata, sem faixa: @nestjs/platform-express@11.2.3 fixa multer 2.2.0 (GHSA-wc9g-mqfw-jrwm, -qfvm-cv95-jqjf, -535w-7cp7-47q4) e @prisma/config@6.19.3 fixa deepmerge-ts 7.1.5 (GHSA-ggr8-5vv4-36mx). Não há patch de Nest 11 nem de Prisma 6 que os solte. Remover cada linha quando o pacote de cima subir sozinho.",
+    "overrides": {
+      "multer": "^2.3.0",
+      "deepmerge-ts": "^8.0.0"
+    }
   },
   "devDependencies": {
     "@eslint/js": "^9.39.2",

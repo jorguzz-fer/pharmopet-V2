@@ -1,0 +1,46 @@
+@import 'tailwindcss';
+@import './tema.gerado.css';
+
+/* Fontes servidas do próprio domínio, não de CDN de terceiro: uma requisição
+   a mais para fora carrega IP de quem usa o sistema, e aqui isso é dado de
+   clínica. Também evita que a tela dependa de um serviço externo estar de pé.
+
+   Só o subconjunto latino. O import sem prefixo traz cirílico, grego e
+   vietnamita junto — trinta arquivos de fonte que ninguém neste sistema vai
+   ler. Se um dia houver i18n para esses alfabetos, é aqui que se acrescenta. */
+@import '@fontsource/manrope/latin-400.css';
+@import '@fontsource/manrope/latin-600.css';
+@import '@fontsource/manrope/latin-800.css';
+@import '@fontsource/ibm-plex-sans/latin-400.css';
+@import '@fontsource/ibm-plex-sans/latin-500.css';
+@import '@fontsource/ibm-plex-sans/latin-600.css';
+@import '@fontsource/ibm-plex-mono/latin-400.css';
+@import '@fontsource/ibm-plex-mono/latin-500.css';
+
+@layer base {
+  html {
+    font-family: var(--font-corpo);
+    color: var(--color-neutro-900);
+    background-color: var(--color-neutro-50);
+    /* Preço e dose em coluna só alinham com numeral tabular. */
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* O foco é a única pista de onde se está para quem navega por teclado.
+     Nunca removê-lo; deixá-lo visível sobre fundo claro e sobre fundo escuro. */
+  :focus-visible {
+    outline: 2px solid var(--color-turquesa-700);
+    outline-offset: 2px;
+  }
+
+  /* Respeita quem pediu menos movimento no sistema operacional. */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}

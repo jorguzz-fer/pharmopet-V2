@@ -1,0 +1,15 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    // ESM de verdade: o pacote é consumido pelo navegador via bundler, mas
+    // "nodenext" obriga o import relativo a trazer a extensão .js, e é isso
+    // que mantém o dist carregável também fora de bundler.
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "lib": ["ES2023", "DOM"],
+    "rootDir": "src",
+    "outDir": "dist",
+    "tsBuildInfoFile": "dist/.tsbuildinfo"
+  },
+  "include": ["src/**/*"]
+}
