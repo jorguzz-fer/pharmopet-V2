@@ -24,15 +24,31 @@ export const cor = {
     400: '#9C90BA',
     700: '#61548A',
   },
-  /** Neutros com viés levemente frio, para assentar sobre o turquesa. */
+  /**
+   * Neutros com viés levemente frio, para assentar sobre o turquesa.
+   *
+   * Do 500 para baixo (números maiores) é texto; 300 e acima é borda, divisor
+   * e controle desabilitado — nunca texto, porque não alcançam contraste AA.
+   */
   neutro: {
     0: '#FFFFFF',
     50: '#F7FAFA',
     100: '#EEF3F3',
     200: '#DFE7E7',
-    500: '#71807F',
+    300: '#C6D2D2',
+    500: '#5E6D6C',
     700: '#3E4B4A',
     900: '#17211F',
+  },
+  /**
+   * Escala para uso sobre o turquesa escuro (painel de login, topo da receita
+   * do tutor). Fundo de referência: turquesa 900.
+   */
+  sobreEscuro: {
+    marca: '#4ED8D1',
+    marcaSecundaria: '#C3B9DC',
+    texto: '#B4DEDB',
+    fundoElevado: '#0E605C',
   },
 } as const;
 
