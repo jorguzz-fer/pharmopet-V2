@@ -18,7 +18,8 @@
     "//build:pacotes": "Os apps consomem os pacotes pelo dist. Num checkout limpo o dist não existe, e sem este passo o typecheck do web quebra antes de qualquer build.",
     "build:pacotes": "pnpm --filter \"./packages/**\" build",
     "contrato": "pnpm --filter @pharmopet/api openapi && pnpm --filter @pharmopet/api-client gerar",
-    "verify": "pnpm build:pacotes && pnpm lint && pnpm typecheck && pnpm test && pnpm build",
+    "//verify": "Tudo o que o CI cobra, na mesma ordem. Se um passo do CI não estiver aqui, ele vira uma falha que só aparece depois do push — foi o que aconteceu com o format:check.",
+    "verify": "pnpm build:pacotes && pnpm format:check && pnpm lint && pnpm typecheck && pnpm test && pnpm build",
     "infra:up": "docker compose -f infra/docker-compose.yml up -d",
     "infra:down": "docker compose -f infra/docker-compose.yml down"
   },

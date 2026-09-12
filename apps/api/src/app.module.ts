@@ -8,6 +8,7 @@ import { IdentidadeModule } from './identidade/identidade.module';
 import { PapeisGuard } from './identidade/papeis.guard';
 import { SessaoGuard } from './identidade/sessao.guard';
 import { PrismaModule } from './prisma/prisma.module';
+import { ReceituarioModule } from './receituario/receituario.module';
 import { validarEnv } from './config/env';
 
 /**
@@ -26,6 +27,7 @@ import { validarEnv } from './config/env';
     PrismaModule,
     IdentidadeModule,
     CatalogoModule,
+    ReceituarioModule,
     HealthModule,
   ],
   /**

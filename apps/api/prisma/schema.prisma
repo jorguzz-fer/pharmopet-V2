@@ -56,8 +56,10 @@ model Usuario {
   criadoEm     DateTime @default(now()) @db.Timestamptz(3)
   atualizadoEm DateTime @updatedAt @db.Timestamptz(3)
 
-  sessoes Sessao[]
-  eventos EventoDeAuditoria[]
+  sessoes  Sessao[]
+  eventos  EventoDeAuditoria[]
+  tutores  Tutor[]
+  receitas Receita[]
 
   @@index([papel])
   @@map("usuario")
@@ -105,6 +107,8 @@ enum AcaoAuditada {
   SENHA_ALTERADA
   USUARIO_CRIADO
   USUARIO_DESATIVADO
+  RECEITA_EMITIDA
+  RECEITA_CANCELADA
 }
 
 /// O que aconteceu, quem fez e quando.
@@ -179,6 +183,7 @@ model Insumo {
 
   restricoes RestricaoDeForma[]
   faixas     FaixaTerapeutica[]
+  prescrito  ItemDaFormulacao[]
 
   @@index([descricao])
   @@index([controlado])
@@ -196,7 +201,8 @@ model FormaFarmaceutica {
   criadaEm     DateTime @default(now()) @db.Timestamptz(3)
   atualizadaEm DateTime @updatedAt @db.Timestamptz(3)
 
-  restricoes RestricaoDeForma[]
+  restricoes  RestricaoDeForma[]
+  formulacoes Formulacao[]
 
   @@map("forma_farmaceutica")
 }
@@ -285,4 +291,230 @@ model CondicoesComerciais {
   atualizadasEm DateTime @updatedAt @db.Timestamptz(3)
 
   @@map("condicoes_comerciais")
+}
+
+// ---------------------------------------------------------------------------
+// Receituário
+//
+// Receita não é formulário: é documento. Duas consequências aparecem no modelo.
+//
+// A primeira é que ela vence, e o prazo depende da lista de controle do que foi
+// prescrito — por isso `validaAte` e `prazoEmDias` são gravados, e não
+// recalculados na leitura: a regra pode mudar, e a receita de ontem continua
+// valendo pelo que valia ontem.
+//
+// A segunda é que, depois de emitida, não se corrige. Os campos congelados
+// (peso, CRMV, preço, código e descrição do insumo) existem por isso: o cadastro
+// muda, o documento não. Nome de tutor e de paciente seguem por relação de
+// propósito — mudança ali é correção de cadastro, não reescrita do que foi
+// prescrito.
+// ---------------------------------------------------------------------------
+
+enum Sexo {
+  MACHO
+  FEMEA
+}
+
+/// Quem responde pelo animal, e quem paga.
+model Tutor {
+  id String @id @default(uuid()) @db.Uuid
+
+  nome String
+
+  /// Só dígitos, conferido pelos dígitos verificadores antes de gravar.
+  ///
+  /// Nulo porque a consulta vem antes do cadastro completo: exigir CPF para
+  /// abrir uma ficha empurraria a equipe a digitar qualquer coisa no campo, que
+  /// é pior do que não ter o dado. Único quando existe — duas fichas do mesmo
+  /// CPF são a mesma pessoa cadastrada duas vezes.
+  cpf String? @unique
+
+  email    String?
+  /// Só dígitos, com DDD.
+  telefone String?
+
+  /// Endereço em campos, e não em texto livre: entrega precisa de CEP e número,
+  /// e extrair isso de uma linha só é adivinhação.
+  cep         String?
+  logradouro  String?
+  numero      String?
+  complemento String?
+  bairro      String?
+  cidade      String?
+  uf          String? @db.Char(2)
+
+  observacoes String?
+
+  /// Quem abriu a ficha. É por aqui que a visibilidade se resolve: um
+  /// veterinário não enxerga a clientela de outro.
+  cadastradoPorId String  @db.Uuid
+  cadastradoPor   Usuario @relation(fields: [cadastradoPorId], references: [id])
+
+  desativadoEm DateTime? @db.Timestamptz(3)
+
+  criadoEm     DateTime @default(now()) @db.Timestamptz(3)
+  atualizadoEm DateTime @updatedAt @db.Timestamptz(3)
+
+  pacientes Paciente[]
+
+  @@index([nome])
+  @@index([cadastradoPorId])
+  @@map("tutor")
+}
+
+/// O animal.
+model Paciente {
+  id String @id @default(uuid()) @db.Uuid
+
+  tutorId String @db.Uuid
+  tutor   Tutor  @relation(fields: [tutorId], references: [id], onDelete: Restrict)
+
+  nome    String
+  especie Especie
+  raca    String?
+  sexo    Sexo?
+
+  castrado Boolean @default(false)
+
+  /// Peso em gramas inteiros, como na faixa terapêutica. Nulo enquanto ninguém
+  /// pesou — e peso sem data de aferição não se pode confiar para dosar, por
+  /// isso as duas colunas andam juntas.
+  pesoEmGramas  Int?
+  pesoAferidoEm DateTime? @db.Timestamptz(3)
+
+  nascimentoEm DateTime? @db.Date
+
+  observacoes String?
+
+  /// Óbito em vez de exclusão: as receitas assinadas continuam existindo.
+  obitoEm DateTime? @db.Timestamptz(3)
+
+  criadoEm     DateTime @default(now()) @db.Timestamptz(3)
+  atualizadoEm DateTime @updatedAt @db.Timestamptz(3)
+
+  receitas Receita[]
+
+  @@index([tutorId])
+  @@index([nome])
+  @@map("paciente")
+}
+
+enum EstadoDaReceita {
+  RASCUNHO
+  EMITIDA
+  CANCELADA
+}
+
+model Receita {
+  id String @id @default(uuid()) @db.Uuid
+
+  /// Número legível, para a farmácia e o tutor se referirem à receita.
+  ///
+  /// Só existe depois de emitida, e vem de uma sequence do Postgres: rascunho
+  /// que ninguém emite não gasta número, e `max(numero) + 1` daria o mesmo
+  /// número a duas emissões simultâneas.
+  numero Int? @unique
+
+  estado EstadoDaReceita @default(RASCUNHO)
+
+  veterinarioId String  @db.Uuid
+  veterinario   Usuario @relation(fields: [veterinarioId], references: [id], onDelete: Restrict)
+
+  pacienteId String   @db.Uuid
+  paciente   Paciente @relation(fields: [pacienteId], references: [id], onDelete: Restrict)
+
+  /// Congelado na emissão: é o CRMV que estava na assinatura.
+  crmvDoVeterinario String?
+
+  /// Congelado na emissão. É contra este peso que a dose foi conferida; ler o
+  /// peso de hoje faria uma receita correta parecer errada seis meses depois.
+  pesoDoPacienteEmGramas Int?
+
+  emitidaEm   DateTime? @db.Timestamptz(3)
+  /// Instante em que deixa de valer, calculado na emissão.
+  validaAte   DateTime? @db.Timestamptz(3)
+  /// O prazo aplicado e de onde ele saiu, para a receita explicar a si mesma.
+  prazoEmDias Int?
+  prazoMotivo String?
+
+  canceladaEm          DateTime? @db.Timestamptz(3)
+  motivoDoCancelamento String?
+
+  observacoes String?
+
+  criadaEm     DateTime @default(now()) @db.Timestamptz(3)
+  atualizadaEm DateTime @updatedAt @db.Timestamptz(3)
+
+  formulacoes Formulacao[]
+
+  @@index([veterinarioId, criadaEm])
+  @@index([pacienteId])
+  @@index([estado])
+  @@map("receita")
+}
+
+/// Uma fórmula da receita: uma cápsula, um biscoito, uma suspensão.
+///
+/// Existe como nível próprio porque dois ativos na mesma cápsula e dois ativos
+/// em cápsulas separadas são prescrições diferentes, e uma lista plana de itens
+/// não sabe dizer qual é qual. É também a unidade que o motor de precificação
+/// recebe.
+model Formulacao {
+  id String @id @default(uuid()) @db.Uuid
+
+  receitaId String  @db.Uuid
+  receita   Receita @relation(fields: [receitaId], references: [id], onDelete: Cascade)
+
+  formaId String            @db.Uuid
+  forma   FormaFarmaceutica @relation(fields: [formaId], references: [id], onDelete: Restrict)
+
+  /// Congelado na emissão: a forma pode ser renomeada no cadastro.
+  formaNome String?
+
+  /// Posologia. Intervalo em horas e duração em dias, ambos inteiros.
+  frequenciaHoras Int
+  dias            Int
+  /// Unidades a manipular. Sai da posologia, mas fica gravado porque o
+  /// veterinário pode arredondar para cima — "faça 30 cápsulas".
+  quantidade      Int
+
+  /// Como tomar, em texto: "dar com comida", "à noite".
+  orientacao String?
+
+  /// Preço congelado na emissão. Nulo no rascunho: preço de rascunho é cotação,
+  /// e cotação muda.
+  valorEmCentavos Int?
+
+  ordem Int @default(0)
+
+  itens ItemDaFormulacao[]
+
+  @@index([receitaId])
+  @@map("formulacao")
+}
+
+model ItemDaFormulacao {
+  id String @id @default(uuid()) @db.Uuid
+
+  formulacaoId String     @db.Uuid
+  formulacao   Formulacao @relation(fields: [formulacaoId], references: [id], onDelete: Cascade)
+
+  insumoId String @db.Uuid
+  insumo   Insumo @relation(fields: [insumoId], references: [id], onDelete: Restrict)
+
+  /// Congelados na emissão. O catálogo é reimportado a cada export da farmácia,
+  /// e uma descrição corrigida não pode reescrever o que foi prescrito.
+  insumoCodigo    String?
+  insumoDescricao String?
+  /// A lista que determinou o prazo desta receita.
+  listaDeControle String?
+
+  /// Dose por unidade manipulada, em microgramas. Inteiro, como no motor.
+  dosePorUnidadeEmMicrogramas Int
+
+  ordem Int @default(0)
+
+  @@unique([formulacaoId, insumoId])
+  @@index([insumoId])
+  @@map("item_da_formulacao")
 }

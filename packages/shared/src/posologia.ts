@@ -46,6 +46,17 @@ export interface PosologiaCalculada {
   totalGramas: number;
 }
 
+/**
+ * Quantas unidades manipular para cobrir o tratamento.
+ *
+ * Não depende da dose — depende de quantas vezes por dia e por quantos dias.
+ * Separada para quem só precisa disso não ter que inventar uma dose para
+ * chamar `calcularPosologia`.
+ */
+export function quantidadeDeDoses(frequenciaHoras: FrequenciaHoras, dias: number): number {
+  return dias * (24 / frequenciaHoras);
+}
+
 /** Converte a dose informada para gramas, que é a unidade do cálculo. */
 export function doseEmGramas(dose: number, unidade: UnidadeDose): number {
   return unidade === 'g' ? dose : dose / 1000;
@@ -60,7 +71,7 @@ export function calcularPosologia(entrada: Posologia): PosologiaCalculada {
   const { dose, unidade, frequenciaHoras, dias } = posologiaSchema.parse(entrada);
 
   const dosesPorDia = 24 / frequenciaHoras;
-  const quantidade = dias * dosesPorDia;
+  const quantidade = quantidadeDeDoses(frequenciaHoras, dias);
   const emGramas = doseEmGramas(dose, unidade);
 
   return {
