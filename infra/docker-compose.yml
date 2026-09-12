@@ -1,0 +1,26 @@
+# Infra local de desenvolvimento.
+#
+# Paridade dev/prod: mesma major do Postgres usada em produção. O banco não
+# é exposto além do localhost, e as credenciais aqui são descartáveis — o
+# ambiente real lê tudo de variável de ambiente.
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: pharmopet-db
+    environment:
+      POSTGRES_USER: pharmopet
+      POSTGRES_PASSWORD: pharmopet
+      POSTGRES_DB: pharmopet
+    ports:
+      - '127.0.0.1:5432:5432'
+    volumes:
+      - pharmopet-db:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U pharmopet -d pharmopet']
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  pharmopet-db:

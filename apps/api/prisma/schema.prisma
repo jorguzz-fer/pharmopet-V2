@@ -1,0 +1,14 @@
+// Schema do domínio PharmoPet.
+//
+// As entidades nascem junto com os módulos que as usam — Identidade na fase 2,
+// Catálogo na fase 3 — em vez de um schema grande escrito antes dos casos de uso.
+// Toda alteração entra por migration versionada, nunca por `db push` em produção.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
