@@ -33,7 +33,10 @@ const linhas = [];
 
 for (const [escala, valores] of Object.entries(cor)) {
   for (const [passo, hex] of Object.entries(valores)) {
-    linhas.push(`  --color-${kebab(escala)}-${passo}: ${hex};`);
+    // O passo também passa pelo kebab, e não só a escala: `marcaSecundaria`
+    // viraria `--color-sobre-escuro-marcaSecundaria`, e o Tailwind descarta
+    // sem avisar toda variável de tema com maiúscula no nome.
+    linhas.push(`  --color-${kebab(escala)}-${kebab(passo)}: ${hex};`);
   }
 }
 
@@ -60,7 +63,12 @@ linhas.push(`  --altura-controle: ${alturaControle};`);
 const conteudo = `/* Gerado por scripts/gerar-tema.mjs a partir de @pharmopet/design-tokens.
    Não edite à mão: a próxima geração apaga. Mude o token. */
 
-@theme {
+/* \`static\` porque o Tailwind 4, por padrão, só emite a variável de tema que
+   alguma classe utilitária usou. Quem lê o token por var() — um SVG que pinta
+   o traço conforme o fundo, por exemplo — encontrava a variável inexistente e
+   caía na cor herdada, sem erro nenhum. Foi assim que o "PET" da marca ficou
+   preto sobre o painel escuro do login, com todos os testes verdes. */
+@theme static {
 ${linhas.join('\n')}
 }
 `;

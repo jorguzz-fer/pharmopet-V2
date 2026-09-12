@@ -1,5 +1,6 @@
 import { NavLink, Outlet } from 'react-router';
 import { Marca } from '@/componentes/Marca';
+import { QuemEsta } from '@/sessao/QuemEsta';
 
 const abas = [
   { para: '/', rotulo: 'Estado', fim: true },
@@ -47,6 +48,10 @@ export function Layout() {
               </NavLink>
             ))}
           </nav>
+
+          <div className="ml-auto">
+            <QuemEsta />
+          </div>
         </div>
       </header>
 

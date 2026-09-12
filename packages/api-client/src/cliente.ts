@@ -1,5 +1,6 @@
 import createClient from 'openapi-fetch';
 import type { paths } from './gerado/api.js';
+import { antiCsrf } from './csrf.js';
 
 /**
  * Cliente da API.
@@ -22,7 +23,7 @@ export type OpcoesDoCliente = {
 };
 
 export function criarClienteApi({ baseUrl, fetch }: OpcoesDoCliente): ClienteApi {
-  return createClient<paths>({
+  const cliente = createClient<paths>({
     baseUrl,
     // A sessão vive em cookie httpOnly: o navegador precisa mandá-lo junto.
     // Nenhum token trafega por JavaScript, então não há o que um XSS roubar.
@@ -36,6 +37,10 @@ export function criarClienteApi({ baseUrl, fetch }: OpcoesDoCliente): ClienteApi
       fetch ??
       ((entrada: RequestInfo | URL, init?: RequestInit) => globalThis.fetch(entrada, init)),
   });
+
+  cliente.use(antiCsrf);
+
+  return cliente;
 }
 
 /**

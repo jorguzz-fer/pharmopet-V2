@@ -4,6 +4,91 @@
  */
 
 export interface paths {
+    "/api/v1/auth/entrar": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Abre uma sessão */
+        post: operations["IdentidadeController_entrar"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/sair": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Encerra a sessão atual */
+        post: operations["IdentidadeController_sair"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/eu": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Quem está logado */
+        get: operations["IdentidadeController_eu"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/senha": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Troca a própria senha e derruba as outras sessões */
+        post: operations["IdentidadeController_trocarSenha"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/usuarios": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Cria um usuário */
+        post: operations["IdentidadeController_criarUsuario"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/health": {
         parameters: {
             query?: never;
@@ -25,6 +110,34 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        EntrarDto: {
+            /** Format: email */
+            email: string;
+            senha: string;
+        };
+        EuDto: {
+            /** Format: uuid */
+            id: string;
+            nome: string;
+            /** Format: email */
+            email: string;
+            /** @enum {string} */
+            papel: "ADMIN" | "VETERINARIO" | "FARMACIA";
+            crmv: string[];
+        };
+        TrocarSenhaDto: {
+            senhaAtual: string;
+            senhaNova: string;
+        };
+        CriarUsuarioDto: {
+            /** Format: email */
+            email: string;
+            nome: string;
+            /** @enum {string} */
+            papel: "ADMIN" | "VETERINARIO" | "FARMACIA";
+            senha: string;
+            crmv?: string | null;
+        };
         /** @description Sinal de vida da API */
         SaudeDto: {
             /** @constant */
@@ -44,6 +157,131 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    IdentidadeController_entrar: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EntrarDto"];
+            };
+        };
+        responses: {
+            /** @description Sessão aberta; os cookies vão na resposta. */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description E-mail ou senha incorretos. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    IdentidadeController_sair: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Sessão encerrada. */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    IdentidadeController_eu: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EuDto"];
+                };
+            };
+        };
+    };
+    IdentidadeController_trocarSenha: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TrocarSenhaDto"];
+            };
+        };
+        responses: {
+            /** @description Senha trocada; é preciso entrar de novo. */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Senha atual incorreta. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    IdentidadeController_criarUsuario: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CriarUsuarioDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EuDto"];
+                };
+            };
+            /** @description Só administrador cria usuário. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     HealthController_verificar: {
         parameters: {
             query?: never;

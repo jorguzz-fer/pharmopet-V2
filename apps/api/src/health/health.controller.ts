@@ -2,6 +2,7 @@ import { Controller, Get } from '@nestjs/common';
 import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { createZodDto } from 'nestjs-zod';
 import { z } from 'zod';
+import { Publica } from '../identidade/decoradores';
 
 /**
  * A resposta nasce de um schema Zod, não de uma classe nua.
@@ -22,6 +23,12 @@ export class SaudeDto extends createZodDto(saudeSchema) {}
 @ApiTags('sistema')
 @Controller('health')
 export class HealthController {
+  /**
+   * Pública porque é o que o orquestrador consulta para decidir se o contêiner
+   * está vivo — e ele não tem sessão. Não revela nada: só diz que o processo
+   * responde, sem tocar banco nem contar o que há dentro.
+   */
+  @Publica()
   @Get()
   @ApiOperation({ summary: 'Liveness da API' })
   @ApiOkResponse({ type: SaudeDto })

@@ -7,6 +7,7 @@
  */
 
 export * from './cliente.js';
+export * from './csrf.js';
 export type { paths, components, operations } from './gerado/api.js';
 
 /** Tipos de domínio prontos para uso, sem obrigar o chamador a indexar `components`. */

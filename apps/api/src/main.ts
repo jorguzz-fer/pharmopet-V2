@@ -1,9 +1,11 @@
 import 'reflect-metadata';
 import { NestFactory } from '@nestjs/core';
 import { Logger } from '@nestjs/common';
+import type { NestExpressApplication } from '@nestjs/platform-express';
 import { SwaggerModule } from '@nestjs/swagger';
 import { ZodValidationPipe } from 'nestjs-zod';
 import helmet from 'helmet';
+import cookieParser from 'cookie-parser';
 import { AppModule } from './app.module';
 import { validarEnv } from './config/env';
 import { criarDocumentoOpenApi } from './openapi/documento';
@@ -12,9 +14,16 @@ async function bootstrap(): Promise<void> {
   // Falha cedo e com mensagem clara se a configuração estiver incompleta.
   const env = validarEnv(process.env);
 
-  const app = await NestFactory.create(AppModule, { bufferLogs: true });
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, { bufferLogs: true });
 
   app.use(helmet());
+  app.use(cookieParser());
+
+  // Atrás de proxy reverso, req.ip seria sempre o IP do proxy — e o limite por
+  // IP viraria um limite global, com um cliente hostil derrubando todos os
+  // outros. Confia só no salto imediato: X-Forwarded-For é cabeçalho livre, e
+  // confiar na cadeia inteira deixaria qualquer um forjar o próprio IP.
+  app.set('trust proxy', 1);
 
   // A API é versionada desde o primeiro endpoint: quebrar contrato depois
   // custa muito mais do que carregar o prefixo agora.
