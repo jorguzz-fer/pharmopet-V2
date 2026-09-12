@@ -228,6 +228,148 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/receituario/tutores": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Busca tutores pelo nome ou pelo CPF */
+        get: operations["CadastroController_listarTutores"];
+        put?: never;
+        /** Cadastra um tutor */
+        post: operations["CadastroController_criarTutor"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/receituario/tutores/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Ficha do tutor */
+        get: operations["CadastroController_acharTutor"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Corrige a ficha do tutor */
+        patch: operations["CadastroController_alterarTutor"];
+        trace?: never;
+    };
+    "/api/v1/receituario/pacientes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Busca pacientes */
+        get: operations["CadastroController_listarPacientes"];
+        put?: never;
+        /** Cadastra um paciente */
+        post: operations["CadastroController_criarPaciente"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/receituario/pacientes/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Ficha do paciente */
+        get: operations["CadastroController_acharPaciente"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Corrige a ficha do paciente */
+        patch: operations["CadastroController_alterarPaciente"];
+        trace?: never;
+    };
+    "/api/v1/receituario/receitas": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Lista receitas */
+        get: operations["ReceitaController_listar"];
+        put?: never;
+        /** Abre um rascunho de receita */
+        post: operations["ReceitaController_criar"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/receituario/receitas/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** A receita inteira, com fórmulas, preço e avisos */
+        get: operations["ReceitaController_achar"];
+        /** Regrava o rascunho */
+        put: operations["ReceitaController_salvar"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/receituario/receitas/{id}/emitir": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Emite a receita: numera, congela e passa a valer */
+        post: operations["ReceitaController_emitir"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/receituario/receitas/{id}/cancelar": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Cancela a receita, com motivo */
+        post: operations["ReceitaController_cancelar"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/health": {
         parameters: {
             query?: never;
@@ -437,6 +579,229 @@ export interface components {
             descontoEmPontosBase: number;
             adicionalDeEntregaEmCentavos: number;
             adicionalDeBiscoitoEmCentavos: number;
+        };
+        CriarTutorDto: {
+            nome: string;
+            cpf?: string[];
+            email?: string | null;
+            telefone?: string[];
+            cep?: string[];
+            logradouro?: string | null;
+            numero?: string | null;
+            complemento?: string | null;
+            bairro?: string | null;
+            cidade?: string | null;
+            uf?: string | null;
+            observacoes?: string | null;
+        };
+        TutorDto: {
+            /** Format: uuid */
+            id: string;
+            nome: string;
+            cpf: string[];
+            email: string[];
+            telefone: string[];
+            cep: string[];
+            logradouro: string[];
+            numero: string[];
+            complemento: string[];
+            bairro: string[];
+            cidade: string[];
+            uf: string[];
+            observacoes: string[];
+            quantidadeDePacientes: number;
+        };
+        ListaDeTutoresDto: {
+            tutores: {
+                /** Format: uuid */
+                id: string;
+                nome: string;
+                cpf: string | null;
+                email: string | null;
+                telefone: string | null;
+                cep: string | null;
+                logradouro: string | null;
+                numero: string | null;
+                complemento: string | null;
+                bairro: string | null;
+                cidade: string | null;
+                uf: string | null;
+                observacoes: string | null;
+                quantidadeDePacientes: number;
+            }[];
+        };
+        AlterarTutorDto: {
+            nome?: string;
+            cpf?: string[];
+            email?: string | null;
+            telefone?: string[];
+            cep?: string[];
+            logradouro?: string | null;
+            numero?: string | null;
+            complemento?: string | null;
+            bairro?: string | null;
+            cidade?: string | null;
+            uf?: string | null;
+            observacoes?: string | null;
+        };
+        CriarPacienteDto: {
+            /** Format: uuid */
+            tutorId: string;
+            nome: string;
+            /** @enum {string} */
+            especie: "CANINO" | "FELINO" | "EQUINO" | "AVE" | "ROEDOR" | "REPTIL";
+            raca?: string | null;
+            sexo?: ("MACHO" | "FEMEA") | null;
+            castrado?: boolean;
+            pesoEmGramas?: number | null;
+            nascimentoEm?: string | null;
+            observacoes?: string | null;
+        };
+        PacienteDto: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            tutorId: string;
+            tutorNome: string;
+            nome: string;
+            /** @enum {string} */
+            especie: "CANINO" | "FELINO" | "EQUINO" | "AVE" | "ROEDOR" | "REPTIL";
+            raca: string[];
+            sexo: ("MACHO" | "FEMEA") | null;
+            castrado: boolean;
+            pesoEmGramas: number | null;
+            pesoAferidoEm: string | null;
+            nascimentoEm: string | null;
+            observacoes: string[];
+            obito: boolean;
+        };
+        ListaDePacientesDto: {
+            pacientes: {
+                /** Format: uuid */
+                id: string;
+                /** Format: uuid */
+                tutorId: string;
+                tutorNome: string;
+                nome: string;
+                /** @enum {string} */
+                especie: "CANINO" | "FELINO" | "EQUINO" | "AVE" | "ROEDOR" | "REPTIL";
+                raca: string | null;
+                sexo: ("MACHO" | "FEMEA") | null;
+                castrado: boolean;
+                pesoEmGramas: number | null;
+                pesoAferidoEm: string | null;
+                nascimentoEm: string | null;
+                observacoes: string | null;
+                obito: boolean;
+            }[];
+        };
+        AlterarPacienteDto: {
+            nome?: string;
+            /** @enum {string} */
+            especie?: "CANINO" | "FELINO" | "EQUINO" | "AVE" | "ROEDOR" | "REPTIL";
+            raca?: string | null;
+            sexo?: ("MACHO" | "FEMEA") | null;
+            castrado?: boolean;
+            pesoEmGramas?: number | null;
+            nascimentoEm?: string | null;
+            observacoes?: string | null;
+        };
+        SalvarReceitaDto: {
+            /** Format: uuid */
+            pacienteId: string;
+            observacoes?: string | null;
+            formulacoes: {
+                /** Format: uuid */
+                formaId: string;
+                frequenciaHoras: 24 | 12 | 8 | 6;
+                dias: number;
+                quantidade?: number;
+                orientacao?: string | null;
+                itens: {
+                    /** Format: uuid */
+                    insumoId: string;
+                    doseMg: number;
+                }[];
+            }[];
+        };
+        ReceitaDto: {
+            /** Format: uuid */
+            id: string;
+            numero: number | null;
+            /** @enum {string} */
+            estado: "RASCUNHO" | "EMITIDA" | "CANCELADA";
+            /** @enum {string} */
+            situacao: "rascunho" | "valida" | "vencida" | "cancelada";
+            /** Format: uuid */
+            veterinarioId: string;
+            veterinarioNome: string;
+            crmv: string[];
+            /** Format: uuid */
+            pacienteId: string;
+            pacienteNome: string;
+            tutorNome: string;
+            pesoDoPacienteEmGramas: number | null;
+            emitidaEm: string | null;
+            validaAte: string | null;
+            prazoEmDias: number | null;
+            prazoMotivo: string[];
+            canceladaEm: string | null;
+            motivoDoCancelamento: string[];
+            observacoes: string[];
+            formulacoes: {
+                /** Format: uuid */
+                id: string;
+                /** Format: uuid */
+                formaId: string;
+                forma: string;
+                frequenciaHoras: number;
+                dias: number;
+                quantidade: number;
+                orientacao: string | null;
+                valorEmCentavos: number | null;
+                itens: {
+                    /** Format: uuid */
+                    insumoId: string;
+                    codigo: string;
+                    descricao: string;
+                    doseMg: number;
+                    listaDeControle: string | null;
+                }[];
+                avisos: {
+                    /** @enum {string} */
+                    tipo: "sem-estoque" | "controlado" | "antimicrobiano" | "fora-da-faixa" | "sem-referencia" | "duracao-acima";
+                    insumoId: string | null;
+                    texto: string;
+                }[];
+                impedimentos: {
+                    insumoId: string | null;
+                    texto: string;
+                }[];
+            }[];
+            valorTotalEmCentavos: number;
+            /** Format: date-time */
+            criadaEm: string;
+        };
+        ListaDeReceitasDto: {
+            receitas: {
+                /** Format: uuid */
+                id: string;
+                numero: number | null;
+                /** @enum {string} */
+                estado: "RASCUNHO" | "EMITIDA" | "CANCELADA";
+                /** @enum {string} */
+                situacao: "rascunho" | "valida" | "vencida" | "cancelada";
+                pacienteNome: string;
+                tutorNome: string;
+                veterinarioNome: string;
+                emitidaEm: string | null;
+                validaAte: string | null;
+                /** Format: date-time */
+                criadaEm: string;
+            }[];
+        };
+        CancelarReceitaDto: {
+            motivo: string;
         };
         /** @description Sinal de vida da API */
         SaudeDto: {
@@ -824,6 +1189,352 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["FaixaDto"][];
+                };
+            };
+        };
+    };
+    CadastroController_listarTutores: {
+        parameters: {
+            query?: {
+                busca?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ListaDeTutoresDto"];
+                };
+            };
+        };
+    };
+    CadastroController_criarTutor: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CriarTutorDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TutorDto"];
+                };
+            };
+        };
+    };
+    CadastroController_acharTutor: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TutorDto"];
+                };
+            };
+            /** @description Não existe, ou não é visível para quem perguntou. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    CadastroController_alterarTutor: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AlterarTutorDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TutorDto"];
+                };
+            };
+        };
+    };
+    CadastroController_listarPacientes: {
+        parameters: {
+            query?: {
+                tutorId?: string;
+                busca?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ListaDePacientesDto"];
+                };
+            };
+        };
+    };
+    CadastroController_criarPaciente: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CriarPacienteDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PacienteDto"];
+                };
+            };
+        };
+    };
+    CadastroController_acharPaciente: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PacienteDto"];
+                };
+            };
+        };
+    };
+    CadastroController_alterarPaciente: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AlterarPacienteDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PacienteDto"];
+                };
+            };
+        };
+    };
+    ReceitaController_listar: {
+        parameters: {
+            query?: {
+                pacienteId?: string;
+                estado?: "RASCUNHO" | "EMITIDA" | "CANCELADA";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ListaDeReceitasDto"];
+                };
+            };
+        };
+    };
+    ReceitaController_criar: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SalvarReceitaDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReceitaDto"];
+                };
+            };
+        };
+    };
+    ReceitaController_achar: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReceitaDto"];
+                };
+            };
+            /** @description Não existe, ou não é visível para quem perguntou. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ReceitaController_salvar: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SalvarReceitaDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReceitaDto"];
+                };
+            };
+            /** @description Receita emitida não se altera. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ReceitaController_emitir: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReceitaDto"];
+                };
+            };
+            /** @description Falta CRMV, falta peso do paciente, há impedimento na fórmula ou lista sem prazo. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ReceitaController_cancelar: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CancelarReceitaDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReceitaDto"];
                 };
             };
         };

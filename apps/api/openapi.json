@@ -452,6 +452,504 @@
         ]
       }
     },
+    "/api/v1/receituario/tutores": {
+      "post": {
+        "operationId": "CadastroController_criarTutor",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CriarTutorDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TutorDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Cadastra um tutor",
+        "tags": [
+          "receituário"
+        ]
+      },
+      "get": {
+        "operationId": "CadastroController_listarTutores",
+        "parameters": [
+          {
+            "name": "busca",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListaDeTutoresDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Busca tutores pelo nome ou pelo CPF",
+        "tags": [
+          "receituário"
+        ]
+      }
+    },
+    "/api/v1/receituario/tutores/{id}": {
+      "get": {
+        "operationId": "CadastroController_acharTutor",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TutorDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Não existe, ou não é visível para quem perguntou."
+          }
+        },
+        "summary": "Ficha do tutor",
+        "tags": [
+          "receituário"
+        ]
+      },
+      "patch": {
+        "operationId": "CadastroController_alterarTutor",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AlterarTutorDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TutorDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Corrige a ficha do tutor",
+        "tags": [
+          "receituário"
+        ]
+      }
+    },
+    "/api/v1/receituario/pacientes": {
+      "post": {
+        "operationId": "CadastroController_criarPaciente",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CriarPacienteDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PacienteDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Cadastra um paciente",
+        "tags": [
+          "receituário"
+        ]
+      },
+      "get": {
+        "operationId": "CadastroController_listarPacientes",
+        "parameters": [
+          {
+            "name": "tutorId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "busca",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListaDePacientesDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Busca pacientes",
+        "tags": [
+          "receituário"
+        ]
+      }
+    },
+    "/api/v1/receituario/pacientes/{id}": {
+      "get": {
+        "operationId": "CadastroController_acharPaciente",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PacienteDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Ficha do paciente",
+        "tags": [
+          "receituário"
+        ]
+      },
+      "patch": {
+        "operationId": "CadastroController_alterarPaciente",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AlterarPacienteDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PacienteDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Corrige a ficha do paciente",
+        "tags": [
+          "receituário"
+        ]
+      }
+    },
+    "/api/v1/receituario/receitas": {
+      "post": {
+        "operationId": "ReceitaController_criar",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SalvarReceitaDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReceitaDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Abre um rascunho de receita",
+        "tags": [
+          "receituário"
+        ]
+      },
+      "get": {
+        "operationId": "ReceitaController_listar",
+        "parameters": [
+          {
+            "name": "pacienteId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "estado",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "enum": [
+                "RASCUNHO",
+                "EMITIDA",
+                "CANCELADA"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListaDeReceitasDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Lista receitas",
+        "tags": [
+          "receituário"
+        ]
+      }
+    },
+    "/api/v1/receituario/receitas/{id}": {
+      "get": {
+        "operationId": "ReceitaController_achar",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReceitaDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Não existe, ou não é visível para quem perguntou."
+          }
+        },
+        "summary": "A receita inteira, com fórmulas, preço e avisos",
+        "tags": [
+          "receituário"
+        ]
+      },
+      "put": {
+        "operationId": "ReceitaController_salvar",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SalvarReceitaDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReceitaDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Receita emitida não se altera."
+          }
+        },
+        "summary": "Regrava o rascunho",
+        "tags": [
+          "receituário"
+        ]
+      }
+    },
+    "/api/v1/receituario/receitas/{id}/emitir": {
+      "post": {
+        "operationId": "ReceitaController_emitir",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReceitaDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Falta CRMV, falta peso do paciente, há impedimento na fórmula ou lista sem prazo."
+          }
+        },
+        "summary": "Emite a receita: numera, congela e passa a valer",
+        "tags": [
+          "receituário"
+        ]
+      }
+    },
+    "/api/v1/receituario/receitas/{id}/cancelar": {
+      "post": {
+        "operationId": "ReceitaController_cancelar",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CancelarReceitaDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReceitaDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Cancela a receita, com motivo",
+        "tags": [
+          "receituário"
+        ]
+      }
+    },
     "/api/v1/health": {
       "get": {
         "operationId": "HealthController_verificar",
@@ -1423,6 +1921,1444 @@
           "descontoEmPontosBase",
           "adicionalDeEntregaEmCentavos",
           "adicionalDeBiscoitoEmCentavos"
+        ]
+      },
+      "CriarTutorDto": {
+        "type": "object",
+        "properties": {
+          "nome": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 120
+          },
+          "cpf": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "email": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 160,
+                "format": "email",
+                "pattern": "^(?:[A-Za-z0-9_'+\\-]+\\.)*[A-Za-z0-9_'+\\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "telefone": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "cep": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "logradouro": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 160
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "numero": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 20
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "complemento": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 80
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "bairro": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 80
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "cidade": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 80
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "uf": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 2,
+                "maxLength": 2
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "observacoes": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 1000
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "nome"
+        ]
+      },
+      "TutorDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "nome": {
+            "type": "string"
+          },
+          "cpf": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "email": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "telefone": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "cep": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "logradouro": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "numero": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "complemento": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "bairro": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "cidade": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "uf": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "observacoes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "quantidadeDePacientes": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": [
+          "id",
+          "nome",
+          "cpf",
+          "email",
+          "telefone",
+          "cep",
+          "logradouro",
+          "numero",
+          "complemento",
+          "bairro",
+          "cidade",
+          "uf",
+          "observacoes",
+          "quantidadeDePacientes"
+        ]
+      },
+      "ListaDeTutoresDto": {
+        "type": "object",
+        "properties": {
+          "tutores": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "format": "uuid",
+                  "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                },
+                "nome": {
+                  "type": "string"
+                },
+                "cpf": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "email": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "telefone": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "cep": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "logradouro": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "numero": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "complemento": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "bairro": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "cidade": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "uf": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "observacoes": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "quantidadeDePacientes": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                }
+              },
+              "required": [
+                "id",
+                "nome",
+                "cpf",
+                "email",
+                "telefone",
+                "cep",
+                "logradouro",
+                "numero",
+                "complemento",
+                "bairro",
+                "cidade",
+                "uf",
+                "observacoes",
+                "quantidadeDePacientes"
+              ]
+            }
+          }
+        },
+        "required": [
+          "tutores"
+        ]
+      },
+      "AlterarTutorDto": {
+        "type": "object",
+        "properties": {
+          "nome": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 120
+          },
+          "cpf": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "email": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 160,
+                "format": "email",
+                "pattern": "^(?:[A-Za-z0-9_'+\\-]+\\.)*[A-Za-z0-9_'+\\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "telefone": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "cep": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "logradouro": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 160
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "numero": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 20
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "complemento": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 80
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "bairro": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 80
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "cidade": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 80
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "uf": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 2,
+                "maxLength": 2
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "observacoes": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 1000
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        }
+      },
+      "CriarPacienteDto": {
+        "type": "object",
+        "properties": {
+          "tutorId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "nome": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80
+          },
+          "especie": {
+            "type": "string",
+            "enum": [
+              "CANINO",
+              "FELINO",
+              "EQUINO",
+              "AVE",
+              "ROEDOR",
+              "REPTIL"
+            ]
+          },
+          "raca": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 80
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "sexo": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "MACHO",
+                  "FEMEA"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "castrado": {
+            "type": "boolean"
+          },
+          "pesoEmGramas": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 2000000
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "nascimentoEm": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "observacoes": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 1000
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "tutorId",
+          "nome",
+          "especie"
+        ]
+      },
+      "PacienteDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "tutorId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "tutorNome": {
+            "type": "string"
+          },
+          "nome": {
+            "type": "string"
+          },
+          "especie": {
+            "type": "string",
+            "enum": [
+              "CANINO",
+              "FELINO",
+              "EQUINO",
+              "AVE",
+              "ROEDOR",
+              "REPTIL"
+            ]
+          },
+          "raca": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "sexo": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "MACHO",
+                  "FEMEA"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "castrado": {
+            "type": "boolean"
+          },
+          "pesoEmGramas": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "pesoAferidoEm": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "nascimentoEm": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "observacoes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "obito": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "tutorId",
+          "tutorNome",
+          "nome",
+          "especie",
+          "raca",
+          "sexo",
+          "castrado",
+          "pesoEmGramas",
+          "pesoAferidoEm",
+          "nascimentoEm",
+          "observacoes",
+          "obito"
+        ]
+      },
+      "ListaDePacientesDto": {
+        "type": "object",
+        "properties": {
+          "pacientes": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "format": "uuid",
+                  "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                },
+                "tutorId": {
+                  "type": "string",
+                  "format": "uuid",
+                  "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                },
+                "tutorNome": {
+                  "type": "string"
+                },
+                "nome": {
+                  "type": "string"
+                },
+                "especie": {
+                  "type": "string",
+                  "enum": [
+                    "CANINO",
+                    "FELINO",
+                    "EQUINO",
+                    "AVE",
+                    "ROEDOR",
+                    "REPTIL"
+                  ]
+                },
+                "raca": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "sexo": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "enum": [
+                        "MACHO",
+                        "FEMEA"
+                      ]
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "castrado": {
+                  "type": "boolean"
+                },
+                "pesoEmGramas": {
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "pesoAferidoEm": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "format": "date-time",
+                      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "nascimentoEm": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "format": "date",
+                      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "observacoes": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "obito": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "id",
+                "tutorId",
+                "tutorNome",
+                "nome",
+                "especie",
+                "raca",
+                "sexo",
+                "castrado",
+                "pesoEmGramas",
+                "pesoAferidoEm",
+                "nascimentoEm",
+                "observacoes",
+                "obito"
+              ]
+            }
+          }
+        },
+        "required": [
+          "pacientes"
+        ]
+      },
+      "AlterarPacienteDto": {
+        "type": "object",
+        "properties": {
+          "nome": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80
+          },
+          "especie": {
+            "type": "string",
+            "enum": [
+              "CANINO",
+              "FELINO",
+              "EQUINO",
+              "AVE",
+              "ROEDOR",
+              "REPTIL"
+            ]
+          },
+          "raca": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 80
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "sexo": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "MACHO",
+                  "FEMEA"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "castrado": {
+            "type": "boolean"
+          },
+          "pesoEmGramas": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 2000000
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "nascimentoEm": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "observacoes": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 1000
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        }
+      },
+      "SalvarReceitaDto": {
+        "type": "object",
+        "properties": {
+          "pacienteId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "observacoes": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 2000
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "formulacoes": {
+            "minItems": 1,
+            "maxItems": 10,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "formaId": {
+                  "type": "string",
+                  "format": "uuid",
+                  "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                },
+                "frequenciaHoras": {
+                  "anyOf": [
+                    {
+                      "type": "number",
+                      "const": 24
+                    },
+                    {
+                      "type": "number",
+                      "const": 12
+                    },
+                    {
+                      "type": "number",
+                      "const": 8
+                    },
+                    {
+                      "type": "number",
+                      "const": 6
+                    }
+                  ]
+                },
+                "dias": {
+                  "type": "integer",
+                  "exclusiveMinimum": 0,
+                  "maximum": 365
+                },
+                "quantidade": {
+                  "type": "integer",
+                  "exclusiveMinimum": 0,
+                  "maximum": 1000
+                },
+                "orientacao": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "maxLength": 500
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "itens": {
+                  "minItems": 1,
+                  "maxItems": 20,
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "insumoId": {
+                        "type": "string",
+                        "format": "uuid",
+                        "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                      },
+                      "doseMg": {
+                        "type": "number",
+                        "exclusiveMinimum": 0,
+                        "maximum": 100000
+                      }
+                    },
+                    "required": [
+                      "insumoId",
+                      "doseMg"
+                    ]
+                  }
+                }
+              },
+              "required": [
+                "formaId",
+                "frequenciaHoras",
+                "dias",
+                "itens"
+              ]
+            }
+          }
+        },
+        "required": [
+          "pacienteId",
+          "formulacoes"
+        ]
+      },
+      "ReceitaDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "numero": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "estado": {
+            "type": "string",
+            "enum": [
+              "RASCUNHO",
+              "EMITIDA",
+              "CANCELADA"
+            ]
+          },
+          "situacao": {
+            "type": "string",
+            "enum": [
+              "rascunho",
+              "valida",
+              "vencida",
+              "cancelada"
+            ]
+          },
+          "veterinarioId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "veterinarioNome": {
+            "type": "string"
+          },
+          "crmv": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "pacienteId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "pacienteNome": {
+            "type": "string"
+          },
+          "tutorNome": {
+            "type": "string"
+          },
+          "pesoDoPacienteEmGramas": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "emitidaEm": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "validaAte": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "prazoEmDias": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "prazoMotivo": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "canceladaEm": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "motivoDoCancelamento": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "observacoes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "formulacoes": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "format": "uuid",
+                  "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                },
+                "formaId": {
+                  "type": "string",
+                  "format": "uuid",
+                  "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                },
+                "forma": {
+                  "type": "string"
+                },
+                "frequenciaHoras": {
+                  "type": "integer",
+                  "minimum": -9007199254740991,
+                  "maximum": 9007199254740991
+                },
+                "dias": {
+                  "type": "integer",
+                  "minimum": -9007199254740991,
+                  "maximum": 9007199254740991
+                },
+                "quantidade": {
+                  "type": "integer",
+                  "minimum": -9007199254740991,
+                  "maximum": 9007199254740991
+                },
+                "orientacao": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "valorEmCentavos": {
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9007199254740991
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "itens": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "insumoId": {
+                        "type": "string",
+                        "format": "uuid",
+                        "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                      },
+                      "codigo": {
+                        "type": "string"
+                      },
+                      "descricao": {
+                        "type": "string"
+                      },
+                      "doseMg": {
+                        "type": "number"
+                      },
+                      "listaDeControle": {
+                        "type": [
+                          "string",
+                          "null"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "insumoId",
+                      "codigo",
+                      "descricao",
+                      "doseMg",
+                      "listaDeControle"
+                    ]
+                  }
+                },
+                "avisos": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "tipo": {
+                        "type": "string",
+                        "enum": [
+                          "sem-estoque",
+                          "controlado",
+                          "antimicrobiano",
+                          "fora-da-faixa",
+                          "sem-referencia",
+                          "duracao-acima"
+                        ]
+                      },
+                      "insumoId": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "format": "uuid",
+                            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "texto": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "tipo",
+                      "insumoId",
+                      "texto"
+                    ]
+                  }
+                },
+                "impedimentos": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "insumoId": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "format": "uuid",
+                            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "texto": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "insumoId",
+                      "texto"
+                    ]
+                  }
+                }
+              },
+              "required": [
+                "id",
+                "formaId",
+                "forma",
+                "frequenciaHoras",
+                "dias",
+                "quantidade",
+                "orientacao",
+                "valorEmCentavos",
+                "itens",
+                "avisos",
+                "impedimentos"
+              ]
+            }
+          },
+          "valorTotalEmCentavos": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "criadaEm": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+          }
+        },
+        "required": [
+          "id",
+          "numero",
+          "estado",
+          "situacao",
+          "veterinarioId",
+          "veterinarioNome",
+          "crmv",
+          "pacienteId",
+          "pacienteNome",
+          "tutorNome",
+          "pesoDoPacienteEmGramas",
+          "emitidaEm",
+          "validaAte",
+          "prazoEmDias",
+          "prazoMotivo",
+          "canceladaEm",
+          "motivoDoCancelamento",
+          "observacoes",
+          "formulacoes",
+          "valorTotalEmCentavos",
+          "criadaEm"
+        ]
+      },
+      "ListaDeReceitasDto": {
+        "type": "object",
+        "properties": {
+          "receitas": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "format": "uuid",
+                  "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                },
+                "numero": {
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "estado": {
+                  "type": "string",
+                  "enum": [
+                    "RASCUNHO",
+                    "EMITIDA",
+                    "CANCELADA"
+                  ]
+                },
+                "situacao": {
+                  "type": "string",
+                  "enum": [
+                    "rascunho",
+                    "valida",
+                    "vencida",
+                    "cancelada"
+                  ]
+                },
+                "pacienteNome": {
+                  "type": "string"
+                },
+                "tutorNome": {
+                  "type": "string"
+                },
+                "veterinarioNome": {
+                  "type": "string"
+                },
+                "emitidaEm": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "format": "date-time",
+                      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "validaAte": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "format": "date-time",
+                      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "criadaEm": {
+                  "type": "string",
+                  "format": "date-time",
+                  "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                }
+              },
+              "required": [
+                "id",
+                "numero",
+                "estado",
+                "situacao",
+                "pacienteNome",
+                "tutorNome",
+                "veterinarioNome",
+                "emitidaEm",
+                "validaAte",
+                "criadaEm"
+              ]
+            }
+          }
+        },
+        "required": [
+          "receitas"
+        ]
+      },
+      "CancelarReceitaDto": {
+        "type": "object",
+        "properties": {
+          "motivo": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 500
+          }
+        },
+        "required": [
+          "motivo"
         ]
       },
       "SaudeDto": {

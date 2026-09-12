@@ -116,6 +116,43 @@ export function conferirDose(
   return { situacao: 'dentro', doseEmMicrogramasPorKg };
 }
 
+export type ConferenciaDeDuracao =
+  /** Não há faixa aplicável, ou a faixa não traz limite de duração. */
+  | { situacao: 'sem-limite' }
+  | { situacao: 'dentro'; limiteEmDias: number }
+  | { situacao: 'acima'; limiteEmDias: number };
+
+/**
+ * Compara a duração do tratamento com o limite da faixa.
+ *
+ * Dose certa por tempo demais também machuca — corticoide em uso prolongado é
+ * o exemplo de manual. O limite só existe quando alguém o cadastrou; sem ele,
+ * o silêncio é honesto, e não um "está tudo bem".
+ */
+export function conferirDuracao(
+  faixas: readonly FaixaTerapeutica[],
+  paciente: Paciente,
+  dias: number,
+): ConferenciaDeDuracao {
+  const faixa = faixaAplicavel(faixas, paciente);
+  if (!faixa || faixa.duracaoMaximaEmDias === null) return { situacao: 'sem-limite' };
+
+  const limiteEmDias = faixa.duracaoMaximaEmDias;
+
+  return dias > limiteEmDias ? { situacao: 'acima', limiteEmDias } : { situacao: 'dentro', limiteEmDias };
+}
+
+/** Frase pronta. `null` quando não há o que avisar. */
+export function descreverDuracao(
+  conferencia: ConferenciaDeDuracao,
+  ativo: string,
+  dias: number,
+): string | null {
+  if (conferencia.situacao !== 'acima') return null;
+
+  return `${ativo} está prescrito por ${dias} dias, acima do máximo recomendado de ${conferencia.limiteEmDias}.`;
+}
+
 /** µg/kg como mg/kg legível: 2500 → "2,5". */
 export function emMgPorKg(microgramasPorKg: number): string {
   return (microgramasPorKg / 1000).toLocaleString('pt-BR', { maximumFractionDigits: 3 });

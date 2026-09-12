@@ -65,6 +65,8 @@ export function cliente(app: INestApplication, ip: string = ipDeTeste()) {
     ip,
     get: (caminho: string) => comOrigem(request(servidor).get(caminho)),
     post: (caminho: string) => comOrigem(request(servidor).post(caminho)),
+    put: (caminho: string) => comOrigem(request(servidor).put(caminho)),
+    patch: (caminho: string) => comOrigem(request(servidor).patch(caminho)),
   };
 }
 

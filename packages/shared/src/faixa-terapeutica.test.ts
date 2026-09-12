@@ -1,7 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import {
   conferirDose,
+  conferirDuracao,
   descreverConferencia,
+  descreverDuracao,
   faixaAplicavel,
   type FaixaTerapeutica,
 } from './faixa-terapeutica.js';
@@ -159,6 +161,41 @@ describe('descreverConferencia', () => {
   it('pede conferência quando não há referência, em vez de silenciar', () => {
     expect(descreverConferencia({ situacao: 'sem-referencia' }, 'Gabapentina')).toContain(
       'Confira a dose',
+    );
+  });
+});
+
+describe('conferirDuracao', () => {
+  /** Corticoide: a faixa cadastra dose e também por quanto tempo. */
+  const CURTA: FaixaTerapeutica = { ...CANINO, duracaoMaximaEmDias: 7 };
+  const paciente = { especie: 'CANINO', pesoEmGramas: 10_000 } as const;
+
+  it('cala quando a faixa não traz limite de duração', () => {
+    expect(conferirDuracao([CANINO], paciente, 90)).toEqual({ situacao: 'sem-limite' });
+  });
+
+  it('cala quando não há faixa aplicável', () => {
+    expect(conferirDuracao([], paciente, 90)).toEqual({ situacao: 'sem-limite' });
+  });
+
+  it('aceita o tratamento que termina no limite', () => {
+    expect(conferirDuracao([CURTA], paciente, 7)).toEqual({ situacao: 'dentro', limiteEmDias: 7 });
+  });
+
+  it('acusa o dia a mais', () => {
+    expect(conferirDuracao([CURTA], paciente, 8)).toEqual({ situacao: 'acima', limiteEmDias: 7 });
+  });
+});
+
+describe('descreverDuracao', () => {
+  it('só fala quando passou do limite', () => {
+    expect(descreverDuracao({ situacao: 'dentro', limiteEmDias: 7 }, 'Prednisolona', 5)).toBeNull();
+    expect(descreverDuracao({ situacao: 'sem-limite' }, 'Prednisolona', 90)).toBeNull();
+  });
+
+  it('diz quantos dias foram prescritos e qual era o máximo', () => {
+    expect(descreverDuracao({ situacao: 'acima', limiteEmDias: 7 }, 'Prednisolona', 30)).toBe(
+      'Prednisolona está prescrito por 30 dias, acima do máximo recomendado de 7.',
     );
   });
 });

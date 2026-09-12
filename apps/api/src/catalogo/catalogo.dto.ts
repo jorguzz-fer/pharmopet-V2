@@ -9,7 +9,7 @@ import { z } from 'zod';
  * para um lugar com menos teste. Três casas é o micrograma, e mais que isso
  * seria precisão que nenhuma balança de farmácia entrega.
  */
-const doseMgSchema = z
+export const doseMgSchema = z
   .number()
   .positive('A dose precisa ser maior que zero.')
   .max(100_000, 'Dose acima do que qualquer formulação usa — confira a unidade.')

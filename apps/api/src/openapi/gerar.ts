@@ -19,10 +19,13 @@ async function gerar(): Promise<void> {
   // import. Por isso ele entra por import dinâmico, depois destes valores:
   // com um import estático o módulo subiria antes e a validação falharia.
   //
-  // Aqui nada é conectado — o documento sai só da metadata dos decoradores,
-  // sem tocar banco nem abrir porta. Estes valores nunca são usados.
+  // O documento sai da metadata dos decoradores, mas o `app.init()` abaixo
+  // sobe a aplicação inteira — e o PrismaService conecta no boot. Ou seja:
+  // gerar o contrato exige um banco alcançável em DATABASE_URL. O valor abaixo
+  // é só o que o CI já define; localmente, rode com o banco de desenvolvimento
+  // no ambiente (`pnpm contrato` a partir de um shell com DATABASE_URL).
   process.env.NODE_ENV ??= 'development';
-  process.env.DATABASE_URL ??= 'postgresql://gerador:gerador@localhost:5432/gerador';
+  process.env.DATABASE_URL ??= 'postgresql://pharmopet:pharmopet@localhost:5432/pharmopet';
 
   const { AppModule } = await import('../app.module');
 
