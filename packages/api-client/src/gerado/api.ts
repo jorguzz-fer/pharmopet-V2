@@ -285,7 +285,8 @@ export interface components {
                 descricao: string;
                 controlado: boolean;
                 listaDeControle: string | null;
-                emFalta: boolean;
+                /** @enum {string} */
+                estoque: "disponivel" | "em-falta" | "desconhecido";
                 formasProibidas: {
                     /** Format: uuid */
                     formaId: string;
@@ -365,8 +366,7 @@ export interface components {
             /** @default 0 */
             custoDeReferenciaPorGramaEmMicro: number;
             markupEmCentesimos: number;
-            /** @default 0 */
-            estoqueEmMiligramas: number;
+            estoqueEmMiligramas?: number | null;
             /** @default false */
             controlado: boolean;
             listaDeControle?: string | null;
@@ -378,7 +378,8 @@ export interface components {
             descricao: string;
             controlado: boolean;
             listaDeControle: string[];
-            emFalta: boolean;
+            /** @enum {string} */
+            estoque: "disponivel" | "em-falta" | "desconhecido";
             formasProibidas: {
                 /** Format: uuid */
                 formaId: string;
@@ -388,7 +389,7 @@ export interface components {
             custoPorGramaEmMicro: number;
             custoDeReferenciaPorGramaEmMicro: number;
             markupEmCentesimos: number;
-            estoqueEmMiligramas: number;
+            estoqueEmMiligramas: number | null;
         };
         CriarFormaDto: {
             nome: string;

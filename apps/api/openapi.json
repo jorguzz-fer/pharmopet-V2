@@ -633,8 +633,13 @@
                     "null"
                   ]
                 },
-                "emFalta": {
-                  "type": "boolean"
+                "estoque": {
+                  "type": "string",
+                  "enum": [
+                    "disponivel",
+                    "em-falta",
+                    "desconhecido"
+                  ]
                 },
                 "formasProibidas": {
                   "type": "array",
@@ -667,7 +672,7 @@
                 "descricao",
                 "controlado",
                 "listaDeControle",
-                "emFalta",
+                "estoque",
                 "formasProibidas"
               ]
             }
@@ -1047,10 +1052,16 @@
             "maximum": 100000
           },
           "estoqueEmMiligramas": {
-            "default": 0,
-            "type": "integer",
-            "minimum": 0,
-            "maximum": 9007199254740991
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "controlado": {
             "default": false,
@@ -1098,8 +1109,13 @@
               "type": "string"
             }
           },
-          "emFalta": {
-            "type": "boolean"
+          "estoque": {
+            "type": "string",
+            "enum": [
+              "disponivel",
+              "em-falta",
+              "desconhecido"
+            ]
           },
           "formasProibidas": {
             "type": "array",
@@ -1141,9 +1157,16 @@
             "maximum": 9007199254740991
           },
           "estoqueEmMiligramas": {
-            "type": "integer",
-            "minimum": -9007199254740991,
-            "maximum": 9007199254740991
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "required": [
@@ -1152,7 +1175,7 @@
           "descricao",
           "controlado",
           "listaDeControle",
-          "emFalta",
+          "estoque",
           "formasProibidas",
           "custoPorGramaEmMicro",
           "custoDeReferenciaPorGramaEmMicro",

@@ -12,7 +12,8 @@
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate deploy",
     "openapi": "nest build && node dist/openapi/gerar.js",
-    "usuario:criar": "nest build && node --env-file-if-exists=.env dist/identidade/criar-usuario.cli.js"
+    "usuario:criar": "nest build && node --env-file-if-exists=.env dist/identidade/criar-usuario.cli.js",
+    "catalogo:conferir": "nest build && node dist/catalogo/importacao/conferir.cli.js"
   },
   "dependencies": {
     "@nestjs/common": "^11.1.6",
