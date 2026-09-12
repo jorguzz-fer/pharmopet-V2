@@ -37,10 +37,21 @@ export type InsumoParaCalculo = {
    * ser vendida abaixo da reposição quando o custo gravado está defasado.
    */
   custoDeReferenciaPorGramaEmMicro: number;
-  /** Multiplicador sobre o custo, em centésimos: 648 é 6,48×. */
+  /**
+   * Multiplicador sobre o custo, em centésimos: 648 é 6,48×.
+   *
+   * Zero ou negativo não é "de graça": é insumo sem regra de preço cadastrada,
+   * e vira impedimento. No catálogo real da PharmoPet isso é um em cada quatro
+   * — quase todo excipiente e veículo —, e a v1 os precificava como grátis, sem
+   * avisar ninguém.
+   */
   markupEmCentesimos: number;
-  /** Estoque disponível, em miligramas. */
-  estoqueEmMiligramas: number;
+  /**
+   * Estoque disponível, em miligramas. `null` é "não sabemos", e é diferente de
+   * zero: zero afirma falta, e afirmar falta sem saber enche a tela de aviso
+   * falso, que é como se ensina alguém a ignorar avisos.
+   */
+  estoqueEmMiligramas: number | null;
   controlado: boolean;
   /** Lista da Portaria 344/98, ou ANTIMICROBIANO. Nulo quando não controlado. */
   listaDeControle: string | null;
@@ -79,7 +90,11 @@ export type EntradaDaPrecificacao = {
  * `codigo` é o do insumo quando o problema é de um insumo específico, para a
  * tela conseguir apontar a linha certa.
  */
-export type Impedimento = { tipo: 'forma-proibida' | 'sem-itens'; codigo?: string; texto: string };
+export type Impedimento = {
+  tipo: 'forma-proibida' | 'sem-itens' | 'sem-regra-de-preco';
+  codigo?: string;
+  texto: string;
+};
 
 /** O que o prescritor precisa saber, mas não impede de seguir. */
 export type Aviso = {
@@ -166,17 +181,32 @@ export function precificar(entrada: EntradaDaPrecificacao): PrecificacaoCalculad
 
     const massaEmMiligramas = Number(massaEmMicrogramas / 1000n);
 
-    if (insumo.estoqueEmMiligramas <= 0) {
-      avisos.push({
-        tipo: 'sem-estoque',
+    // `null` é estoque não informado: não se afirma falta sobre o que não se
+    // sabe. Avisar à toa é como se ensina alguém a ignorar avisos.
+    if (insumo.estoqueEmMiligramas !== null) {
+      if (insumo.estoqueEmMiligramas <= 0) {
+        avisos.push({
+          tipo: 'sem-estoque',
+          codigo: insumo.codigo,
+          texto: `${insumo.descricao} está sem estoque. Fale com a PharmoPet antes de confirmar.`,
+        });
+      } else if (massaEmMiligramas > insumo.estoqueEmMiligramas) {
+        avisos.push({
+          tipo: 'sem-estoque',
+          codigo: insumo.codigo,
+          texto: `${insumo.descricao} tem menos estoque do que esta fórmula precisa.`,
+        });
+      }
+    }
+
+    // Sem markup não há preço, e zero não é "de graça". No catálogo real isso
+    // é um em cada quatro insumos — quase todo excipiente e veículo. A v1
+    // multiplicava por zero e entregava o ingrediente sem cobrar.
+    if (insumo.markupEmCentesimos <= 0) {
+      impedimentos.push({
+        tipo: 'sem-regra-de-preco',
         codigo: insumo.codigo,
-        texto: `${insumo.descricao} está sem estoque. Fale com a PharmoPet antes de confirmar.`,
-      });
-    } else if (massaEmMiligramas > insumo.estoqueEmMiligramas) {
-      avisos.push({
-        tipo: 'sem-estoque',
-        codigo: insumo.codigo,
-        texto: `${insumo.descricao} tem menos estoque do que esta fórmula precisa.`,
+        texto: `${insumo.descricao} está sem regra de preço cadastrada. A farmácia precisa definir o markup antes de orçar.`,
       });
     }
 

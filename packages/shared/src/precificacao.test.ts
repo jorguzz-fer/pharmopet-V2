@@ -323,3 +323,81 @@ describe('precificar', () => {
     });
   });
 });
+
+/**
+ * O catálogo real da PharmoPet trouxe casos que nenhuma fixture inventada
+ * tinha. Estes testes guardam as correções que ele obrigou.
+ */
+describe('casos que o catálogo real revelou', () => {
+  it('não precifica insumo sem markup — zero não é de graça', () => {
+    const resultado = precificar({
+      itens: [
+        {
+          insumo: insumo({ markupEmCentesimos: 0 }),
+          dosePorUnidadeEmMicrogramas: 25_000,
+          quantidade: 60,
+        },
+      ],
+      forma: 'CÁPSULAS',
+      condicoes: SEM_CONDICOES,
+    });
+
+    expect(resultado.impedimentos[0]).toMatchObject({ tipo: 'sem-regra-de-preco', codigo: '665' });
+  });
+
+  /** Dois insumos do catálogo têm markup negativo. Preço negativo não existe. */
+  it('também bloqueia markup negativo', () => {
+    const resultado = precificar({
+      itens: [
+        {
+          insumo: insumo({ markupEmCentesimos: -5_385 }),
+          dosePorUnidadeEmMicrogramas: 25_000,
+          quantidade: 60,
+        },
+      ],
+      forma: 'CÁPSULAS',
+      condicoes: SEM_CONDICOES,
+    });
+
+    expect(resultado.impedimentos[0]?.tipo).toBe('sem-regra-de-preco');
+  });
+
+  /**
+   * Estoque desconhecido não é estoque zerado. O export da farmácia não diz em
+   * que unidade o estoque está, e importar tudo como zero encheria a tela de
+   * "sem estoque" em setecentos insumos — que é como se ensina alguém a
+   * ignorar avisos.
+   */
+  it('não afirma falta quando o estoque não é informado', () => {
+    const resultado = precificar({
+      itens: [
+        {
+          insumo: insumo({ estoqueEmMiligramas: null }),
+          dosePorUnidadeEmMicrogramas: 25_000,
+          quantidade: 60,
+        },
+      ],
+      forma: 'CÁPSULAS',
+      condicoes: SEM_CONDICOES,
+    });
+
+    expect(resultado.avisos).toHaveLength(0);
+    expect(resultado.valorFinalEmCentavos).toBe(34);
+  });
+
+  it('continua avisando quando o estoque é conhecido e está zerado', () => {
+    const resultado = precificar({
+      itens: [
+        {
+          insumo: insumo({ estoqueEmMiligramas: 0 }),
+          dosePorUnidadeEmMicrogramas: 25_000,
+          quantidade: 60,
+        },
+      ],
+      forma: 'CÁPSULAS',
+      condicoes: SEM_CONDICOES,
+    });
+
+    expect(resultado.avisos[0]?.tipo).toBe('sem-estoque');
+  });
+});

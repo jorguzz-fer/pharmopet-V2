@@ -109,7 +109,7 @@ describe('catálogo (contra Postgres)', () => {
         })
         .expect(201);
 
-      expect(resposta.body).toMatchObject({ codigo: '665', emFalta: false });
+      expect(resposta.body).toMatchObject({ codigo: '665', estoque: 'disponivel' });
     });
   });
 
@@ -164,9 +164,9 @@ describe('catálogo (contra Postgres)', () => {
       const corpo = JSON.stringify(resposta.body);
       expect(corpo).not.toContain('35120');
       expect(corpo).not.toContain('648');
-      // Estoque vira booleano: o número exato é informação comercial.
+      // Estoque vira situação: o número exato é informação comercial.
       expect(corpo).not.toContain('500000');
-      expect(resposta.body.insumos[0]).toMatchObject({ emFalta: false });
+      expect(resposta.body.insumos[0]).toMatchObject({ estoque: 'disponivel' });
     });
 
     it('recusa o orçamento detalhado para o prescritor', async () => {

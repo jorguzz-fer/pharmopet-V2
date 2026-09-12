@@ -90,8 +90,12 @@ export const insumoPublicoSchema = z.object({
   descricao: z.string(),
   controlado: z.boolean(),
   listaDeControle: z.string().nullable(),
-  /** Booleano, e não a quantidade: saber o estoque exato não ajuda a prescrever. */
-  emFalta: z.boolean(),
+  /**
+   * Situação, e não a quantidade: o número exato é informação comercial da
+   * farmácia, e saber que são 4.310 mg não muda o que se prescreve.
+   * `desconhecido` é diferente de `em-falta` — não se afirma falta sem saber.
+   */
+  estoque: z.enum(['disponivel', 'em-falta', 'desconhecido']),
   formasProibidas: z.array(z.object({ formaId: z.uuid(), nome: z.string(), motivo: z.string() })),
 });
 export class InsumoPublicoDto extends createZodDto(insumoPublicoSchema) {}
@@ -111,7 +115,7 @@ export const criarInsumoSchema = z.object({
   custoPorGramaEmMicro: z.int().nonnegative(),
   custoDeReferenciaPorGramaEmMicro: z.int().nonnegative().default(0),
   markupEmCentesimos: z.int().positive().max(100_000),
-  estoqueEmMiligramas: z.int().nonnegative().default(0),
+  estoqueEmMiligramas: z.int().nonnegative().nullable().optional(),
   controlado: z.boolean().default(false),
   listaDeControle: z.string().max(20).nullable().optional(),
 });
@@ -121,7 +125,7 @@ export const insumoAdminSchema = insumoPublicoSchema.extend({
   custoPorGramaEmMicro: z.int(),
   custoDeReferenciaPorGramaEmMicro: z.int(),
   markupEmCentesimos: z.int(),
-  estoqueEmMiligramas: z.int(),
+  estoqueEmMiligramas: z.int().nullable(),
 });
 export class InsumoAdminDto extends createZodDto(insumoAdminSchema) {}
 

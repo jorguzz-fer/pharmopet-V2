@@ -49,9 +49,7 @@ export class CatalogoController {
         descricao: i.descricao,
         controlado: i.controlado,
         listaDeControle: i.listaDeControle,
-        // Booleano, e não o número: o estoque exato é informação comercial da
-        // farmácia, e saber que são 4.310 mg não muda o que se prescreve.
-        emFalta: i.estoqueEmMiligramas <= 0,
+        estoque: situacaoDoEstoque(i.estoqueEmMiligramas),
         formasProibidas: i.restricoes.map((r) => ({
           formaId: r.forma.id,
           nome: r.forma.nome,
@@ -137,7 +135,7 @@ export class CatalogoController {
         custoPorGramaEmMicro: corpo.custoPorGramaEmMicro,
         custoDeReferenciaPorGramaEmMicro: corpo.custoDeReferenciaPorGramaEmMicro,
         markupEmCentesimos: corpo.markupEmCentesimos,
-        estoqueEmMiligramas: corpo.estoqueEmMiligramas,
+        estoqueEmMiligramas: corpo.estoqueEmMiligramas ?? null,
         controlado: corpo.controlado,
         listaDeControle: corpo.listaDeControle?.trim() || null,
       },
@@ -149,7 +147,7 @@ export class CatalogoController {
       descricao: criado.descricao,
       controlado: criado.controlado,
       listaDeControle: criado.listaDeControle,
-      emFalta: criado.estoqueEmMiligramas <= 0,
+      estoque: situacaoDoEstoque(criado.estoqueEmMiligramas),
       formasProibidas: [],
       custoPorGramaEmMicro: criado.custoPorGramaEmMicro,
       custoDeReferenciaPorGramaEmMicro: criado.custoDeReferenciaPorGramaEmMicro,
@@ -229,6 +227,20 @@ export class CatalogoController {
       orderBy: [{ especie: 'asc' }, { pesoMinimoEmGramas: 'asc' }],
     });
   }
+}
+
+/**
+ * Situação do estoque, e não a quantidade.
+ *
+ * Três estados, não dois: o export da farmácia não diz em que unidade o estoque
+ * está, então muito insumo entra sem essa informação. Chamar isso de "em falta"
+ * encheria a tela de aviso falso.
+ */
+function situacaoDoEstoque(
+  emMiligramas: number | null,
+): 'disponivel' | 'em-falta' | 'desconhecido' {
+  if (emMiligramas === null) return 'desconhecido';
+  return emMiligramas > 0 ? 'disponivel' : 'em-falta';
 }
 
 /** A parte do orçamento que todo papel pode ver. */

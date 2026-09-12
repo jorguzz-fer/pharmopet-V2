@@ -162,8 +162,10 @@ model Insumo {
   /// Multiplicador sobre o custo, em centésimos: 648 é 6,48×.
   markupEmCentesimos               Int
 
-  /// Estoque disponível, em miligramas.
-  estoqueEmMiligramas Int @default(0)
+  /// Estoque disponível, em miligramas. Nulo é "não informado", e é diferente
+  /// de zero: zero afirma falta, e afirmar falta sem saber enche a tela de aviso
+  /// falso — que é como se ensina alguém a ignorar avisos.
+  estoqueEmMiligramas Int?
 
   controlado      Boolean @default(false)
   /// Lista da Portaria 344/98 (A1, A2, B1, C1…) ou ANTIMICROBIANO.
