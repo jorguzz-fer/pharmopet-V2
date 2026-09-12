@@ -1,0 +1,37 @@
+# O que não vai no contexto de build.
+#
+# node_modules e dist ficam de fora porque são reconstruídos dentro da imagem:
+# mandar os do host encheria o contexto de centenas de megabytes e, pior,
+# poderia sobrescrever o que foi instalado para o Linux da imagem com binário
+# nativo compilado para outra plataforma — o @node-rs/argon2 e os engines do
+# Prisma são exatamente esse caso.
+
+node_modules
+**/node_modules
+dist
+**/dist
+**/*.tsbuildinfo
+
+.git
+.github
+.vscode
+.idea
+
+# Segredo local. O ambiente real vem de variável de ambiente, e um .env
+# empacotado na imagem seria credencial de desenvolvimento viajando para
+# produção.
+.env
+**/.env
+!**/.env.example
+
+# Saída de teste e cobertura.
+coverage
+**/coverage
+
+# Infra de desenvolvimento: o Postgres de produção é outro.
+infra/
+
+# Documentação não entra no build.
+docs/
+*.md
+!README.md
