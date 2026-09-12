@@ -6,7 +6,13 @@ coverage/
 
 .env
 .env.*
+# Arquivo de exemplo não carrega segredo — carrega os nomes das variáveis, que
+# é o que precisa estar versionado. A negação cobre qualquer
+# `.env.<ambiente>.example`, e não só o `.env.example`: sem ela cada exemplo
+# novo exigiria `git add -f`, e o primeiro que alguém esquecesse sumiria do
+# repositório sem aviso nenhum.
 !.env.example
+!.env.*.example
 
 .DS_Store
 *.log
