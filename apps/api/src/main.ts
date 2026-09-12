@@ -1,11 +1,12 @@
 import 'reflect-metadata';
 import { NestFactory } from '@nestjs/core';
 import { Logger } from '@nestjs/common';
-import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import { ZodValidationPipe, cleanupOpenApiDoc } from 'nestjs-zod';
+import { SwaggerModule } from '@nestjs/swagger';
+import { ZodValidationPipe } from 'nestjs-zod';
 import helmet from 'helmet';
 import { AppModule } from './app.module';
 import { validarEnv } from './config/env';
+import { criarDocumentoOpenApi } from './openapi/documento';
 
 async function bootstrap(): Promise<void> {
   // Falha cedo e com mensagem clara se a configuração estiver incompleta.
@@ -31,18 +32,9 @@ async function bootstrap(): Promise<void> {
   });
 
   // OpenAPI é a fonte de verdade do contrato: o cliente é gerado a partir
-  // daqui, nunca escrito à mão.
-  const documento = cleanupOpenApiDoc(
-    SwaggerModule.createDocument(
-      app,
-      new DocumentBuilder()
-        .setTitle('PharmoPet API')
-        .setDescription('Prescrição e manipulação veterinária')
-        .setVersion('1.0.0')
-        .setOpenAPIVersion('3.1.0')
-        .build(),
-    ),
-  );
+  // daqui, nunca escrito à mão. Mesmo documento que o gerador do api-client
+  // escreve em disco — um construtor só, para não haver dois contratos.
+  const documento = criarDocumentoOpenApi(app);
   SwaggerModule.setup('api/docs', app, documento, {
     jsonDocumentUrl: 'api/openapi.json',
   });

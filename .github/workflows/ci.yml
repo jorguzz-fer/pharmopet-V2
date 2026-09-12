@@ -34,6 +34,15 @@ jobs:
       - name: Gerar Prisma Client
         run: pnpm --filter @pharmopet/api prisma:generate
 
+      # O contrato e o cliente são gerados a partir dos controllers. Regerar aqui
+      # e exigir diff zero impede o caso silencioso: a API muda, o cliente
+      # continua tipado contra o contrato antigo e o front só descobre em runtime.
+      - name: Contrato OpenAPI em dia
+        run: |
+          pnpm contrato
+          git diff --exit-code -- apps/api/openapi.json packages/api-client/src/gerado \
+            || { echo "::error::O contrato mudou. Rode 'pnpm contrato' e comite o resultado."; exit 1; }
+
       - name: Formatação
         run: pnpm format:check
 

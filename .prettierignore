@@ -2,3 +2,8 @@ node_modules
 dist
 coverage
 pnpm-lock.yaml
+
+# Saída de gerador. Reformatar aqui faria a verificação de drift do CI acusar
+# diferença a cada geração — compararia estilo, não contrato.
+packages/api-client/src/gerado
+apps/api/openapi.json

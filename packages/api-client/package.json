@@ -1,0 +1,29 @@
+{
+  "name": "@pharmopet/api-client",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Cliente tipado da API, gerado do contrato OpenAPI",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "gerar": "openapi-typescript ../../apps/api/openapi.json --output src/gerado/api.ts",
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "openapi-fetch": "^0.15.1"
+  },
+  "devDependencies": {
+    "openapi-typescript": "^7.9.1",
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.16"
+  }
+}

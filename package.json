@@ -15,6 +15,7 @@
     "lint": "eslint .",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
+    "contrato": "pnpm --filter @pharmopet/api openapi && pnpm --filter @pharmopet/api-client gerar",
     "verify": "pnpm lint && pnpm typecheck && pnpm test && pnpm build",
     "infra:up": "docker compose -f infra/docker-compose.yml up -d",
     "infra:down": "docker compose -f infra/docker-compose.yml down"

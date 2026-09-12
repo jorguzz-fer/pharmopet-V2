@@ -4,7 +4,14 @@ import prettier from 'eslint-config-prettier';
 
 export default tseslint.config(
   {
-    ignores: ['**/dist/**', '**/node_modules/**', '**/coverage/**', '**/*.config.*'],
+    ignores: [
+      '**/dist/**',
+      '**/node_modules/**',
+      '**/coverage/**',
+      '**/*.config.*',
+      // Código de gerador: aqui a correção é mudar o contrato, não o arquivo.
+      'packages/api-client/src/gerado/**',
+    ],
   },
   js.configs.recommended,
   ...tseslint.configs.recommended,
