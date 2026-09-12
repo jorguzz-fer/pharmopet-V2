@@ -17,6 +17,32 @@ jobs:
   verificar:
     name: Lint · Types · Test · Build
     runs-on: ubuntu-latest
+
+    # Os testes de autorização rodam contra Postgres de verdade. Contra dublê,
+    # eles provariam que o dublê concorda com o código — e não que o índice
+    # único de e-mail segura, nem que a sessão revogada some da consulta.
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: pharmopet
+          POSTGRES_PASSWORD: pharmopet
+          POSTGRES_DB: pharmopet
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U pharmopet -d pharmopet"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
+
+    env:
+      DATABASE_URL: postgresql://pharmopet:pharmopet@localhost:5432/pharmopet
+      ALLOWED_ORIGINS: http://localhost:5173
+      # Sem TLS entre o job e o serviço; o schema de ambiente só permite isto
+      # fora de produção, e é o que mantém a exceção presa ao CI.
+      COOKIE_SEGURO: 'false'
+
     steps:
       - uses: actions/checkout@v4
 
@@ -38,6 +64,11 @@ jobs:
       # existe. Sem este passo o typecheck do web falha antes de qualquer build.
       - name: Compilar pacotes compartilhados
         run: pnpm build:pacotes
+
+      # `migrate deploy` e não `db push`: é o mesmo caminho da produção, então
+      # uma migration quebrada falha aqui e não no deploy.
+      - name: Aplicar migrations
+        run: pnpm --filter @pharmopet/api prisma:migrate
 
       # O contrato e o cliente são gerados a partir dos controllers. Regerar aqui
       # e exigir diff zero impede o caso silencioso: a API muda, o cliente

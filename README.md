@@ -17,6 +17,7 @@ pnpm build:pacotes                 # os apps consomem os pacotes pelo dist
 pnpm infra:up                      # Postgres local
 cp apps/api/.env.example apps/api/.env
 pnpm --filter @pharmopet/api prisma:generate
+pnpm --filter @pharmopet/api prisma:migrate
 pnpm --filter @pharmopet/api dev
 ```
 
@@ -31,7 +32,25 @@ pnpm --filter @pharmopet/web dev
 ```
 
 Abre em `http://localhost:5173`. A porta é fixa porque é ela que precisa estar
-no `ALLOWED_ORIGINS` da API — a tela inicial diz se os dois estão se falando.
+no `ALLOWED_ORIGINS` da API — a tela de Estado diz se os dois estão se falando.
+
+## O primeiro usuário
+
+Criar usuário exige ser administrador, e no banco vazio não há nenhum. A saída
+não é uma conta padrão no seed — isso é credencial conhecida esperando em
+produção — e sim um comando, que exige acesso ao servidor:
+
+```bash
+pnpm --filter @pharmopet/api usuario:criar \
+  --email voce@clinica.com --nome "Seu Nome" --papel ADMIN
+```
+
+A senha não vem por argumento, porque linha de comando vai para o histórico do
+shell e aparece na lista de processos. Ou o comando gera uma e mostra **uma vez
+só**, ou você a passa em `PHARMOPET_SENHA`.
+
+Papéis: `ADMIN` (administra a instalação), `VETERINARIO` (prescreve, e aí vale
+`--crmv`), `FARMACIA` (manipula).
 
 ## Contrato
 
@@ -52,6 +71,11 @@ pnpm verify    # pacotes + lint + typecheck + test + build
 
 O mesmo gate roda na CI e bloqueia merge. Rode antes de abrir PR.
 
+Os testes de autorização falam com Postgres de verdade — contra dublê, provariam
+que o dublê concorda com o código. Suba o banco (`pnpm infra:up`) e aplique as
+migrations antes; sem `DATABASE_URL` eles falham dizendo isso, em vez de se
+pularem em silêncio.
+
 ## Estrutura
 
 ```
@@ -70,3 +94,5 @@ docs/adr                 decisões arquiteturais
 - **Branches**: curtas, a partir de `main`; `main` sempre deployável
 - **Schemas**: Zod é a única linguagem de schema — validação e OpenAPI saem dele (ADR 0006)
 - **Segredos**: só por ambiente; nada de valor sensível como padrão no código
+- **Acesso**: rota nasce protegida; abrir uma exige `@Publica()` escrito à mão (ADR 0008)
+- **Cor**: sai do pacote de tokens; hex escrito à mão em componente não passa na revisão

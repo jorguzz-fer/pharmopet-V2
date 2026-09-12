@@ -7,23 +7,55 @@ import { z } from 'zod';
  * tarde, em runtime, num caminho qualquer. Nada de valor secreto embutido
  * como padrão — ausência de segredo é erro, não conveniência.
  */
-export const envSchema = z.object({
-  NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
-  PORT: z.coerce.number().int().positive().default(3000),
+export const envSchema = z
+  .object({
+    NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
+    PORT: z.coerce.number().int().positive().default(3000),
 
-  DATABASE_URL: z.string().url(),
+    DATABASE_URL: z.string().url(),
 
-  /** Origens permitidas para o navegador, separadas por vírgula. */
-  ALLOWED_ORIGINS: z
-    .string()
-    .default('')
-    .transform((v) =>
-      v
-        .split(',')
-        .map((s) => s.trim())
-        .filter(Boolean),
-    ),
-});
+    /** Origens permitidas para o navegador, separadas por vírgula. */
+    ALLOWED_ORIGINS: z
+      .string()
+      .default('')
+      .transform((v) =>
+        v
+          .split(',')
+          .map((s) => s.trim())
+          .filter(Boolean),
+      ),
+
+    /**
+     * Quanto tempo uma sessão vale sem renovação. Doze horas cobre um plantão
+     * inteiro sem pedir senha no meio de um atendimento, e ainda assim expira
+     * antes do dia seguinte.
+     */
+    SESSAO_DURACAO_HORAS: z.coerce
+      .number()
+      .int()
+      .positive()
+      .max(24 * 30)
+      .default(12),
+
+    /**
+     * Marca o cookie de sessão como Secure, o que faz o navegador só enviá-lo por
+     * HTTPS. Padrão ligado: desligar é uma decisão consciente de desenvolvimento
+     * local, e a validação abaixo impede que ela escape para produção.
+     */
+    COOKIE_SEGURO: z
+      .enum(['true', 'false'])
+      .default('true')
+      .transform((v) => v === 'true'),
+  })
+  .refine((env) => env.NODE_ENV !== 'production' || env.COOKIE_SEGURO, {
+    message:
+      'COOKIE_SEGURO=false em produção entregaria o cookie de sessão em texto claro na primeira requisição HTTP.',
+    path: ['COOKIE_SEGURO'],
+  })
+  .refine((env) => env.NODE_ENV !== 'production' || env.ALLOWED_ORIGINS.length > 0, {
+    message: 'Sem ALLOWED_ORIGINS em produção nenhum navegador consegue falar com a API.',
+    path: ['ALLOWED_ORIGINS'],
+  });
 
 export type Env = z.infer<typeof envSchema>;
 

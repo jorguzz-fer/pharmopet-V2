@@ -11,7 +11,8 @@
     "test": "jest",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate deploy",
-    "openapi": "nest build && node dist/openapi/gerar.js"
+    "openapi": "nest build && node dist/openapi/gerar.js",
+    "usuario:criar": "nest build && node --env-file-if-exists=.env dist/identidade/criar-usuario.cli.js"
   },
   "dependencies": {
     "@nestjs/common": "^11.1.6",
@@ -19,8 +20,11 @@
     "@nestjs/core": "^11.1.6",
     "@nestjs/platform-express": "^11.1.6",
     "@nestjs/swagger": "^11.2.0",
+    "@nestjs/throttler": "^6.5.0",
+    "@node-rs/argon2": "^2.2.1",
     "@pharmopet/shared": "workspace:*",
     "@prisma/client": "^6.16.2",
+    "cookie-parser": "^1.4.7",
     "helmet": "^8.1.0",
     "nestjs-zod": "^5.5.0",
     "reflect-metadata": "^0.2.2",
@@ -31,6 +35,8 @@
     "@nestjs/cli": "^11.0.10",
     "@nestjs/schematics": "^11.0.9",
     "@nestjs/testing": "^11.1.6",
+    "@types/cookie-parser": "^1.4.10",
+    "@types/express": "^5.0.6",
     "@types/jest": "^30.0.0",
     "@types/node": "^22.18.1",
     "@types/supertest": "^6.0.3",

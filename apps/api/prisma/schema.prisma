@@ -12,3 +12,127 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+/// Papéis do sistema. Instalação única, sem organização — a ADR 0002 fixou isso.
+enum Papel {
+  /// Administra a instalação: cria usuários, mexe em preço e em catálogo.
+  ADMIN
+  /// Prescreve. É quem monta a receita e a formulação magistral.
+  VETERINARIO
+  /// Manipula: vê a fila de pedidos e move o estado da produção.
+  FARMACIA
+}
+
+/// Quem entra no sistema.
+///
+/// Sem exclusão física: um usuário desativado precisa continuar existindo para
+/// as receitas que ele assinou continuarem tendo autor. `desativadoEm` marca a
+/// saída, e o login recusa quem tem essa data preenchida.
+model Usuario {
+  id        String  @id @default(uuid()) @db.Uuid
+  /// Guardado em minúsculas. O índice único só protege de verdade assim: dois
+  /// cadastros do mesmo e-mail em caixa diferente seriam duas contas da mesma
+  /// pessoa, cada uma com a sua senha.
+  email     String  @unique
+  nome      String
+  papel     Papel
+  /// Hash Argon2id, com os parâmetros embutidos no próprio texto. Senha em claro
+  /// nunca chega aqui, e o hash nunca sai da API.
+  senhaHash String
+  /// CRMV de quem prescreve. Nulo para os demais papéis.
+  crmv      String?
+
+  desativadoEm DateTime? @db.Timestamptz(3)
+
+  /// Momento a partir do qual toda sessão anterior deixa de valer. É o que faz a
+  /// troca de senha derrubar as outras sessões numa escrita só.
+  sessoesValidasDesde DateTime @default(now()) @db.Timestamptz(3)
+
+  /// Senhas erradas seguidas. Zera a cada entrada aceita.
+  tentativasFalhas Int       @default(0)
+  /// Enquanto esta data estiver no futuro, o login recusa até com a senha certa.
+  bloqueadoAte     DateTime? @db.Timestamptz(3)
+
+  criadoEm     DateTime @default(now()) @db.Timestamptz(3)
+  atualizadoEm DateTime @updatedAt @db.Timestamptz(3)
+
+  sessoes Sessao[]
+  eventos EventoDeAuditoria[]
+
+  @@index([papel])
+  @@map("usuario")
+}
+
+/// Sessão de navegador.
+///
+/// Sessão em tabela, e não JWT: a ADR 0008 explica por quê — o blueprint exige
+/// revogação imediata, e um token assinado só deixa de valer quando expira.
+model Sessao {
+  id String @id @default(uuid()) @db.Uuid
+
+  usuarioId String  @db.Uuid
+  usuario   Usuario @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+
+  /// SHA-256 do segredo que viaja no cookie. O segredo não é guardado: um
+  /// vazamento desta tabela não entrega a ninguém uma sessão utilizável.
+  tokenHash String @unique
+
+  /// Segredo do par anti-CSRF. Vai num cookie legível pelo JavaScript e volta em
+  /// cabeçalho; é a conferência dos dois que prova que a chamada saiu da nossa
+  /// página, e não de um formulário hospedado em outro site.
+  csrfToken String
+
+  expiraEm   DateTime  @db.Timestamptz(3)
+  revogadaEm DateTime? @db.Timestamptz(3)
+
+  /// Contexto de origem, para a pessoa reconhecer uma sessão que não é dela.
+  ip              String?
+  agenteDeUsuario String?
+
+  criadaEm    DateTime @default(now()) @db.Timestamptz(3)
+  ultimoUsoEm DateTime @default(now()) @db.Timestamptz(3)
+
+  @@index([usuarioId])
+  @@index([expiraEm])
+  @@map("sessao")
+}
+
+enum AcaoAuditada {
+  ENTRADA_ACEITA
+  ENTRADA_RECUSADA
+  CONTA_BLOQUEADA
+  SAIDA
+  SENHA_ALTERADA
+  USUARIO_CRIADO
+  USUARIO_DESATIVADO
+}
+
+/// O que aconteceu, quem fez e quando.
+///
+/// Só recebe inserção: não existe caminho de escrita que atualize ou apague uma
+/// linha daqui. Auditoria que pode ser reescrita não é auditoria.
+model EventoDeAuditoria {
+  id String @id @default(uuid()) @db.Uuid
+
+  /// Nulo quando não há quem identificar — tentativa de entrada num e-mail que
+  /// não existe, por exemplo. O evento importa mesmo sem autor.
+  usuarioId String?  @db.Uuid
+  usuario   Usuario? @relation(fields: [usuarioId], references: [id], onDelete: SetNull)
+
+  acao AcaoAuditada
+
+  /// O que foi tocado, quando a ação incide sobre algo: "usuario:<id>".
+  alvo String?
+
+  /// Contexto do evento. Nunca senha, nunca token, nunca hash.
+  detalhe Json?
+
+  ip              String?
+  agenteDeUsuario String?
+
+  ocorridoEm DateTime @default(now()) @db.Timestamptz(3)
+
+  @@index([usuarioId, ocorridoEm])
+  @@index([acao, ocorridoEm])
+  @@map("evento_de_auditoria")
+}

@@ -1,6 +1,134 @@
 {
   "openapi": "3.1.0",
   "paths": {
+    "/api/v1/auth/entrar": {
+      "post": {
+        "operationId": "IdentidadeController_entrar",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EntrarDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Sessão aberta; os cookies vão na resposta."
+          },
+          "401": {
+            "description": "E-mail ou senha incorretos."
+          }
+        },
+        "summary": "Abre uma sessão",
+        "tags": [
+          "identidade"
+        ]
+      }
+    },
+    "/api/v1/auth/sair": {
+      "post": {
+        "operationId": "IdentidadeController_sair",
+        "parameters": [],
+        "responses": {
+          "204": {
+            "description": "Sessão encerrada."
+          }
+        },
+        "summary": "Encerra a sessão atual",
+        "tags": [
+          "identidade"
+        ]
+      }
+    },
+    "/api/v1/auth/eu": {
+      "get": {
+        "operationId": "IdentidadeController_eu",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EuDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Quem está logado",
+        "tags": [
+          "identidade"
+        ]
+      }
+    },
+    "/api/v1/auth/senha": {
+      "post": {
+        "operationId": "IdentidadeController_trocarSenha",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TrocarSenhaDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Senha trocada; é preciso entrar de novo."
+          },
+          "401": {
+            "description": "Senha atual incorreta."
+          }
+        },
+        "summary": "Troca a própria senha e derruba as outras sessões",
+        "tags": [
+          "identidade"
+        ]
+      }
+    },
+    "/api/v1/auth/usuarios": {
+      "post": {
+        "operationId": "IdentidadeController_criarUsuario",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CriarUsuarioDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EuDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Só administrador cria usuário."
+          }
+        },
+        "summary": "Cria um usuário",
+        "tags": [
+          "identidade"
+        ]
+      }
+    },
     "/api/v1/health": {
       "get": {
         "operationId": "HealthController_verificar",
@@ -34,6 +162,126 @@
   "servers": [],
   "components": {
     "schemas": {
+      "EntrarDto": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "pattern": "^(?:[A-Za-z0-9_'+\\-]+\\.)*[A-Za-z0-9_'+\\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
+          },
+          "senha": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "email",
+          "senha"
+        ]
+      },
+      "EuDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "nome": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "pattern": "^(?:[A-Za-z0-9_'+\\-]+\\.)*[A-Za-z0-9_'+\\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
+          },
+          "papel": {
+            "type": "string",
+            "enum": [
+              "ADMIN",
+              "VETERINARIO",
+              "FARMACIA"
+            ]
+          },
+          "crmv": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "nome",
+          "email",
+          "papel",
+          "crmv"
+        ]
+      },
+      "TrocarSenhaDto": {
+        "type": "object",
+        "properties": {
+          "senhaAtual": {
+            "type": "string",
+            "minLength": 1
+          },
+          "senhaNova": {
+            "type": "string",
+            "minLength": 12,
+            "maxLength": 200
+          }
+        },
+        "required": [
+          "senhaAtual",
+          "senhaNova"
+        ]
+      },
+      "CriarUsuarioDto": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "pattern": "^(?:[A-Za-z0-9_'+\\-]+\\.)*[A-Za-z0-9_'+\\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
+          },
+          "nome": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 160
+          },
+          "papel": {
+            "type": "string",
+            "enum": [
+              "ADMIN",
+              "VETERINARIO",
+              "FARMACIA"
+            ]
+          },
+          "senha": {
+            "type": "string",
+            "minLength": 12,
+            "maxLength": 200
+          },
+          "crmv": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 40
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "email",
+          "nome",
+          "papel",
+          "senha"
+        ]
+      },
       "SaudeDto": {
         "type": "object",
         "properties": {
