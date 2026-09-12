@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { contraste, atendeAA, paraRgb, MINIMO_AA_TEXTO } from './contraste';
-import { cor, estado } from './tokens';
+import { contraste, atendeAA, paraRgb, MINIMO_AA_TEXTO } from './contraste.js';
+import { cor, estado } from './tokens.js';
 
 describe('contraste', () => {
   it('dá 21 entre preto e branco', () => {

@@ -1,0 +1,6 @@
+{
+  // O build não emite teste; o typecheck, sim, olha para ele. Sem esta separação
+  // o arquivo de teste ficaria fora da verificação de tipos e só quebraria ao rodar.
+  "extends": "./tsconfig.json",
+  "exclude": ["src/**/*.test.ts"]
+}

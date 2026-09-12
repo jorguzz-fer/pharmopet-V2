@@ -1,0 +1,7 @@
+{
+  // O que vai para o dist. O tsconfig.json (usado no typecheck e pelo ts-jest)
+  // enxerga também os .spec.ts — teste fora da verificação de tipos só quebra
+  // na hora de rodar, que é tarde.
+  "extends": "./tsconfig.json",
+  "exclude": ["src/**/*.spec.ts"]
+}

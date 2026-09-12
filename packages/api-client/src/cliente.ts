@@ -15,8 +15,8 @@ export type OpcoesDoCliente = {
   /** Raiz da API, sem barra no fim. Ex.: https://api.pharmopet.com.br */
   baseUrl: string;
   /**
-   * `fetch` alternativo. Existe para teste e para ambientes que precisam
-   * instrumentar a chamada; em produção fica o do próprio runtime.
+   * `fetch` fixo, para quem quer injetar um explicitamente. Omitido, o cliente
+   * usa o do ambiente — resolvido a cada chamada, não na criação (veja abaixo).
    */
   fetch?: typeof globalThis.fetch;
 };
@@ -27,7 +27,14 @@ export function criarClienteApi({ baseUrl, fetch }: OpcoesDoCliente): ClienteApi
     // A sessão vive em cookie httpOnly: o navegador precisa mandá-lo junto.
     // Nenhum token trafega por JavaScript, então não há o que um XSS roubar.
     credentials: 'include',
-    ...(fetch ? { fetch } : {}),
+    // O openapi-fetch guarda `globalThis.fetch` no momento em que o cliente é
+    // criado. Como o cliente do app nasce junto com o módulo, qualquer coisa
+    // que troque o fetch depois — service worker, instrumentação, o dublê de
+    // um teste — seria ignorada em silêncio. Resolver na hora da chamada evita
+    // essa classe inteira de "por que não está passando pelo meu wrapper?".
+    fetch:
+      fetch ??
+      ((entrada: RequestInfo | URL, init?: RequestInit) => globalThis.fetch(entrada, init)),
   });
 }
 

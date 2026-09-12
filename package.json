@@ -15,14 +15,17 @@
     "lint": "eslint .",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
+    "//build:pacotes": "Os apps consomem os pacotes pelo dist. Num checkout limpo o dist não existe, e sem este passo o typecheck do web quebra antes de qualquer build.",
+    "build:pacotes": "pnpm --filter \"./packages/**\" build",
     "contrato": "pnpm --filter @pharmopet/api openapi && pnpm --filter @pharmopet/api-client gerar",
-    "verify": "pnpm lint && pnpm typecheck && pnpm test && pnpm build",
+    "verify": "pnpm build:pacotes && pnpm lint && pnpm typecheck && pnpm test && pnpm build",
     "infra:up": "docker compose -f infra/docker-compose.yml up -d",
     "infra:down": "docker compose -f infra/docker-compose.yml down"
   },
   "pnpm": {
-    "//": "pnpm 10 bloqueia scripts de instalação por padrão. Só o Prisma precisa dos seus, para baixar os engines.",
+    "//": "pnpm 10 bloqueia scripts de instalação por padrão. Liberado só o que precisa colocar binário no lugar: os engines do Prisma e o do esbuild, que o Vite usa.",
     "onlyBuiltDependencies": [
+      "esbuild",
       "@prisma/client",
       "@prisma/engines",
       "prisma"

@@ -1,4 +1,4 @@
-import { cor, estado, fonte, tamanhoFonte, espaco, raio, alturaControle } from './tokens';
+import { cor, estado, fonte, tamanhoFonte, espaco, raio, alturaControle } from './tokens.js';
 
 /**
  * Emite os tokens como custom properties CSS.
