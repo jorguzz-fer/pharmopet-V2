@@ -129,6 +129,329 @@
         ]
       }
     },
+    "/api/v1/catalogo/insumos": {
+      "get": {
+        "operationId": "CatalogoController_insumos",
+        "parameters": [
+          {
+            "name": "busca",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListaDeInsumosDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Busca insumos pelo nome ou pelo código",
+        "tags": [
+          "catálogo"
+        ]
+      },
+      "post": {
+        "operationId": "CatalogoController_criarInsumo",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CriarInsumoDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InsumoAdminDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Cadastra um insumo",
+        "tags": [
+          "catálogo"
+        ]
+      }
+    },
+    "/api/v1/catalogo/formas": {
+      "get": {
+        "operationId": "CatalogoController_formas",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListaDeFormasDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Formas farmacêuticas disponíveis",
+        "tags": [
+          "catálogo"
+        ]
+      },
+      "post": {
+        "operationId": "CatalogoController_criarForma",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CriarFormaDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FormaDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Cadastra uma forma farmacêutica",
+        "tags": [
+          "catálogo"
+        ]
+      }
+    },
+    "/api/v1/catalogo/orcamento": {
+      "post": {
+        "operationId": "CatalogoController_orcamento",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PrecificarDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrcamentoDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Calcula o preço de uma formulação",
+        "tags": [
+          "catálogo"
+        ]
+      }
+    },
+    "/api/v1/catalogo/orcamento/detalhado": {
+      "post": {
+        "operationId": "CatalogoController_orcamentoDetalhado",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PrecificarDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrcamentoDetalhadoDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "A composição do preço não é visível para o prescritor."
+          }
+        },
+        "summary": "Calcula o preço e mostra a composição",
+        "tags": [
+          "catálogo"
+        ]
+      }
+    },
+    "/api/v1/catalogo/restricoes": {
+      "post": {
+        "operationId": "CatalogoController_criarRestricao",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CriarRestricaoDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "summary": "Proíbe um insumo numa forma",
+        "tags": [
+          "catálogo"
+        ]
+      }
+    },
+    "/api/v1/catalogo/faixas": {
+      "post": {
+        "operationId": "CatalogoController_criarFaixa",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CriarFaixaDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FaixaDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Cadastra uma faixa terapêutica",
+        "tags": [
+          "catálogo"
+        ]
+      }
+    },
+    "/api/v1/catalogo/condicoes": {
+      "get": {
+        "operationId": "CatalogoController_lerCondicoes",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CondicoesDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Condições comerciais em vigor",
+        "tags": [
+          "catálogo"
+        ]
+      },
+      "put": {
+        "operationId": "CatalogoController_gravarCondicoes",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CondicoesDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CondicoesDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Altera as condições comerciais",
+        "tags": [
+          "catálogo"
+        ]
+      }
+    },
+    "/api/v1/catalogo/insumos/{id}/faixas": {
+      "get": {
+        "operationId": "CatalogoController_faixasDoInsumo",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/FaixaDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Faixas terapêuticas de um insumo",
+        "tags": [
+          "catálogo"
+        ]
+      }
+    },
     "/api/v1/health": {
       "get": {
         "operationId": "HealthController_verificar",
@@ -280,6 +603,826 @@
           "nome",
           "papel",
           "senha"
+        ]
+      },
+      "ListaDeInsumosDto": {
+        "type": "object",
+        "properties": {
+          "insumos": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "format": "uuid",
+                  "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                },
+                "codigo": {
+                  "type": "string"
+                },
+                "descricao": {
+                  "type": "string"
+                },
+                "controlado": {
+                  "type": "boolean"
+                },
+                "listaDeControle": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "emFalta": {
+                  "type": "boolean"
+                },
+                "formasProibidas": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "formaId": {
+                        "type": "string",
+                        "format": "uuid",
+                        "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                      },
+                      "nome": {
+                        "type": "string"
+                      },
+                      "motivo": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "formaId",
+                      "nome",
+                      "motivo"
+                    ]
+                  }
+                }
+              },
+              "required": [
+                "id",
+                "codigo",
+                "descricao",
+                "controlado",
+                "listaDeControle",
+                "emFalta",
+                "formasProibidas"
+              ]
+            }
+          }
+        },
+        "required": [
+          "insumos"
+        ]
+      },
+      "ListaDeFormasDto": {
+        "type": "object",
+        "properties": {
+          "formas": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "format": "uuid",
+                  "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                },
+                "nome": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "nome"
+              ]
+            }
+          }
+        },
+        "required": [
+          "formas"
+        ]
+      },
+      "PrecificarDto": {
+        "type": "object",
+        "properties": {
+          "formaId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "itens": {
+            "minItems": 1,
+            "maxItems": 20,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "insumoId": {
+                  "type": "string",
+                  "format": "uuid",
+                  "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                },
+                "doseMg": {
+                  "type": "number",
+                  "exclusiveMinimum": 0,
+                  "maximum": 100000
+                },
+                "quantidade": {
+                  "type": "integer",
+                  "exclusiveMinimum": 0,
+                  "maximum": 1000
+                }
+              },
+              "required": [
+                "insumoId",
+                "doseMg",
+                "quantidade"
+              ]
+            }
+          },
+          "paciente": {
+            "type": "object",
+            "properties": {
+              "especie": {
+                "type": "string",
+                "enum": [
+                  "CANINO",
+                  "FELINO",
+                  "EQUINO",
+                  "AVE",
+                  "ROEDOR",
+                  "REPTIL"
+                ]
+              },
+              "pesoEmGramas": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 2000000
+              }
+            },
+            "required": [
+              "especie",
+              "pesoEmGramas"
+            ]
+          }
+        },
+        "required": [
+          "formaId",
+          "itens"
+        ]
+      },
+      "OrcamentoDto": {
+        "type": "object",
+        "properties": {
+          "valorFinalEmCentavos": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "forma": {
+            "type": "string"
+          },
+          "avisos": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "tipo": {
+                  "type": "string",
+                  "enum": [
+                    "sem-estoque",
+                    "controlado",
+                    "antimicrobiano",
+                    "fora-da-faixa",
+                    "sem-referencia"
+                  ]
+                },
+                "insumoId": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "format": "uuid",
+                      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "texto": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "tipo",
+                "insumoId",
+                "texto"
+              ]
+            }
+          },
+          "impedimentos": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "insumoId": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "format": "uuid",
+                      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "texto": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "insumoId",
+                "texto"
+              ]
+            }
+          }
+        },
+        "required": [
+          "valorFinalEmCentavos",
+          "forma",
+          "avisos",
+          "impedimentos"
+        ]
+      },
+      "OrcamentoDetalhadoDto": {
+        "type": "object",
+        "properties": {
+          "valorFinalEmCentavos": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "forma": {
+            "type": "string"
+          },
+          "avisos": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "tipo": {
+                  "type": "string",
+                  "enum": [
+                    "sem-estoque",
+                    "controlado",
+                    "antimicrobiano",
+                    "fora-da-faixa",
+                    "sem-referencia"
+                  ]
+                },
+                "insumoId": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "format": "uuid",
+                      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "texto": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "tipo",
+                "insumoId",
+                "texto"
+              ]
+            }
+          },
+          "impedimentos": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "insumoId": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "format": "uuid",
+                      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "texto": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "insumoId",
+                "texto"
+              ]
+            }
+          },
+          "itens": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "insumoId": {
+                  "type": "string",
+                  "format": "uuid",
+                  "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                },
+                "descricao": {
+                  "type": "string"
+                },
+                "massaTotalEmMiligramas": {
+                  "type": "integer",
+                  "minimum": -9007199254740991,
+                  "maximum": 9007199254740991
+                },
+                "custoEmCentavos": {
+                  "type": "integer",
+                  "minimum": -9007199254740991,
+                  "maximum": 9007199254740991
+                }
+              },
+              "required": [
+                "insumoId",
+                "descricao",
+                "massaTotalEmMiligramas",
+                "custoEmCentavos"
+              ]
+            }
+          },
+          "totalDeMateriaPrimaEmCentavos": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "taxaDeManipulacaoEmCentavos": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "custoDeEmbalagensEmCentavos": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "subtotalEmCentavos": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "descontoEmCentavos": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "adicionalDeEntregaEmCentavos": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "adicionalDeBiscoitoEmCentavos": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": [
+          "valorFinalEmCentavos",
+          "forma",
+          "avisos",
+          "impedimentos",
+          "itens",
+          "totalDeMateriaPrimaEmCentavos",
+          "taxaDeManipulacaoEmCentavos",
+          "custoDeEmbalagensEmCentavos",
+          "subtotalEmCentavos",
+          "descontoEmCentavos",
+          "adicionalDeEntregaEmCentavos",
+          "adicionalDeBiscoitoEmCentavos"
+        ]
+      },
+      "CriarInsumoDto": {
+        "type": "object",
+        "properties": {
+          "codigo": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 40
+          },
+          "descricao": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 200
+          },
+          "custoPorGramaEmMicro": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "custoDeReferenciaPorGramaEmMicro": {
+            "default": 0,
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "markupEmCentesimos": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 100000
+          },
+          "estoqueEmMiligramas": {
+            "default": 0,
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "controlado": {
+            "default": false,
+            "type": "boolean"
+          },
+          "listaDeControle": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 20
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "codigo",
+          "descricao",
+          "custoPorGramaEmMicro",
+          "markupEmCentesimos"
+        ]
+      },
+      "InsumoAdminDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "codigo": {
+            "type": "string"
+          },
+          "descricao": {
+            "type": "string"
+          },
+          "controlado": {
+            "type": "boolean"
+          },
+          "listaDeControle": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "emFalta": {
+            "type": "boolean"
+          },
+          "formasProibidas": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "formaId": {
+                  "type": "string",
+                  "format": "uuid",
+                  "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                },
+                "nome": {
+                  "type": "string"
+                },
+                "motivo": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "formaId",
+                "nome",
+                "motivo"
+              ]
+            }
+          },
+          "custoPorGramaEmMicro": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "custoDeReferenciaPorGramaEmMicro": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "markupEmCentesimos": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "estoqueEmMiligramas": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": [
+          "id",
+          "codigo",
+          "descricao",
+          "controlado",
+          "listaDeControle",
+          "emFalta",
+          "formasProibidas",
+          "custoPorGramaEmMicro",
+          "custoDeReferenciaPorGramaEmMicro",
+          "markupEmCentesimos",
+          "estoqueEmMiligramas"
+        ]
+      },
+      "CriarFormaDto": {
+        "type": "object",
+        "properties": {
+          "nome": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 80
+          }
+        },
+        "required": [
+          "nome"
+        ]
+      },
+      "FormaDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "nome": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "nome"
+        ]
+      },
+      "CriarRestricaoDto": {
+        "type": "object",
+        "properties": {
+          "insumoId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "formaId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "motivo": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 200
+          }
+        },
+        "required": [
+          "insumoId",
+          "formaId",
+          "motivo"
+        ]
+      },
+      "CriarFaixaDto": {
+        "type": "object",
+        "properties": {
+          "insumoId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "especie": {
+            "type": "string",
+            "enum": [
+              "CANINO",
+              "FELINO",
+              "EQUINO",
+              "AVE",
+              "ROEDOR",
+              "REPTIL"
+            ]
+          },
+          "pesoMinimoEmGramas": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "pesoMaximoEmGramas": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "doseMinimaEmMicrogramasPorKg": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991
+          },
+          "doseMaximaEmMicrogramasPorKg": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991
+          },
+          "duracaoMaximaEmDias": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "observacao": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 500
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "insumoId",
+          "especie",
+          "doseMinimaEmMicrogramasPorKg",
+          "doseMaximaEmMicrogramasPorKg"
+        ]
+      },
+      "FaixaDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "insumoId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "especie": {
+            "type": "string",
+            "enum": [
+              "CANINO",
+              "FELINO",
+              "EQUINO",
+              "AVE",
+              "ROEDOR",
+              "REPTIL"
+            ]
+          },
+          "pesoMinimoEmGramas": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "pesoMaximoEmGramas": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "doseMinimaEmMicrogramasPorKg": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "doseMaximaEmMicrogramasPorKg": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "duracaoMaximaEmDias": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "observacao": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "insumoId",
+          "especie",
+          "pesoMinimoEmGramas",
+          "pesoMaximoEmGramas",
+          "doseMinimaEmMicrogramasPorKg",
+          "doseMaximaEmMicrogramasPorKg",
+          "duracaoMaximaEmDias",
+          "observacao"
+        ]
+      },
+      "CondicoesDto": {
+        "type": "object",
+        "properties": {
+          "taxaDeManipulacaoEmCentavos": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "custoDeEmbalagensEmCentavos": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "descontoEmPontosBase": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 10000
+          },
+          "adicionalDeEntregaEmCentavos": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "adicionalDeBiscoitoEmCentavos": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": [
+          "taxaDeManipulacaoEmCentavos",
+          "custoDeEmbalagensEmCentavos",
+          "descontoEmPontosBase",
+          "adicionalDeEntregaEmCentavos",
+          "adicionalDeBiscoitoEmCentavos"
         ]
       },
       "SaudeDto": {

@@ -96,3 +96,7 @@ docs/adr                 decisões arquiteturais
 - **Segredos**: só por ambiente; nada de valor sensível como padrão no código
 - **Acesso**: rota nasce protegida; abrir uma exige `@Publica()` escrito à mão (ADR 0008)
 - **Cor**: sai do pacote de tokens; hex escrito à mão em componente não passa na revisão
+- **Números**: dinheiro e grandeza física em inteiro, com a unidade no nome do
+  campo — `...EmCentavos`, `...EmMicro`, `...EmMiligramas` (ADR 0009)
+- **Resposta**: o recorte por papel é no servidor. Se o dado não pode ser visto,
+  ele não entra na resposta — esconder na tela não esconde de ninguém

@@ -5,4 +5,7 @@
  * mais de um app. Utilitário de um app só mora no app.
  */
 
+export * from './dinheiro.js';
 export * from './posologia.js';
+export * from './precificacao.js';
+export * from './faixa-terapeutica.js';

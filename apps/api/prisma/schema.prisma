@@ -136,3 +136,151 @@ model EventoDeAuditoria {
   @@index([acao, ocorridoEm])
   @@map("evento_de_auditoria")
 }
+
+// ---------------------------------------------------------------------------
+// Catálogo e precificação
+//
+// Todo valor monetário é inteiro, nunca ponto flutuante — a ADR 0009 explica.
+// Duas escalas convivem, e o nome do campo diz qual: centavo para o que a
+// pessoa paga, micro-real (10⁻⁶ BRL) para custo por grama, que é pequeno
+// demais para caber em centavo sem virar zero.
+// ---------------------------------------------------------------------------
+
+/// Matéria-prima que a farmácia manipula.
+model Insumo {
+  id String @id @default(uuid()) @db.Uuid
+
+  /// Código do sistema da farmácia. É por ele que a equipe se refere ao insumo.
+  codigo    String @unique
+  descricao String
+
+  /// Custo por grama, em micro-reais.
+  custoPorGramaEmMicro             Int
+  /// Piso de custo por grama, em micro-reais. Evita vender abaixo da reposição
+  /// quando o custo gravado está defasado.
+  custoDeReferenciaPorGramaEmMicro Int @default(0)
+  /// Multiplicador sobre o custo, em centésimos: 648 é 6,48×.
+  markupEmCentesimos               Int
+
+  /// Estoque disponível, em miligramas.
+  estoqueEmMiligramas Int @default(0)
+
+  controlado      Boolean @default(false)
+  /// Lista da Portaria 344/98 (A1, A2, B1, C1…) ou ANTIMICROBIANO.
+  /// A exigência de receituário depende disto, então não é só rótulo.
+  listaDeControle String?
+
+  desativadoEm DateTime? @db.Timestamptz(3)
+
+  criadoEm     DateTime @default(now()) @db.Timestamptz(3)
+  atualizadoEm DateTime @updatedAt @db.Timestamptz(3)
+
+  restricoes RestricaoDeForma[]
+  faixas     FaixaTerapeutica[]
+
+  @@index([descricao])
+  @@index([controlado])
+  @@map("insumo")
+}
+
+/// Como a fórmula é entregue: cápsula, biscoito, suspensão, pasta.
+model FormaFarmaceutica {
+  id String @id @default(uuid()) @db.Uuid
+
+  nome String @unique
+
+  desativadaEm DateTime? @db.Timestamptz(3)
+
+  criadaEm     DateTime @default(now()) @db.Timestamptz(3)
+  atualizadaEm DateTime @updatedAt @db.Timestamptz(3)
+
+  restricoes RestricaoDeForma[]
+
+  @@map("forma_farmaceutica")
+}
+
+/// Insumo que não pode ser manipulado numa forma — "não faz em pasta".
+///
+/// É restrição técnica da farmácia, não preferência: entra como impedimento no
+/// orçamento, e não como aviso.
+model RestricaoDeForma {
+  id String @id @default(uuid()) @db.Uuid
+
+  insumoId String @db.Uuid
+  insumo   Insumo @relation(fields: [insumoId], references: [id], onDelete: Cascade)
+
+  formaId String            @db.Uuid
+  forma   FormaFarmaceutica @relation(fields: [formaId], references: [id], onDelete: Cascade)
+
+  /// Por que não pode. Aparece para quem prescreve.
+  motivo String
+
+  criadaEm DateTime @default(now()) @db.Timestamptz(3)
+
+  @@unique([insumoId, formaId])
+  @@index([insumoId])
+  @@map("restricao_de_forma")
+}
+
+enum Especie {
+  CANINO
+  FELINO
+  EQUINO
+  AVE
+  ROEDOR
+  REPTIL
+}
+
+/// Dose recomendada de um insumo, por espécie e faixa de peso.
+///
+/// Peso em gramas e dose em microgramas por quilo, ambos inteiros: meio quilo
+/// de calopsita não deveria virar 0,5 em ponto flutuante no meio de um cálculo
+/// de dose.
+model FaixaTerapeutica {
+  id String @id @default(uuid()) @db.Uuid
+
+  insumoId String @db.Uuid
+  insumo   Insumo @relation(fields: [insumoId], references: [id], onDelete: Cascade)
+
+  especie Especie
+
+  /// Nulos significam "sem limite deste lado".
+  pesoMinimoEmGramas Int?
+  pesoMaximoEmGramas Int?
+
+  doseMinimaEmMicrogramasPorKg Int
+  doseMaximaEmMicrogramasPorKg Int
+
+  duracaoMaximaEmDias Int?
+
+  observacao String?
+
+  criadaEm     DateTime @default(now()) @db.Timestamptz(3)
+  atualizadaEm DateTime @updatedAt @db.Timestamptz(3)
+
+  @@index([insumoId, especie])
+  @@map("faixa_terapeutica")
+}
+
+/// Condições comerciais da instalação.
+///
+/// Uma linha só, presa por `id`. Hoje a farmácia pratica as mesmas condições
+/// para todo mundo; quando houver cadastro de clínica com termos negociados,
+/// isto vira uma linha por clínica — e o motor de precificação não muda, porque
+/// já recebe as condições por parâmetro.
+model CondicoesComerciais {
+  /// Sempre "padrao". Um enum de um valor só, para o banco garantir a linha única.
+  id String @id @default("padrao")
+
+  taxaDeManipulacaoEmCentavos   Int @default(0)
+  custoDeEmbalagensEmCentavos   Int @default(0)
+  /// Desconto em pontos-base: 4000 é 40%.
+  descontoEmPontosBase          Int @default(0)
+  adicionalDeEntregaEmCentavos  Int @default(0)
+  /// Cobrado só quando a forma é biscoito ou petisco.
+  adicionalDeBiscoitoEmCentavos Int @default(0)
+
+  atualizadasEm DateTime @updatedAt @db.Timestamptz(3)
+
+  @@map("condicoes_comerciais")
+}
