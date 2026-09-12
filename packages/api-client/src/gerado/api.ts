@@ -89,6 +89,145 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/catalogo/insumos": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Busca insumos pelo nome ou pelo código */
+        get: operations["CatalogoController_insumos"];
+        put?: never;
+        /** Cadastra um insumo */
+        post: operations["CatalogoController_criarInsumo"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/catalogo/formas": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Formas farmacêuticas disponíveis */
+        get: operations["CatalogoController_formas"];
+        put?: never;
+        /** Cadastra uma forma farmacêutica */
+        post: operations["CatalogoController_criarForma"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/catalogo/orcamento": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Calcula o preço de uma formulação */
+        post: operations["CatalogoController_orcamento"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/catalogo/orcamento/detalhado": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Calcula o preço e mostra a composição */
+        post: operations["CatalogoController_orcamentoDetalhado"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/catalogo/restricoes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Proíbe um insumo numa forma */
+        post: operations["CatalogoController_criarRestricao"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/catalogo/faixas": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Cadastra uma faixa terapêutica */
+        post: operations["CatalogoController_criarFaixa"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/catalogo/condicoes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Condições comerciais em vigor */
+        get: operations["CatalogoController_lerCondicoes"];
+        /** Altera as condições comerciais */
+        put: operations["CatalogoController_gravarCondicoes"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/catalogo/insumos/{id}/faixas": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Faixas terapêuticas de um insumo */
+        get: operations["CatalogoController_faixasDoInsumo"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/health": {
         parameters: {
             query?: never;
@@ -137,6 +276,167 @@ export interface components {
             papel: "ADMIN" | "VETERINARIO" | "FARMACIA";
             senha: string;
             crmv?: string | null;
+        };
+        ListaDeInsumosDto: {
+            insumos: {
+                /** Format: uuid */
+                id: string;
+                codigo: string;
+                descricao: string;
+                controlado: boolean;
+                listaDeControle: string | null;
+                emFalta: boolean;
+                formasProibidas: {
+                    /** Format: uuid */
+                    formaId: string;
+                    nome: string;
+                    motivo: string;
+                }[];
+            }[];
+        };
+        ListaDeFormasDto: {
+            formas: {
+                /** Format: uuid */
+                id: string;
+                nome: string;
+            }[];
+        };
+        PrecificarDto: {
+            /** Format: uuid */
+            formaId: string;
+            itens: {
+                /** Format: uuid */
+                insumoId: string;
+                doseMg: number;
+                quantidade: number;
+            }[];
+            paciente?: {
+                /** @enum {string} */
+                especie: "CANINO" | "FELINO" | "EQUINO" | "AVE" | "ROEDOR" | "REPTIL";
+                pesoEmGramas: number;
+            };
+        };
+        OrcamentoDto: {
+            valorFinalEmCentavos: number;
+            forma: string;
+            avisos: {
+                /** @enum {string} */
+                tipo: "sem-estoque" | "controlado" | "antimicrobiano" | "fora-da-faixa" | "sem-referencia";
+                insumoId: string | null;
+                texto: string;
+            }[];
+            impedimentos: {
+                insumoId: string | null;
+                texto: string;
+            }[];
+        };
+        OrcamentoDetalhadoDto: {
+            valorFinalEmCentavos: number;
+            forma: string;
+            avisos: {
+                /** @enum {string} */
+                tipo: "sem-estoque" | "controlado" | "antimicrobiano" | "fora-da-faixa" | "sem-referencia";
+                insumoId: string | null;
+                texto: string;
+            }[];
+            impedimentos: {
+                insumoId: string | null;
+                texto: string;
+            }[];
+            itens: {
+                /** Format: uuid */
+                insumoId: string;
+                descricao: string;
+                massaTotalEmMiligramas: number;
+                custoEmCentavos: number;
+            }[];
+            totalDeMateriaPrimaEmCentavos: number;
+            taxaDeManipulacaoEmCentavos: number;
+            custoDeEmbalagensEmCentavos: number;
+            subtotalEmCentavos: number;
+            descontoEmCentavos: number;
+            adicionalDeEntregaEmCentavos: number;
+            adicionalDeBiscoitoEmCentavos: number;
+        };
+        CriarInsumoDto: {
+            codigo: string;
+            descricao: string;
+            custoPorGramaEmMicro: number;
+            /** @default 0 */
+            custoDeReferenciaPorGramaEmMicro: number;
+            markupEmCentesimos: number;
+            /** @default 0 */
+            estoqueEmMiligramas: number;
+            /** @default false */
+            controlado: boolean;
+            listaDeControle?: string | null;
+        };
+        InsumoAdminDto: {
+            /** Format: uuid */
+            id: string;
+            codigo: string;
+            descricao: string;
+            controlado: boolean;
+            listaDeControle: string[];
+            emFalta: boolean;
+            formasProibidas: {
+                /** Format: uuid */
+                formaId: string;
+                nome: string;
+                motivo: string;
+            }[];
+            custoPorGramaEmMicro: number;
+            custoDeReferenciaPorGramaEmMicro: number;
+            markupEmCentesimos: number;
+            estoqueEmMiligramas: number;
+        };
+        CriarFormaDto: {
+            nome: string;
+        };
+        FormaDto: {
+            /** Format: uuid */
+            id: string;
+            nome: string;
+        };
+        CriarRestricaoDto: {
+            /** Format: uuid */
+            insumoId: string;
+            /** Format: uuid */
+            formaId: string;
+            motivo: string;
+        };
+        CriarFaixaDto: {
+            /** Format: uuid */
+            insumoId: string;
+            /** @enum {string} */
+            especie: "CANINO" | "FELINO" | "EQUINO" | "AVE" | "ROEDOR" | "REPTIL";
+            pesoMinimoEmGramas?: number | null;
+            pesoMaximoEmGramas?: number | null;
+            doseMinimaEmMicrogramasPorKg: number;
+            doseMaximaEmMicrogramasPorKg: number;
+            duracaoMaximaEmDias?: number | null;
+            observacao?: string | null;
+        };
+        FaixaDto: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            insumoId: string;
+            /** @enum {string} */
+            especie: "CANINO" | "FELINO" | "EQUINO" | "AVE" | "ROEDOR" | "REPTIL";
+            pesoMinimoEmGramas: number | null;
+            pesoMaximoEmGramas: number | null;
+            doseMinimaEmMicrogramasPorKg: number;
+            doseMaximaEmMicrogramasPorKg: number;
+            duracaoMaximaEmDias: number | null;
+            observacao: string[];
+        };
+        CondicoesDto: {
+            taxaDeManipulacaoEmCentavos: number;
+            custoDeEmbalagensEmCentavos: number;
+            descontoEmPontosBase: number;
+            adicionalDeEntregaEmCentavos: number;
+            adicionalDeBiscoitoEmCentavos: number;
         };
         /** @description Sinal de vida da API */
         SaudeDto: {
@@ -279,6 +579,252 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    CatalogoController_insumos: {
+        parameters: {
+            query?: {
+                busca?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ListaDeInsumosDto"];
+                };
+            };
+        };
+    };
+    CatalogoController_criarInsumo: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CriarInsumoDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InsumoAdminDto"];
+                };
+            };
+        };
+    };
+    CatalogoController_formas: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ListaDeFormasDto"];
+                };
+            };
+        };
+    };
+    CatalogoController_criarForma: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CriarFormaDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FormaDto"];
+                };
+            };
+        };
+    };
+    CatalogoController_orcamento: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PrecificarDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OrcamentoDto"];
+                };
+            };
+        };
+    };
+    CatalogoController_orcamentoDetalhado: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PrecificarDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OrcamentoDetalhadoDto"];
+                };
+            };
+            /** @description A composição do preço não é visível para o prescritor. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    CatalogoController_criarRestricao: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CriarRestricaoDto"];
+            };
+        };
+        responses: {
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    CatalogoController_criarFaixa: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CriarFaixaDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FaixaDto"];
+                };
+            };
+        };
+    };
+    CatalogoController_lerCondicoes: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CondicoesDto"];
+                };
+            };
+        };
+    };
+    CatalogoController_gravarCondicoes: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CondicoesDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CondicoesDto"];
+                };
+            };
+        };
+    };
+    CatalogoController_faixasDoInsumo: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FaixaDto"][];
+                };
             };
         };
     };

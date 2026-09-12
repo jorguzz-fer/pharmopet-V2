@@ -5,7 +5,13 @@ module.exports = {
   rootDir: 'src',
   testRegex: '.*\\.spec\\.ts$',
   moduleNameMapper: {
+    // O pacote entra pelo fonte, e não pelo dist: assim um teste da API roda
+    // contra a versão atual do domínio sem depender de um build anterior.
     '^@pharmopet/shared$': '<rootDir>/../../../packages/shared/src/index.ts',
+    // Esse fonte é ESM e escreve o import relativo com extensão .js, como
+    // "nodenext" exige. O Jest resolve em CommonJS e não acharia o arquivo;
+    // a extensão sai aqui. Não afeta o código da API, que não a usa.
+    '^(\\.{1,2}/.*)\\.js$': '$1',
   },
   // Um arquivo por vez. Os testes de integração falam com o mesmo banco e
   // limpam as tabelas entre si; em paralelo, um apagava os dados do outro no
