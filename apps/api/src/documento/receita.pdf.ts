@@ -3,6 +3,8 @@ import {
   descreverSituacao,
   formatarPeso,
   formatarReais,
+  rotuloDoAroma,
+  type Aroma,
   type SituacaoDaReceita,
 } from '@pharmopet/shared';
 
@@ -49,6 +51,8 @@ export type FormulacaoImpressa = {
   frequenciaHoras: number;
   dias: number;
   orientacao: string | null;
+  aroma: Aroma | null;
+  usoContinuo: boolean;
   valorEmCentavos: number | null;
   itens: { codigo: string; descricao: string; doseMg: number; listaDeControle: string | null }[];
 };
@@ -209,7 +213,7 @@ function formulacoes(doc: PDFKit.PDFDocument, receita: DocumentoDaReceita, largu
     if (doc.y > doc.page.height - 200) doc.addPage();
 
     doc.font('Helvetica-Bold').fontSize(10.5).fillColor(TINTA);
-    doc.text(`${indice + 1}. ${formulacao.forma}`, MARGEM, doc.y + 4, { width: largura });
+    doc.text(`${indice + 1}. ${tituloDaForma(formulacao)}`, MARGEM, doc.y + 4, { width: largura });
 
     for (const item of formulacao.itens) {
       doc.font('Helvetica').fontSize(9.5).fillColor(TINTA);
@@ -396,7 +400,19 @@ export function posologia(formulacao: FormulacaoImpressa): string {
   const porDia = vezes === 1 ? '1 vez ao dia' : `${vezes} vezes ao dia`;
   const dias = formulacao.dias === 1 ? '1 dia' : `${formulacao.dias} dias`;
 
-  return `Dar ${porDia}, por ${dias}. Aviar ${formulacao.quantidade} ${unidade(formulacao)}.`;
+  const base = `Dar ${porDia}, por ${dias}. Aviar ${formulacao.quantidade} ${unidade(formulacao)}.`;
+
+  // O uso contínuo entra na linha da posologia, junto do "por 30 dias" que ele
+  // qualifica. Num canto separado do papel, seria lido como se o tratamento
+  // acabasse no último comprimido.
+  return formulacao.usoContinuo ? `${base} Uso contínuo.` : base;
+}
+
+/** O sabor entra no título: é o que a bancada lê para saber o que fabricar. */
+function tituloDaForma(formulacao: FormulacaoImpressa): string {
+  return formulacao.aroma
+    ? `${formulacao.forma} — sabor ${rotuloDoAroma(formulacao.aroma).toLowerCase()}`
+    : formulacao.forma;
 }
 
 function unidade(formulacao: FormulacaoImpressa): string {

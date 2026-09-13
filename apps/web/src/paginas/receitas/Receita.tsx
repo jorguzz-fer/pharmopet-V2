@@ -1,7 +1,7 @@
 import { useCallback, useState } from 'react';
 import { Link, useParams } from 'react-router';
 import { exigir, type components } from '@pharmopet/api-client';
-import { descreverSituacao, formatarPeso, formatarReais } from '@pharmopet/shared';
+import { descreverSituacao, formatarPeso, formatarReais, rotuloDoAroma } from '@pharmopet/shared';
 import { api } from '@/api/cliente';
 import { mensagemDeErro, useConsulta } from '@/api/consulta';
 import { Aviso, tomDoAviso } from '@/componentes/Aviso';
@@ -75,7 +75,7 @@ function Detalhe({ receita, aoMudar }: { receita: ReceitaDto; aoMudar: () => voi
       {receita.formulacoes.map((f, i) => (
         <Cartao
           key={f.id}
-          titulo={`Fórmula ${i + 1} — ${f.forma}`}
+          titulo={`Fórmula ${i + 1} — ${f.forma}${f.aroma ? ` (${rotuloDoAroma(f.aroma)})` : ''}`}
           acessorio={
             <span className="font-titulo text-lg font-bold">
               {f.valorEmCentavos === null ? '—' : formatarReais(f.valorEmCentavos)}
@@ -99,6 +99,7 @@ function Detalhe({ receita, aoMudar }: { receita: ReceitaDto; aoMudar: () => voi
 
             <p className="text-sm text-neutro-700">
               {f.quantidade} unidades · 1 a cada {f.frequenciaHoras} h · {f.dias} dias
+              {f.usoContinuo ? ' · uso contínuo' : ''}
             </p>
 
             {f.orientacao ? <p className="text-sm text-neutro-500">{f.orientacao}</p> : null}

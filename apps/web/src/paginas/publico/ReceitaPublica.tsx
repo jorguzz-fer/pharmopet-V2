@@ -1,7 +1,7 @@
 import { useCallback } from 'react';
 import { useParams } from 'react-router';
 import { exigir, type components } from '@pharmopet/api-client';
-import { formatarReais } from '@pharmopet/shared';
+import { formatarReais, rotuloDoAroma } from '@pharmopet/shared';
 import { api } from '@/api/cliente';
 import { useConsulta } from '@/api/consulta';
 import { ambiente } from '@/config/ambiente';
@@ -93,7 +93,7 @@ export function ReceitaPublica() {
         {receita.formulacoes.map((f, i) => (
           <Cartao
             key={`${f.forma}-${i}`}
-            titulo={`${i + 1}. ${f.forma}`}
+            titulo={`${i + 1}. ${f.forma}${f.aroma ? ` — sabor ${rotuloDoAroma(f.aroma).toLowerCase()}` : ''}`}
             acessorio={
               <span className="font-titulo text-lg font-bold">
                 {f.valorEmCentavos === null ? '—' : formatarReais(f.valorEmCentavos)}
@@ -117,6 +117,13 @@ export function ReceitaPublica() {
                 {vezesAoDia(f.frequenciaHoras)}, por {f.dias} {f.dias === 1 ? 'dia' : 'dias'}.{' '}
                 {f.quantidade} {f.quantidade === 1 ? 'unidade' : 'unidades'}.
               </p>
+
+              {f.usoContinuo ? (
+                <p className="text-sm text-neutro-700">
+                  Uso contínuo: o tratamento não termina no último. Procure a clínica antes de
+                  acabar.
+                </p>
+              ) : null}
 
               {f.orientacao ? <p className="text-sm text-neutro-500">{f.orientacao}</p> : null}
             </div>

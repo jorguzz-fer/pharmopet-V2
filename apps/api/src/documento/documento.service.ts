@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Prisma } from '@prisma/client';
 import {
+  type Aroma,
   formatarCnpj,
   formatarCpf,
   formatarTelefone,
@@ -61,6 +62,8 @@ export type ResumoPublico = {
     frequenciaHoras: number;
     dias: number;
     orientacao: string | null;
+    aroma: Aroma | null;
+    usoContinuo: boolean;
     valorEmCentavos: number | null;
     itens: { descricao: string; doseMg: number }[];
   }[];
@@ -137,6 +140,8 @@ export class DocumentoService {
         frequenciaHoras: f.frequenciaHoras,
         dias: f.dias,
         orientacao: f.orientacao,
+        aroma: f.aroma,
+        usoContinuo: f.usoContinuo,
         valorEmCentavos: f.valorEmCentavos,
         // Código e lista de controle ficam no papel, não na página: são para
         // quem manipula.
@@ -206,6 +211,8 @@ export class DocumentoService {
         frequenciaHoras: f.frequenciaHoras,
         dias: f.dias,
         orientacao: f.orientacao,
+        aroma: f.aroma,
+        usoContinuo: f.usoContinuo,
         valorEmCentavos: f.valorEmCentavos,
         itens: f.itens.map((i) => ({
           codigo: i.codigo,

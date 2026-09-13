@@ -64,10 +64,10 @@ export class CatalogoService {
     });
   }
 
-  async listarFormas(): Promise<{ id: string; nome: string }[]> {
+  async listarFormas(): Promise<{ id: string; nome: string; aceitaAroma: boolean }[]> {
     return this.prisma.formaFarmaceutica.findMany({
       where: { desativadaEm: null },
-      select: { id: true, nome: true },
+      select: { id: true, nome: true, aceitaAroma: true },
       orderBy: { nome: 'asc' },
     });
   }

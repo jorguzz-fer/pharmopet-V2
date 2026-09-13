@@ -7,6 +7,7 @@ import {
 import { randomBytes } from 'node:crypto';
 import { Prisma, type EstadoDaReceita } from '@prisma/client';
 import {
+  type Aroma,
   conferirDuracao,
   descreverDuracao,
   prazoDaReceita,
@@ -27,6 +28,8 @@ export type FormulacaoPedida = {
   dias: number;
   quantidade?: number;
   orientacao?: string | null;
+  aroma?: Aroma | null;
+  usoContinuo?: boolean;
   itens: { insumoId: string; doseMg: number }[];
 };
 
@@ -64,6 +67,8 @@ export type FormulacaoResolvida = {
   dias: number;
   quantidade: number;
   orientacao: string | null;
+  aroma: Aroma | null;
+  usoContinuo: boolean;
   valorEmCentavos: number | null;
   itens: {
     insumoId: string;
@@ -120,6 +125,7 @@ export class ReceitaService {
   async criar(pedido: ReceitaPedida, ator: Ator): Promise<ReceitaCompleta> {
     const paciente = await this.pacienteVisivel(pedido.pacienteId, ator);
     await this.exigirVinculo(pedido.clinicaId ?? null, ator);
+    await this.conferirAromas(pedido.formulacoes);
 
     const criada = await this.prisma.receita.create({
       data: {
@@ -142,6 +148,7 @@ export class ReceitaService {
 
     await this.pacienteVisivel(pedido.pacienteId, ator);
     await this.exigirVinculo(pedido.clinicaId ?? null, ator);
+    await this.conferirAromas(pedido.formulacoes);
 
     return this.prisma.$transaction(async (tx) => {
       // Apaga e recria em vez de casar item a item: a fórmula é um bloco, e
@@ -375,6 +382,8 @@ export class ReceitaService {
           dias: formulacao.dias,
           quantidade: formulacao.quantidade,
           orientacao: formulacao.orientacao,
+          aroma: formulacao.aroma,
+          usoContinuo: formulacao.usoContinuo,
           valorEmCentavos: formulacao.valorEmCentavos,
           itens,
           avisos: [],
@@ -432,6 +441,8 @@ export class ReceitaService {
         dias: formulacao.dias,
         quantidade: formulacao.quantidade,
         orientacao: formulacao.orientacao,
+        aroma: formulacao.aroma,
+        usoContinuo: formulacao.usoContinuo,
         valorEmCentavos:
           orcamento.impedimentos.length > 0 ? null : orcamento.calculo.valorFinalEmCentavos,
         itens,
@@ -467,6 +478,8 @@ export class ReceitaService {
         quantidade:
           formulacao.quantidade ?? quantidadeDeDoses(formulacao.frequenciaHoras, formulacao.dias),
         orientacao: formulacao.orientacao ?? null,
+        aroma: formulacao.aroma ?? null,
+        usoContinuo: formulacao.usoContinuo ?? false,
         ordem,
         itens: {
           create: formulacao.itens.map((item, posicao) => ({
@@ -477,6 +490,46 @@ export class ReceitaService {
         },
       };
     });
+  }
+
+  /**
+   * Confere o aroma contra a forma escolhida.
+   *
+   * Duas recusas, e as duas importam:
+   *
+   * - **forma palatável sem aroma** chegaria à bancada sem dizer o que
+   *   fabricar, e alguém escolheria o sabor por conta própria — ou ligaria
+   *   para perguntar, no dia da entrega;
+   * - **forma não palatável com aroma** é campo preenchido à toa, e um dado à
+   *   toa vira uma expectativa: o tutor lê "morango" numa cápsula.
+   *
+   * Uma consulta para todas as fórmulas da receita, e não uma por fórmula.
+   */
+  private async conferirAromas(pedidas: readonly FormulacaoPedida[]): Promise<void> {
+    const formas = await this.prisma.formaFarmaceutica.findMany({
+      where: { id: { in: [...new Set(pedidas.map((f) => f.formaId))] } },
+      select: { id: true, nome: true, aceitaAroma: true },
+    });
+
+    const porId = new Map(formas.map((f) => [f.id, f]));
+
+    for (const pedida of pedidas) {
+      const forma = porId.get(pedida.formaId);
+      // Forma inexistente não é problema deste método: a chave estrangeira
+      // recusa na gravação, com a mensagem dela.
+      if (!forma) continue;
+
+      const aroma = pedida.aroma ?? null;
+
+      if (forma.aceitaAroma && aroma === null) {
+        throw new BadRequestException(
+          `Escolha o aroma: ${forma.nome} é uma forma que o animal come.`,
+        );
+      }
+      if (!forma.aceitaAroma && aroma !== null) {
+        throw new BadRequestException(`${forma.nome} não leva aroma.`);
+      }
+    }
   }
 
   /**

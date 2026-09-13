@@ -1,3 +1,4 @@
+import { AROMAS } from '@pharmopet/shared';
 import { createZodDto } from 'nestjs-zod';
 import { z } from 'zod';
 
@@ -12,6 +13,8 @@ const formulacaoPublicaSchema = z.object({
   frequenciaHoras: z.number().int(),
   dias: z.number().int(),
   orientacao: z.string().nullable(),
+  aroma: z.enum(AROMAS).nullable(),
+  usoContinuo: z.boolean(),
   valorEmCentavos: z.number().int().nullable(),
   itens: z.array(itemPublicoSchema),
 });
