@@ -1,6 +1,7 @@
 import { MINIMO_AA_TEXTO, atendeAA, contraste, cor, estado } from '@pharmopet/design-tokens';
 import { Botao } from '@/componentes/Botao';
 import { Campo } from '@/componentes/Campo';
+import { CampoDeSenha } from '@/componentes/CampoDeSenha';
 import { Cartao } from '@/componentes/Cartao';
 import { Selo } from '@/componentes/Selo';
 
@@ -158,6 +159,11 @@ export function Sistema() {
             rotulo="CRMV"
             defaultValue="28.114"
             erro="Informe o estado do conselho, ex.: SP 28.114."
+          />
+          <CampoDeSenha
+            rotulo="Senha"
+            defaultValue="uma senha bem longa"
+            ajuda="Nasce escondida. O olho mostra, e o rótulo dele diz o que o clique faz."
           />
         </div>
       </Cartao>
