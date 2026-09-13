@@ -119,16 +119,41 @@ export class ListaDeFormasDto extends createZodDto(listaDeFormasSchema) {}
 
 // --- Administração do catálogo ---
 
-export const criarInsumoSchema = z.object({
-  codigo: z.string().min(1).max(40),
-  descricao: z.string().min(2).max(200),
-  custoPorGramaEmMicro: z.int().nonnegative(),
-  custoDeReferenciaPorGramaEmMicro: z.int().nonnegative().default(0),
-  markupEmCentesimos: z.int().positive().max(100_000),
-  estoqueEmMiligramas: z.int().nonnegative().nullable().optional(),
-  controlado: z.boolean().default(false),
-  listaDeControle: z.string().max(20).nullable().optional(),
-});
+/**
+ * Controlado sem lista não é um cadastro incompleto: é um prazo errado.
+ *
+ * `prazoDaReceita` decide a validade pela lista de cada item. Lista nula cai no
+ * prazo padrão, que são 180 dias — então marcar um entorpecente como controlado
+ * e deixar a lista em branco dá a ele seis meses de validade, em silêncio, em
+ * vez dos trinta dias da Portaria 344/98. O sistema até sabe recusar lista
+ * desconhecida; o que ele não sabe é distinguir "sem lista" de "comum".
+ */
+export const LISTA_OBRIGATORIA =
+  'Insumo controlado precisa da lista da Portaria 344/98 (A1, B1, C1…) ou ANTIMICROBIANO: ' +
+  'é ela que define o prazo de validade da receita.';
+
+export function faltaListaDeControle(
+  controlado: boolean,
+  lista: string | null | undefined,
+): boolean {
+  return controlado && !lista?.trim();
+}
+
+export const criarInsumoSchema = z
+  .object({
+    codigo: z.string().min(1).max(40),
+    descricao: z.string().min(2).max(200),
+    custoPorGramaEmMicro: z.int().nonnegative(),
+    custoDeReferenciaPorGramaEmMicro: z.int().nonnegative().default(0),
+    markupEmCentesimos: z.int().positive().max(100_000),
+    estoqueEmMiligramas: z.int().nonnegative().nullable().optional(),
+    controlado: z.boolean().default(false),
+    listaDeControle: z.string().max(20).nullable().optional(),
+  })
+  .refine((c) => !faltaListaDeControle(c.controlado, c.listaDeControle), {
+    message: LISTA_OBRIGATORIA,
+    path: ['listaDeControle'],
+  });
 export class CriarInsumoDto extends createZodDto(criarInsumoSchema) {}
 
 export const insumoAdminSchema = insumoPublicoSchema.extend({
@@ -139,11 +164,44 @@ export const insumoAdminSchema = insumoPublicoSchema.extend({
 });
 export class InsumoAdminDto extends createZodDto(insumoAdminSchema) {}
 
+/**
+ * O que a administração corrige num insumo já cadastrado.
+ *
+ * Tudo opcional: a tela manda o que mudou. O código fica de fora de propósito —
+ * é a chave pela qual o export da farmácia reencontra a linha, e deixar
+ * renomeá-lo faria a importação seguinte criar um insumo novo em vez de
+ * atualizar este.
+ */
+export const alterarInsumoSchema = z.object({
+  descricao: z.string().min(2).max(200).optional(),
+  custoPorGramaEmMicro: z.int().nonnegative().optional(),
+  custoDeReferenciaPorGramaEmMicro: z.int().nonnegative().optional(),
+  /** Positivo, e não só não-negativo: markup zero é preço zero (fase 3). */
+  markupEmCentesimos: z.int().positive().max(100_000).optional(),
+  estoqueEmMiligramas: z.int().nonnegative().nullable().optional(),
+  controlado: z.boolean().optional(),
+  listaDeControle: z.string().max(20).nullable().optional(),
+});
+export class AlterarInsumoDto extends createZodDto(alterarInsumoSchema) {}
+
 export const criarFormaSchema = z.object({
   nome: z.string().min(2).max(80),
   aceitaAroma: z.boolean().optional(),
 });
 export class CriarFormaDto extends createZodDto(criarFormaSchema) {}
+
+/**
+ * O que se corrige numa forma farmacêutica.
+ *
+ * O nome não entra: é a chave da forma para o importador. Desativar é o caminho
+ * para uma forma que saiu de linha — apagar levaria junto as restrições que
+ * apontam para ela, que é justamente o conhecimento que não se quer perder.
+ */
+export const alterarFormaSchema = z.object({
+  aceitaAroma: z.boolean().optional(),
+  desativada: z.boolean().optional(),
+});
+export class AlterarFormaDto extends createZodDto(alterarFormaSchema) {}
 
 export class FormaDto extends createZodDto(formaSchema) {}
 

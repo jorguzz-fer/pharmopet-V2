@@ -160,6 +160,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/catalogo/insumos/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Altera um insumo */
+        patch: operations["CatalogoController_alterarInsumo"];
+        trace?: never;
+    };
+    "/api/v1/catalogo/formas/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Altera uma forma farmacêutica */
+        patch: operations["CatalogoController_alterarForma"];
+        trace?: never;
+    };
     "/api/v1/catalogo/restricoes": {
         parameters: {
             query?: never;
@@ -172,6 +206,23 @@ export interface paths {
         /** Proíbe um insumo numa forma */
         post: operations["CatalogoController_criarRestricao"];
         delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/catalogo/restricoes/{insumoId}/{formaId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Remove a proibição de um insumo numa forma */
+        delete: operations["CatalogoController_removerRestricao"];
         options?: never;
         head?: never;
         patch?: never;
@@ -743,6 +794,15 @@ export interface components {
             markupEmCentesimos: number;
             estoqueEmMiligramas: number | null;
         };
+        AlterarInsumoDto: {
+            descricao?: string;
+            custoPorGramaEmMicro?: number;
+            custoDeReferenciaPorGramaEmMicro?: number;
+            markupEmCentesimos?: number;
+            estoqueEmMiligramas?: number | null;
+            controlado?: boolean;
+            listaDeControle?: string | null;
+        };
         CriarFormaDto: {
             nome: string;
             aceitaAroma?: boolean;
@@ -752,6 +812,10 @@ export interface components {
             id: string;
             nome: string;
             aceitaAroma: boolean;
+        };
+        AlterarFormaDto: {
+            aceitaAroma?: boolean;
+            desativada?: boolean;
         };
         CriarRestricaoDto: {
             /** Format: uuid */
@@ -1582,6 +1646,56 @@ export interface operations {
             };
         };
     };
+    CatalogoController_alterarInsumo: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AlterarInsumoDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InsumoAdminDto"];
+                };
+            };
+        };
+    };
+    CatalogoController_alterarForma: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AlterarFormaDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FormaDto"];
+                };
+            };
+        };
+    };
     CatalogoController_criarRestricao: {
         parameters: {
             query?: never;
@@ -1594,6 +1708,26 @@ export interface operations {
                 "application/json": components["schemas"]["CriarRestricaoDto"];
             };
         };
+        responses: {
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    CatalogoController_removerRestricao: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                insumoId: string;
+                formaId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
         responses: {
             204: {
                 headers: {

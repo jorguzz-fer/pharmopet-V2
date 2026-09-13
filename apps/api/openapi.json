@@ -356,6 +356,88 @@
         ]
       }
     },
+    "/api/v1/catalogo/insumos/{id}": {
+      "patch": {
+        "operationId": "CatalogoController_alterarInsumo",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AlterarInsumoDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InsumoAdminDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Altera um insumo",
+        "tags": [
+          "catálogo"
+        ]
+      }
+    },
+    "/api/v1/catalogo/formas/{id}": {
+      "patch": {
+        "operationId": "CatalogoController_alterarForma",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AlterarFormaDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FormaDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Altera uma forma farmacêutica",
+        "tags": [
+          "catálogo"
+        ]
+      }
+    },
     "/api/v1/catalogo/restricoes": {
       "post": {
         "operationId": "CatalogoController_criarRestricao",
@@ -376,6 +458,38 @@
           }
         },
         "summary": "Proíbe um insumo numa forma",
+        "tags": [
+          "catálogo"
+        ]
+      }
+    },
+    "/api/v1/catalogo/restricoes/{insumoId}/{formaId}": {
+      "delete": {
+        "operationId": "CatalogoController_removerRestricao",
+        "parameters": [
+          {
+            "name": "insumoId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "formaId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "summary": "Remove a proibição de um insumo numa forma",
         "tags": [
           "catálogo"
         ]
@@ -2341,6 +2455,57 @@
           "estoqueEmMiligramas"
         ]
       },
+      "AlterarInsumoDto": {
+        "type": "object",
+        "properties": {
+          "descricao": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 200
+          },
+          "custoPorGramaEmMicro": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "custoDeReferenciaPorGramaEmMicro": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "markupEmCentesimos": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 100000
+          },
+          "estoqueEmMiligramas": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "controlado": {
+            "type": "boolean"
+          },
+          "listaDeControle": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 20
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        }
+      },
       "CriarFormaDto": {
         "type": "object",
         "properties": {
@@ -2377,6 +2542,17 @@
           "nome",
           "aceitaAroma"
         ]
+      },
+      "AlterarFormaDto": {
+        "type": "object",
+        "properties": {
+          "aceitaAroma": {
+            "type": "boolean"
+          },
+          "desativada": {
+            "type": "boolean"
+          }
+        }
       },
       "CriarRestricaoDto": {
         "type": "object",
