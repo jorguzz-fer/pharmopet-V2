@@ -460,6 +460,57 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/receituario/receitas/{id}/pdf": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** A receita emitida em PDF, para imprimir ou anexar */
+        get: operations["DocumentoController_pdf"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/publico/receitas/{token}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** A receita que o tutor abre pelo link */
+        get: operations["PublicoController_consultar"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/publico/receitas/{token}/pdf": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** O PDF da receita, pelo mesmo link */
+        get: operations["PublicoController_pdf"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/health": {
         parameters: {
             query?: never;
@@ -979,6 +1030,7 @@ export interface components {
             canceladaEm: string | null;
             motivoDoCancelamento: string | null;
             observacoes: string | null;
+            tokenPublico: string | null;
             formulacoes: {
                 /** Format: uuid */
                 id: string;
@@ -1033,6 +1085,37 @@ export interface components {
         };
         CancelarReceitaDto: {
             motivo: string;
+        };
+        ReceitaPublicaDto: {
+            numero: number;
+            /** @enum {string} */
+            situacao: "rascunho" | "valida" | "vencida" | "cancelada";
+            /** Format: date-time */
+            emitidaEm: string;
+            /** Format: date-time */
+            validaAte: string;
+            prazoMotivo: string;
+            motivoDoCancelamento: string | null;
+            clinicaNome: string | null;
+            veterinarioNome: string;
+            crmv: string;
+            tutorNome: string;
+            tutorCpf: string | null;
+            pacienteNome: string;
+            pacienteEspecie: string;
+            formulacoes: {
+                forma: string;
+                quantidade: number;
+                frequenciaHoras: number;
+                dias: number;
+                orientacao: string | null;
+                valorEmCentavos: number | null;
+                itens: {
+                    descricao: string;
+                    doseMg: number;
+                }[];
+            }[];
+            valorTotalEmCentavos: number;
         };
         /** @description Sinal de vida da API */
         SaudeDto: {
@@ -2005,6 +2088,73 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ReceitaDto"];
                 };
+            };
+        };
+    };
+    DocumentoController_pdf: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    PublicoController_consultar: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                token: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReceitaPublicaDto"];
+                };
+            };
+            /** @description Link inválido, ou receita ainda não emitida. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    PublicoController_pdf: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                token: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Link inválido, ou receita ainda não emitida. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };

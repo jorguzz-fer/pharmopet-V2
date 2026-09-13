@@ -4,6 +4,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
+import { randomBytes } from 'node:crypto';
 import { Prisma, type EstadoDaReceita } from '@prisma/client';
 import {
   conferirDuracao,
@@ -270,6 +271,9 @@ export class ReceitaService {
           prazoMotivo: prazo.motivo,
           crmvDoVeterinario: ator.crmv,
           pesoDoPacienteEmGramas: peso,
+          // Nasce aqui, junto do número, e não muda mais: é o link que o tutor
+          // guarda, e link que muda é link que ele perdeu.
+          tokenPublico: novoTokenPublico(),
           // O cabeçalho do documento não muda quando o cadastro da clínica
           // mudar. O logotipo segue por relação: é marca, não identificação.
           clinicaNome: receita.clinica?.nomeFantasia ?? null,
@@ -522,3 +526,17 @@ export class ReceitaService {
 }
 
 export type Contexto = { ip?: string | null; agenteDeUsuario?: string | null };
+
+/**
+ * O segredo do link do tutor.
+ *
+ * 32 bytes de `randomBytes` — não `Math.random`, não o uuid da receita, não o
+ * número. Qualquer um dos três deixaria quem tem um link chegar ao próximo, e
+ * o que está do outro lado é a receita de outro paciente.
+ *
+ * `base64url` porque isto vai inteiro numa URL que circula por WhatsApp: sem
+ * `+`, `/` ou `=` para um aplicativo qualquer escapar errado e quebrar o link.
+ */
+function novoTokenPublico(): string {
+  return randomBytes(32).toString('base64url');
+}

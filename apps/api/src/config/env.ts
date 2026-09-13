@@ -46,6 +46,23 @@ export const envSchema = z
       .enum(['true', 'false'])
       .default('true')
       .transform((v) => v === 'true'),
+
+    /**
+     * Quem manipula, impresso no rodapé do documento.
+     *
+     * Pedido do cliente na reunião de 11/09: o papel precisa dizer o endereço,
+     * o telefone e o CNPJ da farmácia. É identificação de quem responde pela
+     * manipulação, e não vem do banco porque é uma farmácia por instalação
+     * (ADR 0002) — cadastrar uma linha para editar num lugar só seria tela
+     * sem uso.
+     *
+     * Sem configuração, o rodapé sai sem o bloco. Melhor ausente do que
+     * inventado: endereço errado num documento é pior do que endereço nenhum.
+     */
+    FARMACIA_NOME: z.string().trim().min(1).optional(),
+    FARMACIA_CNPJ: z.string().trim().min(1).optional(),
+    FARMACIA_ENDERECO: z.string().trim().min(1).optional(),
+    FARMACIA_TELEFONE: z.string().trim().min(1).optional(),
   })
   .refine((env) => env.NODE_ENV !== 'production' || env.COOKIE_SEGURO, {
     message:

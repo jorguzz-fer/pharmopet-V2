@@ -52,6 +52,23 @@ export function formatarCpf(bruto: string): string {
 }
 
 /**
+ * O CPF com o miolo escondido: `123.***.**9-09`.
+ *
+ * Para a página que o tutor abre sem login. Ele precisa reconhecer que a
+ * receita é dele, e para isso bastam as pontas; o número inteiro numa URL que
+ * circula por WhatsApp é dado de identificação à solta.
+ *
+ * Guarda os três primeiros e os três últimos dígitos de propósito — é o que
+ * distingue dois tutores de mesmo nome sem entregar o documento.
+ */
+export function mascararCpf(bruto: string): string {
+  const d = apenasDigitos(bruto);
+  if (d.length !== 11) return '***';
+
+  return `${d.slice(0, 3)}.***.**${d.slice(8, 9)}-${d.slice(9)}`;
+}
+
+/**
  * Telefone brasileiro com DDD, fixo ou celular.
  *
  * Aceita o `55` na frente e descarta: quem digita o país está descrevendo o

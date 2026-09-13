@@ -21,9 +21,9 @@ Legenda: ✅ já existe no v2 · 🟡 parcial · ❌ ainda não
 | 4   | Motor de preço                                   | ✅  | `precificacao.service`                                         |
 | 5   | Faixa terapêutica / dose por peso                | ✅  | `validacaoClinica.*`, `RangeTerapeutico`                       |
 | 6   | Tutor, paciente, receita (dados e regras)        | ✅  | `prescricao.*`, `Tutor`, `Animal`                              |
-| 7   | **Tela de prescrição (wizard de 4 passos)**      | ❌  | `PrescriptionWizard/`, `MagistralBuilder`                      |
-| 8   | PDF da receita, com marca da clínica             | ❌  | `pdf.service`, `documento.service`                             |
-| 9   | Link público para o tutor abrir sem login        | ❌  | `publico.routes`, `PublicOrder`, `OrderStatus`                 |
+| 7   | **Tela de prescrição (wizard de 4 passos)**      | ✅  | `PrescriptionWizard/`, `MagistralBuilder`                      |
+| 8   | PDF da receita, com marca da clínica             | ✅  | `pdf.service`, `documento.service`                             |
+| 9   | Link público para o tutor abrir sem login        | 🟡  | `publico.routes`, `PublicOrder`, `OrderStatus`                 |
 | 10  | Bulário magistral: busca formulação por doença   | ❌  | `BularioMagistral`, `bulario`                                  |
 | 11  | Assistente de IA com RAG sobre o bulário         | ❌  | `ai-assistant.service` (OpenAI)                                |
 | 12  | Pedido e estado da produção                      | ❌  | `Pedido`, `PedidoStatus`                                       |
@@ -31,7 +31,7 @@ Legenda: ✅ já existe no v2 · 🟡 parcial · ❌ ainda não
 | 14  | Envio ao tutor por WhatsApp                      | ❌  | `whatsapp.service`                                             |
 | 15  | Painel admin: dashboards e relatórios            | ❌  | `pages/admin/*` (12 telas)                                     |
 | 16  | Follow-up de tutores                             | ❌  | `FollowUp`, `AdminFollowUps`                                   |
-| 17  | **Clínicas: entidade, login próprio, dashboard** | ❌  | `Clinica`, `clinica-auth.routes`, `pages/clinic/*`             |
+| 17  | **Clínicas: entidade, login próprio, dashboard** | ✅  | `Clinica`, `clinica-auth.routes`, `pages/clinic/*`             |
 | 18  | Integração Prisma Five (ERP da farmácia)         | ❌  | `prismaFive.service`                                           |
 | 19  | Armazenamento de arquivos (logo, documentos)     | ❌  | `storage.service`                                              |
 
@@ -62,6 +62,40 @@ a ADR 0011 junto.
 
 Não dá para adiar: a fase 7 (tela de prescrição) já precisa saber se a receita
 tem clínica, e o PDF precisa saber de quem é o logotipo.
+
+---
+
+## Pedidos da reunião de 11/09/2026
+
+Alinhados com Marcos Brasil na revisão fina do v1, e portanto **aprovados**.
+Estão aqui porque são requisito de produto que o inventário acima não captura —
+não são coisas que o v1 já faz, são coisas que ele ainda vai fazer.
+
+| O que                                                                           | Onde entra          | Feito |
+| ------------------------------------------------------------------------------- | ------------------- | ----- |
+| Multiplicador de frequência no cálculo de insumo (24h→×1, 12h→×2, 8h→×3, 6h→×4) | posologia           | ✅    |
+| Quantidade definida depois de escolhidos todos os ativos                        | montagem da fórmula | ✅    |
+| Endereço, telefone e CNPJ da farmácia no documento impresso                     | documento           | ✅    |
+| Endereço de entrega no cadastro, com escolha entre clínica e tutor              | cadastro + pedido   | ❌    |
+| Aroma na forma farmacêutica: carne, frango, banana, morango                     | catálogo + fórmula  | ❌    |
+| Campo de uso contínuo, ao lado da quantidade                                    | montagem da fórmula | ❌    |
+| Pancreatina, ciclosporina e SAM só em cápsula — alerta se pedir biscoito        | catálogo            | ❌    |
+| Mensagem de "pedido em análise" ao enviar por WhatsApp                          | notificações        | ❌    |
+
+Três observações sobre a lista:
+
+1. **O multiplicador de frequência já está feito**, e era o item mais pesado. O
+   v1 multiplicava miligrama por dias e ignorava a posologia, o que subestima o
+   insumo em três vezes numa fórmula de 8 em 8 horas. Aqui
+   `quantidadeDeDoses(frequenciaHoras, dias)` existe desde a fase 3, conferida
+   contra a planilha `CALCULADORA_POSOLOGIA.xlsx`.
+2. **A restrição de biscoito já tem onde morar**: `RestricaoDeForma` no catálogo
+   é exatamente isso, e o v2 já a aplica como impedimento. Falta cadastrar as
+   três linhas — pancreatina, ciclosporina e SAM contra a forma biscoito.
+3. **O endereço da farmácia é configuração**, não cadastro: `FARMACIA_NOME`,
+   `FARMACIA_CNPJ`, `FARMACIA_ENDERECO` e `FARMACIA_TELEFONE`. Sem os quatro, o
+   rodapé sai sem o bloco — os valores reais foram mostrados em tela na reunião
+   e ainda não chegaram por escrito.
 
 ---
 

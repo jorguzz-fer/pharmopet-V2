@@ -441,6 +441,13 @@ model Receita {
 
   estado EstadoDaReceita @default(RASCUNHO)
 
+  /// O segredo que abre a receita sem login, para o tutor.
+  ///
+  /// Nasce na emissão, como o número: rascunho é rabisco, e rabisco com URL
+  /// pública vazaria fórmula que ninguém conferiu. São 32 bytes aleatórios em
+  /// base64url — não deriva do id, então ter um link não leva ao próximo.
+  tokenPublico String? @unique
+
   veterinarioId String  @db.Uuid
   veterinario   Usuario @relation(fields: [veterinarioId], references: [id], onDelete: Restrict)
 

@@ -6,6 +6,7 @@ import { NovaClinica } from '@/paginas/clinicas/NovaClinica';
 import { Estado } from '@/paginas/estado/Estado';
 import { Login } from '@/paginas/login/Login';
 import { NaoEncontrada } from '@/paginas/NaoEncontrada';
+import { ReceitaPublica } from '@/paginas/publico/ReceitaPublica';
 import { NovaReceita } from '@/paginas/receitas/NovaReceita';
 import { Receita } from '@/paginas/receitas/Receita';
 import { Receitas } from '@/paginas/receitas/Receitas';
@@ -32,6 +33,11 @@ import { ExigeSessao } from '@/sessao/ExigeSessao';
  */
 export const rotas: RouteObject[] = [
   { path: '/entrar', element: <Login /> },
+  // Fora do `ExigeSessao` de propósito, e a única assim: é o link que o tutor
+  // abre, e ele não tem nem vai ter login (ADR 0013). Quem autoriza é o token
+  // da URL, conferido pela API. O caminho é curto porque vai inteiro numa
+  // mensagem de WhatsApp, atrás de um token que já é longo.
+  { path: '/r/:token', element: <ReceitaPublica /> },
   {
     element: <ExigeSessao />,
     children: [
