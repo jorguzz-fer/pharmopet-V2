@@ -90,6 +90,12 @@ export function ReceitaPublica() {
           </p>
         ) : null}
 
+        {receita.pedido ? (
+          <Cartao titulo={`Pedido nº ${receita.pedido.numero}`}>
+            <p className="text-sm text-neutro-900">{receita.pedido.situacao}</p>
+          </Cartao>
+        ) : null}
+
         {receita.formulacoes.map((f, i) => (
           <Cartao
             key={`${f.forma}-${i}`}

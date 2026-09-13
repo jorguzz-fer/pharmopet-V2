@@ -8,6 +8,7 @@
 export * from './aroma.js';
 export * from './dinheiro.js';
 export * from './documento.js';
+export * from './pedido.js';
 export * from './peso.js';
 export * from './posologia.js';
 export * from './precificacao.js';

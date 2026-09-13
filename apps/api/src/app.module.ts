@@ -9,6 +9,7 @@ import { HealthModule } from './health/health.module';
 import { IdentidadeModule } from './identidade/identidade.module';
 import { PapeisGuard } from './identidade/papeis.guard';
 import { SessaoGuard } from './identidade/sessao.guard';
+import { PedidosModule } from './pedidos/pedidos.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { ReceituarioModule } from './receituario/receituario.module';
 import { validarEnv } from './config/env';
@@ -32,6 +33,7 @@ import { validarEnv } from './config/env';
     ClinicasModule,
     ReceituarioModule,
     DocumentoModule,
+    PedidosModule,
     HealthModule,
   ],
   /**

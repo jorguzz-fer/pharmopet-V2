@@ -116,6 +116,15 @@ function NovoTutor({ aoCriar }: { aoCriar: () => void }) {
   const [nome, setNome] = useState('');
   const [cpf, setCpf] = useState('');
   const [telefone, setTelefone] = useState('');
+  const [endereco, setEndereco] = useState({
+    cep: '',
+    logradouro: '',
+    numero: '',
+    complemento: '',
+    bairro: '',
+    cidade: '',
+    uf: '',
+  });
   const [erro, setErro] = useState<string | null>(null);
   const [enviando, setEnviando] = useState(false);
 
@@ -133,6 +142,7 @@ function NovoTutor({ aoCriar }: { aoCriar: () => void }) {
             nome: nome.trim(),
             ...(cpf.trim() ? { cpf: cpf.trim() } : {}),
             ...(telefone.trim() ? { telefone: telefone.trim() } : {}),
+            ...somenteOsPreenchidos(endereco),
           },
         }),
       );
@@ -172,6 +182,65 @@ function NovoTutor({ aoCriar }: { aoCriar: () => void }) {
           />
         </div>
 
+        <fieldset className="flex flex-col gap-4 border-t border-neutro-100 pt-4">
+          <legend className="sr-only">Endereço de entrega</legend>
+          <p className="text-sm font-semibold text-neutro-700">Endereço de entrega</p>
+          <p className="-mt-3 text-xs text-neutro-500">
+            É para onde a farmácia manda quando a entrega não for na clínica. Pode ficar para
+            depois, mas sem ele não dá para enviar o pedido ao tutor.
+          </p>
+
+          <div className="grid gap-4 sm:grid-cols-3">
+            <Campo
+              rotulo="CEP"
+              inputMode="numeric"
+              value={endereco.cep}
+              onChange={(e) => setEndereco({ ...endereco, cep: e.target.value })}
+            />
+            <div className="sm:col-span-2">
+              <Campo
+                rotulo="Logradouro"
+                value={endereco.logradouro}
+                onChange={(e) => setEndereco({ ...endereco, logradouro: e.target.value })}
+              />
+            </div>
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-3">
+            <Campo
+              rotulo="Número"
+              value={endereco.numero}
+              onChange={(e) => setEndereco({ ...endereco, numero: e.target.value })}
+            />
+            <div className="sm:col-span-2">
+              <Campo
+                rotulo="Complemento"
+                value={endereco.complemento}
+                onChange={(e) => setEndereco({ ...endereco, complemento: e.target.value })}
+              />
+            </div>
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-3">
+            <Campo
+              rotulo="Bairro"
+              value={endereco.bairro}
+              onChange={(e) => setEndereco({ ...endereco, bairro: e.target.value })}
+            />
+            <Campo
+              rotulo="Cidade"
+              value={endereco.cidade}
+              onChange={(e) => setEndereco({ ...endereco, cidade: e.target.value })}
+            />
+            <Campo
+              rotulo="UF"
+              maxLength={2}
+              value={endereco.uf}
+              onChange={(e) => setEndereco({ ...endereco, uf: e.target.value.toUpperCase() })}
+            />
+          </div>
+        </fieldset>
+
         {erro ? (
           <p
             role="alert"
@@ -186,5 +255,20 @@ function NovoTutor({ aoCriar }: { aoCriar: () => void }) {
         </Botao>
       </form>
     </Cartao>
+  );
+}
+
+/**
+ * Só os campos que a pessoa preencheu.
+ *
+ * Mandar `cep: ''` seria gravar string vazia onde o modelo quer ausência — e
+ * "endereço com CEP vazio" é o tipo de dado que faz a tela de entrega achar
+ * que há endereço quando não há.
+ */
+function somenteOsPreenchidos(endereco: Record<string, string>): Record<string, string> {
+  return Object.fromEntries(
+    Object.entries(endereco)
+      .map(([chave, valor]) => [chave, valor.trim()])
+      .filter(([, valor]) => valor !== ''),
   );
 }

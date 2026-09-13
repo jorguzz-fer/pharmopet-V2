@@ -3,11 +3,13 @@ import { ConfigService } from '@nestjs/config';
 import { Prisma } from '@prisma/client';
 import {
   type Aroma,
+  descreverParaOTutor,
   formatarCnpj,
   formatarCpf,
   formatarTelefone,
   mascararCpf,
   situacaoDaReceita,
+  type EstadoDoPedido,
 } from '@pharmopet/shared';
 import { PrismaService } from '../prisma/prisma.service';
 import { ReceitaService } from '../receituario/receita.service';
@@ -68,6 +70,7 @@ export type ResumoPublico = {
     itens: { descricao: string; doseMg: number }[];
   }[];
   valorTotalEmCentavos: number;
+  pedido: { numero: number; estado: EstadoDoPedido; situacao: string } | null;
 };
 
 @Injectable()
@@ -117,6 +120,20 @@ export class DocumentoService {
     const documento = await this.porToken(token);
     const tutorCpf = documento.tutor.cpf;
 
+    // O pedido vivo desta receita. Sem escopo: quem tem o token é o tutor, e é
+    // o pedido dele que está sendo mostrado.
+    const receita = await this.prisma.receita.findUnique({
+      where: { tokenPublico: token },
+      select: {
+        pedidos: {
+          where: { estado: { not: 'CANCELADO' } },
+          select: { numero: true, estado: true },
+          take: 1,
+        },
+      },
+    });
+    const pedido = receita?.pedidos[0] ?? null;
+
     return {
       numero: documento.numero,
       situacao: documento.situacao,
@@ -148,6 +165,13 @@ export class DocumentoService {
         itens: f.itens.map((i) => ({ descricao: i.descricao, doseMg: i.doseMg })),
       })),
       valorTotalEmCentavos: documento.valorTotalEmCentavos,
+      pedido: pedido
+        ? {
+            numero: pedido.numero,
+            estado: pedido.estado,
+            situacao: descreverParaOTutor(pedido.estado),
+          }
+        : null,
     };
   }
 

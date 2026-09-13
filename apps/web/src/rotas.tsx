@@ -7,6 +7,7 @@ import { Estado } from '@/paginas/estado/Estado';
 import { Login } from '@/paginas/login/Login';
 import { NaoEncontrada } from '@/paginas/NaoEncontrada';
 import { ReceitaPublica } from '@/paginas/publico/ReceitaPublica';
+import { Pedidos } from '@/paginas/pedidos/Pedidos';
 import { NovaReceita } from '@/paginas/receitas/NovaReceita';
 import { Receita } from '@/paginas/receitas/Receita';
 import { Receitas } from '@/paginas/receitas/Receitas';
@@ -54,6 +55,7 @@ export const rotas: RouteObject[] = [
           // Antes de `receitas/:id`, senão "nova" seria lido como um id.
           { path: 'receitas/nova', element: <NovaReceita /> },
           { path: 'receitas/:id', element: <Receita /> },
+          { path: 'pedidos', element: <Pedidos /> },
           { path: 'clinicas', element: <Clinicas /> },
           // Antes de `clinicas/:id`, pelo mesmo motivo de `receitas/nova`.
           { path: 'clinicas/nova', element: <NovaClinica /> },

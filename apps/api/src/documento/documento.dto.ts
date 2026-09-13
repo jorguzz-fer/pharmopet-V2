@@ -1,4 +1,4 @@
-import { AROMAS } from '@pharmopet/shared';
+import { AROMAS, ESTADOS_DO_PEDIDO } from '@pharmopet/shared';
 import { createZodDto } from 'nestjs-zod';
 import { z } from 'zod';
 
@@ -42,6 +42,20 @@ export const receitaPublicaSchema = z.object({
   pacienteEspecie: z.string(),
   formulacoes: z.array(formulacaoPublicaSchema),
   valorTotalEmCentavos: z.number().int(),
+  /**
+   * O andamento do pedido, quando já foi enviado à farmácia.
+   *
+   * Nulo enquanto ninguém enviou — e a página diz isso em vez de inventar um
+   * estado, porque "sem pedido" e "pedido em análise" são coisas diferentes
+   * para quem espera em casa.
+   */
+  pedido: z
+    .object({
+      numero: z.number().int(),
+      estado: z.enum(ESTADOS_DO_PEDIDO),
+      situacao: z.string(),
+    })
+    .nullable(),
 });
 
 export class ReceitaPublicaDto extends createZodDto(receitaPublicaSchema) {}
