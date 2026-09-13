@@ -1,10 +1,23 @@
 import { NavLink, Outlet } from 'react-router';
+import type { components } from '@pharmopet/api-client';
 import { Marca } from '@/componentes/Marca';
 import { QuemEsta } from '@/sessao/QuemEsta';
+import { useSessao } from '@/sessao/SessaoContexto';
 
-const abas = [
-  { para: '/', rotulo: 'Estado', fim: true },
-  { para: '/sistema', rotulo: 'Design system', fim: false },
+type Papel = components['schemas']['EuDto']['papel'];
+
+/**
+ * As abas, e quem vê cada uma.
+ *
+ * `papeis` esconde o que não serve àquele perfil — a farmácia não cadastra
+ * tutor, então a aba só ocuparia espaço e levaria a um 403. Esconder é
+ * conveniência: a regra mora na API, e o guard de papel recusa quem digitar a
+ * URL direto.
+ */
+const abas: { para: string; rotulo: string; fim: boolean; papeis?: Papel[] }[] = [
+  { para: '/', rotulo: 'Receitas', fim: true },
+  { para: '/tutores', rotulo: 'Tutores', fim: false, papeis: ['ADMIN', 'VETERINARIO'] },
+  { para: '/sistema', rotulo: 'Design system', fim: false, papeis: ['ADMIN'] },
 ];
 
 /**
@@ -15,6 +28,10 @@ const abas = [
  * uma gaveta para trocar de tela com o animal na mesa.
  */
 export function Layout() {
+  const { estado } = useSessao();
+  const papel = estado.situacao === 'dentro' ? estado.usuario.papel : null;
+  const visiveis = abas.filter((aba) => !aba.papeis || (papel && aba.papeis.includes(papel)));
+
   return (
     <div className="min-h-dvh">
       {/* Primeiro alvo do Tab: quem navega por teclado pula a navegação
@@ -30,7 +47,7 @@ export function Layout() {
         <div className="mx-auto flex max-w-5xl flex-wrap items-center gap-x-6 gap-y-2 px-4 py-3">
           <Marca />
           <nav aria-label="Seções" className="flex gap-1">
-            {abas.map((aba) => (
+            {visiveis.map((aba) => (
               <NavLink
                 key={aba.para}
                 to={aba.para}

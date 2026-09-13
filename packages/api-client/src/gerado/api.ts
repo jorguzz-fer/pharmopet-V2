@@ -404,7 +404,7 @@ export interface components {
             email: string;
             /** @enum {string} */
             papel: "ADMIN" | "VETERINARIO" | "FARMACIA";
-            crmv: string[];
+            crmv: string | null;
         };
         TrocarSenhaDto: {
             senhaAtual: string;
@@ -519,7 +519,7 @@ export interface components {
             codigo: string;
             descricao: string;
             controlado: boolean;
-            listaDeControle: string[];
+            listaDeControle: string | null;
             /** @enum {string} */
             estoque: "disponivel" | "em-falta" | "desconhecido";
             formasProibidas: {
@@ -572,7 +572,7 @@ export interface components {
             doseMinimaEmMicrogramasPorKg: number;
             doseMaximaEmMicrogramasPorKg: number;
             duracaoMaximaEmDias: number | null;
-            observacao: string[];
+            observacao: string | null;
         };
         CondicoesDto: {
             taxaDeManipulacaoEmCentavos: number;
@@ -583,10 +583,10 @@ export interface components {
         };
         CriarTutorDto: {
             nome: string;
-            cpf?: string[];
+            cpf?: string | null;
             email?: string | null;
-            telefone?: string[];
-            cep?: string[];
+            telefone?: string | null;
+            cep?: string | null;
             logradouro?: string | null;
             numero?: string | null;
             complemento?: string | null;
@@ -599,17 +599,17 @@ export interface components {
             /** Format: uuid */
             id: string;
             nome: string;
-            cpf: string[];
-            email: string[];
-            telefone: string[];
-            cep: string[];
-            logradouro: string[];
-            numero: string[];
-            complemento: string[];
-            bairro: string[];
-            cidade: string[];
-            uf: string[];
-            observacoes: string[];
+            cpf: string | null;
+            email: string | null;
+            telefone: string | null;
+            cep: string | null;
+            logradouro: string | null;
+            numero: string | null;
+            complemento: string | null;
+            bairro: string | null;
+            cidade: string | null;
+            uf: string | null;
+            observacoes: string | null;
             quantidadeDePacientes: number;
         };
         ListaDeTutoresDto: {
@@ -633,10 +633,10 @@ export interface components {
         };
         AlterarTutorDto: {
             nome?: string;
-            cpf?: string[];
+            cpf?: string | null;
             email?: string | null;
-            telefone?: string[];
-            cep?: string[];
+            telefone?: string | null;
+            cep?: string | null;
             logradouro?: string | null;
             numero?: string | null;
             complemento?: string | null;
@@ -667,13 +667,13 @@ export interface components {
             nome: string;
             /** @enum {string} */
             especie: "CANINO" | "FELINO" | "EQUINO" | "AVE" | "ROEDOR" | "REPTIL";
-            raca: string[];
+            raca: string | null;
             sexo: ("MACHO" | "FEMEA") | null;
             castrado: boolean;
             pesoEmGramas: number | null;
             pesoAferidoEm: string | null;
             nascimentoEm: string | null;
-            observacoes: string[];
+            observacoes: string | null;
             obito: boolean;
         };
         ListaDePacientesDto: {
@@ -736,7 +736,7 @@ export interface components {
             /** Format: uuid */
             veterinarioId: string;
             veterinarioNome: string;
-            crmv: string[];
+            crmv: string | null;
             /** Format: uuid */
             pacienteId: string;
             pacienteNome: string;
@@ -745,10 +745,10 @@ export interface components {
             emitidaEm: string | null;
             validaAte: string | null;
             prazoEmDias: number | null;
-            prazoMotivo: string[];
+            prazoMotivo: string | null;
             canceladaEm: string | null;
-            motivoDoCancelamento: string[];
-            observacoes: string[];
+            motivoDoCancelamento: string | null;
+            observacoes: string | null;
             formulacoes: {
                 /** Format: uuid */
                 id: string;
