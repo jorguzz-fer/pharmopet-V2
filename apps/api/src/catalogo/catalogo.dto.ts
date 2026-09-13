@@ -108,7 +108,12 @@ export class InsumoPublicoDto extends createZodDto(insumoPublicoSchema) {}
 export const listaDeInsumosSchema = z.object({ insumos: z.array(insumoPublicoSchema) });
 export class ListaDeInsumosDto extends createZodDto(listaDeInsumosSchema) {}
 
-export const formaSchema = z.object({ id: z.uuid(), nome: z.string() });
+export const formaSchema = z.object({
+  id: z.uuid(),
+  nome: z.string(),
+  /** Se é uma forma que o animal come, e portanto pede sabor. */
+  aceitaAroma: z.boolean(),
+});
 export const listaDeFormasSchema = z.object({ formas: z.array(formaSchema) });
 export class ListaDeFormasDto extends createZodDto(listaDeFormasSchema) {}
 
@@ -134,7 +139,10 @@ export const insumoAdminSchema = insumoPublicoSchema.extend({
 });
 export class InsumoAdminDto extends createZodDto(insumoAdminSchema) {}
 
-export const criarFormaSchema = z.object({ nome: z.string().min(2).max(80) });
+export const criarFormaSchema = z.object({
+  nome: z.string().min(2).max(80),
+  aceitaAroma: z.boolean().optional(),
+});
 export class CriarFormaDto extends createZodDto(criarFormaSchema) {}
 
 export class FormaDto extends createZodDto(formaSchema) {}

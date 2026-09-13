@@ -1,7 +1,14 @@
 import { useCallback, useMemo, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router';
 import { exigir, type components } from '@pharmopet/api-client';
-import { formatarPeso, formatarReais, quantidadeDeDoses } from '@pharmopet/shared';
+import {
+  AROMAS,
+  formatarPeso,
+  formatarReais,
+  quantidadeDeDoses,
+  rotuloDoAroma,
+  type Aroma,
+} from '@pharmopet/shared';
 import { api } from '@/api/cliente';
 import { mensagemDeErro, useAtrasado, useConsulta } from '@/api/consulta';
 import { Aviso, tomDoAviso } from '@/componentes/Aviso';
@@ -16,6 +23,14 @@ import { Selo } from '@/componentes/Selo';
 type Insumo = components['schemas']['ListaDeInsumosDto']['insumos'][number];
 type Orcamento = components['schemas']['OrcamentoDto'];
 type Clinica = components['schemas']['ClinicaDto'];
+/**
+ * Do contrato, e não escrito à mão.
+ *
+ * A versão anterior declarava `{ id, nome }` aqui: quando a API ganhou
+ * `aceitaAroma`, o tipo local continuou dizendo que o campo não existia, e o
+ * compilador defendeu a mentira em vez de apontar a diferença.
+ */
+type Forma = components['schemas']['ListaDeFormasDto']['formas'][number];
 
 /** Um ativo da fórmula, do jeito que a tela o guarda enquanto se monta. */
 type ItemEmEdicao = { insumo: Insumo; doseMg: string };
@@ -94,7 +109,7 @@ function Montagem({
   aoSalvar,
 }: {
   paciente: components['schemas']['PacienteDto'];
-  formas: { id: string; nome: string }[];
+  formas: Forma[];
   clinicas: Clinica[];
   aoSalvar: (id: string) => void;
 }) {
@@ -106,8 +121,16 @@ function Montagem({
   const [frequenciaHoras, setFrequencia] = useState<24 | 12 | 8 | 6>(12);
   const [dias, setDias] = useState('10');
   const [orientacao, setOrientacao] = useState('');
+  const [aroma, setAroma] = useState<Aroma | ''>('');
+  const [usoContinuo, setUsoContinuo] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
   const [salvando, setSalvando] = useState(false);
+
+  const forma = formas.find((f) => f.id === formaId) ?? null;
+  // Só as formas que o animal come pedem sabor. Mostrar "Aroma" numa cápsula
+  // seria um campo para ignorar em toda receita.
+  const pedeAroma = forma?.aceitaAroma ?? false;
+  const faltaAroma = pedeAroma && aroma === '';
 
   const diasNumero = Number(dias) || 0;
   const quantidade = diasNumero > 0 ? quantidadeDeDoses(frequenciaHoras, diasNumero) : 0;
@@ -162,7 +185,12 @@ function Montagem({
   // e a emissão congela a clínica sem volta.
   const faltaClinica = clinicas.length > 1 && clinicaId === '';
   const podeSalvar =
-    itensProntos.length > 0 && quantidade > 0 && !impedido && !faltaClinica && !salvando;
+    itensProntos.length > 0 &&
+    quantidade > 0 &&
+    !impedido &&
+    !faltaClinica &&
+    !faltaAroma &&
+    !salvando;
 
   async function salvar() {
     setErro(null);
@@ -181,6 +209,8 @@ function Montagem({
                 dias: diasNumero,
                 quantidade,
                 ...(orientacao.trim() ? { orientacao: orientacao.trim() } : {}),
+                ...(aroma ? { aroma } : {}),
+                usoContinuo,
                 itens: itensProntos,
               },
             ],
@@ -225,7 +255,12 @@ function Montagem({
               id="forma"
               className="min-h-[var(--altura-controle)] w-full rounded-controle border border-neutro-200 bg-neutro-0 px-3 text-base"
               value={formaId}
-              onChange={(e) => setFormaId(e.target.value)}
+              onChange={(e) => {
+                setFormaId(e.target.value);
+                // Trocar de biscoito para cápsula deixaria um sabor pendurado
+                // numa forma que não o aceita, e a API recusaria o salvamento.
+                setAroma('');
+              }}
             >
               {formas.map((f) => (
                 <option key={f.id} value={f.id}>
@@ -234,6 +269,30 @@ function Montagem({
               ))}
             </select>
           </div>
+
+          {pedeAroma ? (
+            <div className="flex flex-col gap-1">
+              <label htmlFor="aroma" className="text-sm font-semibold text-neutro-700">
+                Aroma
+              </label>
+              <select
+                id="aroma"
+                className="min-h-[var(--altura-controle)] w-full rounded-controle border border-neutro-200 bg-neutro-0 px-3 text-base"
+                value={aroma}
+                onChange={(e) => setAroma(e.target.value as Aroma | '')}
+              >
+                <option value="">Escolha o sabor</option>
+                {AROMAS.map((a) => (
+                  <option key={a} value={a}>
+                    {rotuloDoAroma(a)}
+                  </option>
+                ))}
+              </select>
+              <p className="text-xs text-neutro-500">
+                {forma?.nome} é uma forma que o animal come, e a farmácia precisa saber o sabor.
+              </p>
+            </div>
+          ) : null}
 
           <Ativos itens={itens} aoMudar={setItens} />
         </div>
@@ -272,6 +331,22 @@ function Montagem({
               {quantidade > 0 ? `${quantidade} unidades` : '—'}
             </p>
           </div>
+        </div>
+
+        <div className="mt-4">
+          <label className="flex items-center gap-2 text-sm text-neutro-700">
+            <input
+              type="checkbox"
+              checked={usoContinuo}
+              onChange={(e) => setUsoContinuo(e.target.checked)}
+              className="size-4 rounded border-neutro-300"
+            />
+            Uso contínuo
+          </label>
+          <p className="mt-1 text-xs text-neutro-500">
+            Marca que o tratamento não termina no último comprimido. Não altera a validade da
+            receita, que segue a lista de controle.
+          </p>
         </div>
 
         <div className="mt-4">

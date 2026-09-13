@@ -207,6 +207,13 @@ model FormaFarmaceutica {
 
   nome String @unique
 
+  /// Se a forma é comida pelo animal e portanto pede sabor.
+  ///
+  /// Coluna, e não uma lista de nomes no código: "BISCOITOS" e "PASTA" são
+  /// cadastro da farmácia, e casar por nome quebraria no dia em que alguém
+  /// cadastrasse "BISCOITO PALATÁVEL".
+  aceitaAroma Boolean @default(false)
+
   desativadaEm DateTime? @db.Timestamptz(3)
 
   criadaEm     DateTime @default(now()) @db.Timestamptz(3)
@@ -239,6 +246,18 @@ model RestricaoDeForma {
   @@unique([insumoId, formaId])
   @@index([insumoId])
   @@map("restricao_de_forma")
+}
+
+/// Os sabores que a farmácia produz.
+///
+/// Enum, e não texto livre: "carne", "Carne" e "sabor carne" seriam três
+/// sabores na fila de produção. A lista é a que o cliente fechou na reunião de
+/// 11/09, e ele disse "esses quatro por enquanto" — crescer é uma migration.
+enum Aroma {
+  CARNE
+  FRANGO
+  BANANA
+  MORANGO
 }
 
 enum Especie {
@@ -524,6 +543,20 @@ model Formulacao {
 
   /// Como tomar, em texto: "dar com comida", "à noite".
   orientacao String?
+
+  /// O sabor, para as formas que o animal come.
+  ///
+  /// Obrigatório quando a forma aceita aroma e proibido quando não aceita:
+  /// biscoito sem sabor chega à bancada sem dizer o que fabricar, e cápsula
+  /// com sabor é campo preenchido à toa.
+  aroma Aroma?
+
+  /// Tratamento sem prazo para acabar.
+  ///
+  /// Não mexe na validade da receita — o prazo é da lista de controle e a lei
+  /// não abre exceção para uso contínuo. Serve para a farmácia saber que vai
+  /// repetir e para o tutor não achar que termina no último comprimido.
+  usoContinuo Boolean @default(false)
 
   /// Preço congelado na emissão. Nulo no rascunho: preço de rascunho é cotação,
   /// e cotação muda.

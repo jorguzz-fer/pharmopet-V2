@@ -1670,11 +1670,15 @@
                 },
                 "nome": {
                   "type": "string"
+                },
+                "aceitaAroma": {
+                  "type": "boolean"
                 }
               },
               "required": [
                 "id",
-                "nome"
+                "nome",
+                "aceitaAroma"
               ]
             }
           }
@@ -2179,6 +2183,9 @@
             "type": "string",
             "minLength": 2,
             "maxLength": 80
+          },
+          "aceitaAroma": {
+            "type": "boolean"
           }
         },
         "required": [
@@ -2195,11 +2202,15 @@
           },
           "nome": {
             "type": "string"
+          },
+          "aceitaAroma": {
+            "type": "boolean"
           }
         },
         "required": [
           "id",
-          "nome"
+          "nome",
+          "aceitaAroma"
         ]
       },
       "CriarRestricaoDto": {
@@ -4251,6 +4262,25 @@
                     }
                   ]
                 },
+                "aroma": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "enum": [
+                        "CARNE",
+                        "FRANGO",
+                        "BANANA",
+                        "MORANGO"
+                      ]
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "usoContinuo": {
+                  "type": "boolean"
+                },
                 "itens": {
                   "minItems": 1,
                   "maxItems": 20,
@@ -4527,6 +4557,25 @@
                     "null"
                   ]
                 },
+                "aroma": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "enum": [
+                        "CARNE",
+                        "FRANGO",
+                        "BANANA",
+                        "MORANGO"
+                      ]
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "usoContinuo": {
+                  "type": "boolean"
+                },
                 "valorEmCentavos": {
                   "anyOf": [
                     {
@@ -4649,6 +4698,8 @@
                 "dias",
                 "quantidade",
                 "orientacao",
+                "aroma",
+                "usoContinuo",
                 "valorEmCentavos",
                 "itens",
                 "avisos",
@@ -4912,6 +4963,25 @@
                     "null"
                   ]
                 },
+                "aroma": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "enum": [
+                        "CARNE",
+                        "FRANGO",
+                        "BANANA",
+                        "MORANGO"
+                      ]
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "usoContinuo": {
+                  "type": "boolean"
+                },
                 "valorEmCentavos": {
                   "anyOf": [
                     {
@@ -4949,6 +5019,8 @@
                 "frequenciaHoras",
                 "dias",
                 "orientacao",
+                "aroma",
+                "usoContinuo",
                 "valorEmCentavos",
                 "itens"
               ]

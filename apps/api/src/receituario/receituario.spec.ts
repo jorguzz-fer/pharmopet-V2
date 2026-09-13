@@ -765,4 +765,163 @@ describe('receituário (contra Postgres)', () => {
         .expect(200);
     });
   });
+
+  /**
+   * Pedidos da reunião de 11/09: o sabor das formas que o animal come, e a
+   * marca de uso contínuo.
+   */
+  describe('aroma e uso contínuo', () => {
+    async function biscoito(): Promise<string> {
+      const forma = await prisma.formaFarmaceutica.create({
+        data: { nome: 'BISCOITO', aceitaAroma: true },
+      });
+      return forma.id;
+    }
+
+    it('recusa a forma palatável sem sabor escolhido', async () => {
+      const { gabapentinaId } = await semearCatalogo();
+      const biscoitoId = await biscoito();
+      const vet = autenticado(await entrarComo('VETERINARIO'));
+      const { pacienteId } = await semearFicha(vet);
+
+      // Sem aroma, o pedido chegaria à bancada sem dizer o que fabricar.
+      const recusa = await vet
+        .post('/api/v1/receituario/receitas')
+        .send({ pacienteId, formulacoes: [fórmula(biscoitoId, gabapentinaId)] })
+        .expect(400);
+
+      expect(recusa.body.message).toContain('aroma');
+      expect(recusa.body.message).toContain('BISCOITO');
+    });
+
+    it('aceita a forma palatável com sabor', async () => {
+      const { gabapentinaId } = await semearCatalogo();
+      const biscoitoId = await biscoito();
+      const vet = autenticado(await entrarComo('VETERINARIO'));
+      const { pacienteId } = await semearFicha(vet);
+
+      const criada = await vet
+        .post('/api/v1/receituario/receitas')
+        .send({
+          pacienteId,
+          formulacoes: [{ ...fórmula(biscoitoId, gabapentinaId), aroma: 'FRANGO' }],
+        })
+        .expect(201);
+
+      expect(criada.body.formulacoes[0].aroma).toBe('FRANGO');
+    });
+
+    it('recusa sabor numa forma que ninguém come', async () => {
+      const { capsulaId, gabapentinaId } = await semearCatalogo();
+      const vet = autenticado(await entrarComo('VETERINARIO'));
+      const { pacienteId } = await semearFicha(vet);
+
+      // Cápsula com sabor é dado à toa que vira expectativa: o tutor lê
+      // "morango" e espera um biscoito.
+      const recusa = await vet
+        .post('/api/v1/receituario/receitas')
+        .send({
+          pacienteId,
+          formulacoes: [{ ...fórmula(capsulaId, gabapentinaId), aroma: 'MORANGO' }],
+        })
+        .expect(400);
+
+      expect(recusa.body.message).toContain('não leva aroma');
+    });
+
+    it('guarda o uso contínuo, e ele não mexe na validade', async () => {
+      const { capsulaId, gabapentinaId } = await semearCatalogo();
+      const vet = autenticado(await entrarComo('VETERINARIO'));
+      const { pacienteId } = await semearFicha(vet);
+
+      const criada = await vet
+        .post('/api/v1/receituario/receitas')
+        .send({
+          pacienteId,
+          formulacoes: [{ ...fórmula(capsulaId, gabapentinaId), usoContinuo: true }],
+        })
+        .expect(201);
+
+      const emitida = await vet
+        .post(`/api/v1/receituario/receitas/${criada.body.id}/emitir`)
+        .expect(200);
+
+      expect(emitida.body.formulacoes[0].usoContinuo).toBe(true);
+      // O ponto: a gabapentina é C1, e C1 são 30 dias. Uso contínuo é o
+      // tratamento que não acaba, não uma receita que não vence — a lei não
+      // abre essa exceção, e deixar o prazo esticar aqui seria inventá-la.
+      expect(emitida.body.prazoEmDias).toBe(30);
+    });
+
+    it('o sabor fica congelado na emissão, como o resto', async () => {
+      const { gabapentinaId } = await semearCatalogo();
+      const biscoitoId = await biscoito();
+      const vet = autenticado(await entrarComo('VETERINARIO'));
+      const { pacienteId } = await semearFicha(vet);
+
+      const criada = await vet
+        .post('/api/v1/receituario/receitas')
+        .send({
+          pacienteId,
+          formulacoes: [{ ...fórmula(biscoitoId, gabapentinaId), aroma: 'BANANA' }],
+        })
+        .expect(201);
+
+      await vet.post(`/api/v1/receituario/receitas/${criada.body.id}/emitir`).expect(200);
+
+      // A farmácia deixa de fazer banana; a receita na mão do tutor não muda.
+      await prisma.formaFarmaceutica.update({
+        where: { id: biscoitoId },
+        data: { aceitaAroma: false },
+      });
+
+      const lida = await vet.get(`/api/v1/receituario/receitas/${criada.body.id}`).expect(200);
+      expect(lida.body.formulacoes[0].aroma).toBe('BANANA');
+    });
+  });
+
+  /**
+   * A restrição pedida na reunião: pancreatina, ciclosporina e SAM só em
+   * cápsula. O mecanismo é o mesmo de sempre — o que muda é o dado, cadastrado
+   * pelo comando `catalogo:restricoes`.
+   */
+  describe('ativos que não se fazem em biscoito', () => {
+    it('barra a emissão e diz por quê', async () => {
+      const vet = autenticado(await entrarComo('VETERINARIO'));
+      const biscoitoForma = await prisma.formaFarmaceutica.create({
+        data: { nome: 'BISCOITO', aceitaAroma: true },
+      });
+      const pancreatina = await prisma.insumo.create({
+        data: {
+          codigo: '901',
+          descricao: 'PANCREATINA 200MG',
+          custoPorGramaEmMicro: 50_000,
+          markupEmCentesimos: 500,
+          estoqueEmMiligramas: 100_000,
+        },
+      });
+      await prisma.restricaoDeForma.create({
+        data: {
+          insumoId: pancreatina.id,
+          formaId: biscoitoForma.id,
+          motivo: 'Não se manipula em biscoito — somente em cápsula.',
+        },
+      });
+
+      const { pacienteId } = await semearFicha(vet);
+      const criada = await vet
+        .post('/api/v1/receituario/receitas')
+        .send({
+          pacienteId,
+          formulacoes: [{ ...fórmula(biscoitoForma.id, pancreatina.id), aroma: 'CARNE' }],
+        })
+        .expect(201);
+
+      const recusa = await vet
+        .post(`/api/v1/receituario/receitas/${criada.body.id}/emitir`)
+        .expect(400);
+
+      expect(recusa.body.message).toContain('biscoito');
+    });
+  });
 });

@@ -172,10 +172,10 @@ export class CatalogoController {
   @ApiCreatedResponse({ type: FormaDto })
   async criarForma(@Body() corpo: CriarFormaDto): Promise<FormaDto> {
     const criada = await this.prisma.formaFarmaceutica.create({
-      data: { nome: corpo.nome.trim().toUpperCase() },
+      data: { nome: corpo.nome.trim().toUpperCase(), aceitaAroma: corpo.aceitaAroma ?? false },
     });
 
-    return { id: criada.id, nome: criada.nome };
+    return { id: criada.id, nome: criada.nome, aceitaAroma: criada.aceitaAroma };
   }
 
   @Papeis('ADMIN')

@@ -598,6 +598,7 @@ export interface components {
                 /** Format: uuid */
                 id: string;
                 nome: string;
+                aceitaAroma: boolean;
             }[];
         };
         PrecificarDto: {
@@ -692,11 +693,13 @@ export interface components {
         };
         CriarFormaDto: {
             nome: string;
+            aceitaAroma?: boolean;
         };
         FormaDto: {
             /** Format: uuid */
             id: string;
             nome: string;
+            aceitaAroma: boolean;
         };
         CriarRestricaoDto: {
             /** Format: uuid */
@@ -996,6 +999,8 @@ export interface components {
                 dias: number;
                 quantidade?: number;
                 orientacao?: string | null;
+                aroma?: ("CARNE" | "FRANGO" | "BANANA" | "MORANGO") | null;
+                usoContinuo?: boolean;
                 itens: {
                     /** Format: uuid */
                     insumoId: string;
@@ -1041,6 +1046,8 @@ export interface components {
                 dias: number;
                 quantidade: number;
                 orientacao: string | null;
+                aroma: ("CARNE" | "FRANGO" | "BANANA" | "MORANGO") | null;
+                usoContinuo: boolean;
                 valorEmCentavos: number | null;
                 itens: {
                     /** Format: uuid */
@@ -1109,6 +1116,8 @@ export interface components {
                 frequenciaHoras: number;
                 dias: number;
                 orientacao: string | null;
+                aroma: ("CARNE" | "FRANGO" | "BANANA" | "MORANGO") | null;
+                usoContinuo: boolean;
                 valorEmCentavos: number | null;
                 itens: {
                     descricao: string;

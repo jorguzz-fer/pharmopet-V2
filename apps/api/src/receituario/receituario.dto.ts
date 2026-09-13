@@ -1,4 +1,4 @@
-import { cpfValido, normalizarTelefone } from '@pharmopet/shared';
+import { AROMAS, cpfValido, normalizarTelefone } from '@pharmopet/shared';
 import { createZodDto } from 'nestjs-zod';
 import { z } from 'zod';
 import { doseMgSchema } from '../catalogo/catalogo.dto';
@@ -142,6 +142,12 @@ export const formulacaoEntradaSchema = z.object({
    */
   quantidade: z.number().int().positive().max(1_000).optional(),
   orientacao: textoOpcional(500),
+  /**
+   * O sabor. A API confere contra a forma escolhida: obrigatório quando ela
+   * aceita aroma, recusado quando não aceita.
+   */
+  aroma: z.enum(AROMAS).nullable().optional(),
+  usoContinuo: z.boolean().optional(),
   itens: z
     .array(z.object({ insumoId: z.uuid(), doseMg: doseMgSchema }))
     .min(1, 'A fórmula precisa de pelo menos um insumo.')
@@ -193,6 +199,8 @@ const formulacaoSchema = z.object({
   dias: z.int(),
   quantidade: z.int(),
   orientacao: z.string().nullable(),
+  aroma: z.enum(AROMAS).nullable(),
+  usoContinuo: z.boolean(),
   /**
    * No rascunho é cotação de agora; na emitida é o valor congelado. Só o total:
    * a composição do preço continua restrita a ADMIN e FARMACIA, como na fase 3.

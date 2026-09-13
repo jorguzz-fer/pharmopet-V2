@@ -54,6 +54,8 @@ describe('o que o documento escreve', () => {
         frequenciaHoras: 8,
         dias: 10,
         orientacao: null,
+        aroma: null,
+        usoContinuo: false,
         valorEmCentavos: 100,
         itens: [],
         ...sobre,
@@ -76,6 +78,18 @@ describe('o que o documento escreve', () => {
 
     it('diz quanto aviar, que é o que a farmácia executa', () => {
       expect(posologia(formulacao({ quantidade: 30 }))).toContain('Aviar 30 unidades.');
+    });
+
+    it('marca o uso contínuo na mesma linha do prazo que ele qualifica', () => {
+      // Num canto separado do papel, "uso contínuo" seria lido depois de "por
+      // 30 dias" já ter dito ao tutor que o tratamento acaba.
+      const texto = posologia(formulacao({ usoContinuo: true, dias: 30 }));
+
+      expect(texto).toBe('Dar 3 vezes ao dia, por 30 dias. Aviar 30 unidades. Uso contínuo.');
+    });
+
+    it('não escreve nada quando não é contínuo', () => {
+      expect(posologia(formulacao({ usoContinuo: false }))).not.toContain('contínuo');
     });
   });
 });
