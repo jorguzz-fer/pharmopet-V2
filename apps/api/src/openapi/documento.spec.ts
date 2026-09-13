@@ -16,7 +16,7 @@ import { resolve } from 'node:path';
 
 type Schema = {
   type?: unknown;
-  items?: { type?: unknown };
+  items?: { type?: unknown; enum?: unknown[] };
   anyOf?: { type?: unknown }[];
   properties?: Record<string, Schema>;
 };
@@ -54,21 +54,40 @@ describe('contrato OpenAPI', () => {
   });
 
   /**
-   * A varredura geral. Hoje nenhum DTO tem, de verdade, um campo `string[]`;
-   * se algum passar a ter, este teste falha e obriga a decidir explicitamente
-   * — que é melhor do que a deformação voltar disfarçada de campo legítimo.
+   * A varredura geral, contra lista de texto **livre**.
+   *
+   * A deformação sai como `{"type":"array","items":{"type":"string"}}`, e é
+   * exatamente isso que se procura. Uma lista de enum — `especies`, no bulário
+   * — sai com `enum` nos itens, e é lista de verdade: um `z.string().nullable()`
+   * torto nunca ganha lista de valores possíveis, porque não havia lista
+   * nenhuma na origem. O `enum` separa os dois casos sem afrouxar a guarda.
+   *
+   * Este teste já pegou o bulário quando `especies` entrou, que é o que ele
+   * existe para fazer: obrigar a decidir em vez de deixar passar.
    */
-  it('nenhum campo de DTO é lista de textos', () => {
+  it('nenhum campo de DTO é lista de texto livre', () => {
     const suspeitos: string[] = [];
 
     for (const [nome, schema] of Object.entries(schemas)) {
       for (const [campo, valor] of Object.entries(schema.properties ?? {})) {
-        if (valor.type === 'array' && valor.items?.type === 'string') {
+        const itens = valor.items;
+        if (valor.type === 'array' && itens?.type === 'string' && itens.enum === undefined) {
           suspeitos.push(`${nome}.${campo}`);
         }
       }
     }
 
     expect(suspeitos).toEqual([]);
+  });
+
+  /**
+   * A contraprova da regra acima: a lista que passou a existir traz mesmo os
+   * valores possíveis, e não é a deformação com outra roupa.
+   */
+  it('a lista de espécies do bulário traz os valores fechados', () => {
+    const especies = schemas['FormulacaoDoBularioDto']?.properties?.['especies'];
+
+    expect(especies?.type).toBe('array');
+    expect(especies?.items?.enum).toContain('CANINO');
   });
 });

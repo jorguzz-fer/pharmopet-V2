@@ -758,3 +758,51 @@ model Pedido {
   @@index([receitaId])
   @@map("pedido")
 }
+
+// ---------------------------------------------------------------------------
+// Bulário magistral
+//
+// O que a farmácia publica como referência clínica — dezenove guias, 315
+// formulações. Não é o catálogo: não tem preço, não tem estoque, e nada aqui
+// entra numa receita por si só. A ADR 0015 explica por que as duas coisas são
+// separadas, e por que preencher receita a partir daqui ficou fora de escopo.
+// ---------------------------------------------------------------------------
+
+/// Uma formulação do bulário, como ela aparece no guia.
+model FormulacaoDoBulario {
+  id String @id @default(uuid()) @db.Uuid
+
+  /// O número do guia — "12.3", "11.12.1". É o identificador que a farmácia
+  /// usa para se referir à formulação, e a chave da reimportação.
+  numero String @unique
+
+  titulo           String
+  linhaTerapeutica String
+  /// A marca da linha, quando a formulação pertence a uma: "Pharmo Pet Odonto".
+  linhaExclusiva   String?
+
+  /// Como é entregue, em texto livre: "Gel transdérmico", "Petisco mastigável".
+  ///
+  /// Texto e não `FormaFarmaceutica`: os guias descrevem 153 formas diferentes,
+  /// e o catálogo cadastra 18. Amarrar as duas obrigaria a inventar um de-para
+  /// que ninguém conferiu — e a forma aqui é descrição, não a chave de nada.
+  formaFarmaceutica String?
+
+  indicacao   String?
+  /// O que distingue esta formulação, nas palavras do guia.
+  diferencial String?
+  /// A composição inteira, como está no guia, uma linha por item.
+  composicao  String?
+  modoDeUsar  String?
+  observacoes String?
+
+  /// Para quais espécies o guia a indica. Vazio é "não disse", e não "nenhuma":
+  /// 164 das 315 não declaram espécie porque valem para mais de uma.
+  especies Especie[]
+
+  criadaEm     DateTime @default(now()) @db.Timestamptz(3)
+  atualizadaEm DateTime @updatedAt @db.Timestamptz(3)
+
+  @@index([linhaTerapeutica])
+  @@map("formulacao_do_bulario")
+}
