@@ -52,6 +52,48 @@ só**, ou você a passa em `PHARMOPET_SENHA`.
 Papéis: `ADMIN` (administra a instalação), `VETERINARIO` (prescreve, e aí vale
 `--crmv`), `FARMACIA` (manipula).
 
+## O catálogo
+
+Sem catálogo não há o que prescrever: a montagem da receita abre sem forma
+farmacêutica e sem ativo, e a instalação parece quebrada quando só está vazia.
+Insumo não se cadastra um a um pela tela — vem do export da farmácia.
+
+Confira antes de importar. Este comando não toca no banco; só diz, linha a
+linha, o que o sistema sabe precificar e o que não sabe:
+
+```bash
+pnpm --filter @pharmopet/api catalogo:conferir -- --arquivo insumos.json
+```
+
+Depois, importe:
+
+```bash
+pnpm --filter @pharmopet/api catalogo:importar -- \
+  --formas formas.json \
+  --insumos insumos.json \
+  --controlados controlados.json \
+  --excecoes excecoes.json
+```
+
+Cada arquivo é opcional e independente — dá para importar só as formas, ou só
+reaplicar os controlados depois de um export novo. É idempotente: rodar de novo
+atualiza preço e descrição de quem já existe, sem duplicar.
+
+**Nada entra por suposição.** O que a conferência bloqueia fica de fora aqui
+também, e o comando diz quantos foram. Do export real de hoje, 308 de 702
+entram — o resto espera decisões de precificação que a farmácia ainda não tomou.
+
+Três coisas que a reimportação **não** sobrescreve, de propósito: `controlado` e
+a lista de controle (quem manda neles é `controlados.json` e a tela; um reimport
+não deve desmarcar um controlado), o estoque (o export traz número sem unidade)
+e o `aceitaAroma` da forma (`formas.json` traz só nomes).
+
+E um aviso que vale ler: se um código passar a apontar para outro produto, o
+comando avisa. Restrição de forma e faixa terapêutica ficam penduradas na linha
+do insumo, então seguem o código — uma proibição escrita para uma substância
+passaria a valer para a que herdou o número. Receita já emitida não corre risco:
+ela congela código e descrição na emissão.
+
 ## Contrato
 
 O cliente do front nunca é escrito à mão: sai do OpenAPI que a API publica.

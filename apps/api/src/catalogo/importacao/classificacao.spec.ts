@@ -1,4 +1,4 @@
-import { classificar, conferir, type LinhaDoExport } from './classificacao';
+import { classificar, conferir, mesmaSubstancia, type LinhaDoExport } from './classificacao';
 
 /** Gabapentina, como ela sai do export da farmácia. */
 function linha(sobrescreve: Partial<LinhaDoExport> = {}): LinhaDoExport {
@@ -150,5 +150,35 @@ describe('conferir', () => {
 
   it('aguenta export vazio', () => {
     expect(conferir([])).toMatchObject({ total: 0, importaveis: [], bloqueadas: [] });
+  });
+});
+
+/**
+ * Existe por um caso visto de verdade: o código 901 era "PANCREATINA 200MG" e
+ * o export trouxe "Vitamina K2 (Menaquinona)". A reimportação trocou a
+ * descrição, e a restrição "não se manipula em biscoito" — escrita para a
+ * pancreatina — ficou valendo para a vitamina. Ninguém foi avisado.
+ */
+describe('mesma substância', () => {
+  it('reconhece a descrição encurtada como o mesmo produto', () => {
+    expect(mesmaSubstancia('PANCREATINA 200MG', 'Pancreatina')).toBe(true);
+  });
+
+  it('não se importa com caixa, acento nem pontuação', () => {
+    expect(mesmaSubstancia('Terbinafina (HCL)', 'TERBINAFINA HCL')).toBe(true);
+    expect(mesmaSubstancia('SOLUÇÃO', 'solucao')).toBe(true);
+  });
+
+  it('acusa quando o código passa a ser outro produto', () => {
+    expect(mesmaSubstancia('PANCREATINA 200MG', 'Vitamina K2 (Menaquinona)')).toBe(false);
+  });
+
+  /**
+   * Erra para o lado de calar. Um aviso a cada export vira aviso que ninguém
+   * lê, e aí o dia em que a troca for de verdade também passa batido.
+   */
+  it('cala diante de descrição vazia, em vez de acusar troca', () => {
+    expect(mesmaSubstancia('', 'Pancreatina')).toBe(true);
+    expect(mesmaSubstancia('Pancreatina', '   ')).toBe(true);
   });
 });
