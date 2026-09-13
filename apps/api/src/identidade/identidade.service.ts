@@ -1,4 +1,10 @@
-import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  Logger,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { randomUUID } from 'node:crypto';
 import type { Papel, Usuario } from '@prisma/client';
@@ -197,6 +203,88 @@ export class IdentidadeService {
     });
 
     return criado;
+  }
+
+  /**
+   * Corrige uma conta: nome, papel, CRMV, e ligar ou desligar.
+   *
+   * Desativar já valia antes desta rota existir — o login recusa e a sessão
+   * aberta deixa de resolver no mesmo instante. O que faltava era o caminho
+   * para acionar: `USUARIO_DESATIVADO` estava no enum de auditoria e nunca era
+   * emitido, porque só o acesso direto ao banco desligava alguém.
+   */
+  async alterarUsuario(
+    id: string,
+    dados: { nome?: string; papel?: Papel; crmv?: string | null; desativado?: boolean },
+    autor: { id: string } & Origem,
+  ): Promise<Usuario> {
+    const atual = await this.prisma.usuario.findUnique({ where: { id } });
+    if (!atual) throw new NotFoundException('Usuário não encontrado.');
+
+    const papel = dados.papel ?? atual.papel;
+    const estavaDesativado = atual.desativadoEm !== null;
+    const desativado = dados.desativado ?? estavaDesativado;
+
+    // Desligar a si mesmo é sair pela porta e jogar a chave dentro: a sessão
+    // cai no mesmo instante, e o conserto passa a exigir o comando no servidor.
+    if (desativado && id === autor.id) {
+      throw new ConflictException('Você não pode desativar a própria conta.');
+    }
+
+    // O último administrador ativo não sai nem pelo desligamento nem pela troca
+    // de papel. Sem ele ninguém administra a instalação, e a única saída é
+    // `usuario:criar` com acesso ao servidor.
+    const perdeOAdmin =
+      atual.papel === 'ADMIN' && !estavaDesativado && (desativado || papel !== 'ADMIN');
+    if (perdeOAdmin && (await this.outrosAdminsAtivos(id)) === 0) {
+      throw new ConflictException(
+        'Esta é a única conta de administração ativa. Promova ou crie outra antes.',
+      );
+    }
+
+    const alterado = await this.prisma.usuario.update({
+      where: { id },
+      data: {
+        ...(dados.nome !== undefined ? { nome: dados.nome.trim() } : {}),
+        papel,
+        // CRMV só faz sentido em quem prescreve. Deixá-lo pendurado num papel
+        // que não assina receita guardaria credencial profissional numa conta
+        // que não a exerce — e ela reapareceria numa promoção futura.
+        crmv:
+          papel === 'VETERINARIO'
+            ? dados.crmv === undefined
+              ? atual.crmv
+              : dados.crmv?.trim() || null
+            : null,
+        ...(dados.desativado === undefined
+          ? {}
+          : // Religar limpa a data; desligar só marca se ainda não estava, para
+            // reenviar o mesmo corpo não apagar quando a pessoa saiu.
+            desativado
+            ? { desativadoEm: atual.desativadoEm ?? new Date() }
+            : { desativadoEm: null }),
+      },
+    });
+
+    if (desativado !== estavaDesativado) {
+      await this.auditoria.registrar({
+        acao: 'USUARIO_DESATIVADO',
+        usuarioId: autor.id,
+        alvo: `usuario:${id}`,
+        detalhe: { desativado },
+        ip: autor.ip,
+        agenteDeUsuario: autor.agenteDeUsuario,
+      });
+    }
+
+    return alterado;
+  }
+
+  /** Quantos administradores ativos existem além deste. */
+  private async outrosAdminsAtivos(exceto: string): Promise<number> {
+    return this.prisma.usuario.count({
+      where: { papel: 'ADMIN', desativadoEm: null, id: { not: exceto } },
+    });
   }
 
   private async contabilizarFalha(usuario: Usuario, origem: Origem): Promise<void> {

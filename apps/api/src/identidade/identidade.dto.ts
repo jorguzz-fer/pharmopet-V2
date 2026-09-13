@@ -55,6 +55,16 @@ export class EuDto extends createZodDto(euSchema) {}
  */
 export const usuarioSchema = euSchema.extend({
   bloqueado: z.boolean(),
+  /**
+   * Desligado da instalação. Diferente de `bloqueado`: bloqueio é temporário e
+   * automático, por senha errada demais; desativado é decisão de alguém, e não
+   * vence sozinho.
+   *
+   * Quem foi desativado continua na lista, como a clínica suspensa: sumir da
+   * tela seria indistinguível de nunca ter existido, e quem procura por que
+   * alguém parou de entrar precisa achar a pessoa.
+   */
+  desativado: z.boolean(),
   criadoEm: z.iso.datetime(),
 });
 export class ListaDeUsuariosDto extends createZodDto(
@@ -76,3 +86,23 @@ export const criarUsuarioSchema = z.object({
   crmv: z.string().max(40).nullable().optional(),
 });
 export class CriarUsuarioDto extends createZodDto(criarUsuarioSchema) {}
+
+/**
+ * O que a administração corrige numa conta.
+ *
+ * O e-mail fica de fora de propósito: ele é a identidade de login, e trocá-lo é
+ * trocar quem entra naquela conta. Um e-mail digitado errado deixa a conta
+ * inalcançável desde o primeiro dia — o caminho é desativá-la e criar a certa,
+ * que deixa rastro de duas contas em vez de uma que mudou de dono em silêncio.
+ *
+ * Senha também não: trocar a senha de outra pessoa é outra operação, com outro
+ * risco, e não cabe no mesmo formulário que conserta um nome.
+ */
+export const alterarUsuarioSchema = z.object({
+  nome: z.string().min(2, 'Informe o nome.').max(160).optional(),
+  papel: z.enum(['ADMIN', 'VETERINARIO', 'FARMACIA', 'CLINICA']).optional(),
+  crmv: z.string().max(40).nullable().optional(),
+  /** `true` desliga a conta; `false` religa. Ver `usuarioSchema.desativado`. */
+  desativado: z.boolean().optional(),
+});
+export class AlterarUsuarioDto extends createZodDto(alterarUsuarioSchema) {}

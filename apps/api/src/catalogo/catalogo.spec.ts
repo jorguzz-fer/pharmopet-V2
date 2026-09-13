@@ -51,6 +51,16 @@ describe('catálogo (contra Postgres)', () => {
           .post(caminho)
           .set('Cookie', `${COOKIE_SESSAO}=${credenciais.sessao}`)
           .set(CABECALHO_CSRF, credenciais.csrf),
+      patch: (caminho: string) =>
+        http
+          .patch(caminho)
+          .set('Cookie', `${COOKIE_SESSAO}=${credenciais.sessao}`)
+          .set(CABECALHO_CSRF, credenciais.csrf),
+      delete: (caminho: string) =>
+        http
+          .delete(caminho)
+          .set('Cookie', `${COOKIE_SESSAO}=${credenciais.sessao}`)
+          .set(CABECALHO_CSRF, credenciais.csrf),
     };
   }
 
@@ -444,5 +454,221 @@ describe('catálogo (contra Postgres)', () => {
 
       expect(resposta.body.insumos).toHaveLength(0);
     });
+  });
+
+  /**
+   * Controlado sem lista de controle não é cadastro pela metade: é prazo
+   * errado. `prazoDaReceita` decide a validade pela lista de cada item, e lista
+   * nula cai no prazo padrão — 180 dias. Um entorpecente marcado como
+   * controlado e sem lista ganharia seis meses de validade, calado, em vez dos
+   * trinta dias da Portaria 344/98.
+   */
+  describe('controlado exige a lista', () => {
+    it('recusa cadastrar controlado sem lista', async () => {
+      const sessao = autenticado(await entrarComo('ADMIN'));
+
+      await sessao
+        .post('/api/v1/catalogo/insumos')
+        .send({
+          codigo: '559',
+          descricao: 'Diazepam',
+          custoPorGramaEmMicro: 1_000,
+          markupEmCentesimos: 648,
+          controlado: true,
+        })
+        .expect(400);
+
+      expect(await prisma.insumo.count()).toBe(0);
+    });
+
+    it('recusa marcar como controlado sem dizer a lista', async () => {
+      const { insumoId } = await semearCatalogo();
+      const sessao = autenticado(await entrarComo('ADMIN'));
+
+      await sessao
+        .patch(`/api/v1/catalogo/insumos/${insumoId}`)
+        .send({ controlado: true })
+        .expect(400);
+
+      const depois = await prisma.insumo.findUniqueOrThrow({ where: { id: insumoId } });
+      expect(depois.controlado).toBe(false);
+    });
+
+    /** O mesmo estado inválido, chegando por outro caminho. */
+    it('recusa apagar a lista de quem já é controlado', async () => {
+      const { insumoId } = await semearCatalogo();
+      await prisma.insumo.update({
+        where: { id: insumoId },
+        data: { controlado: true, listaDeControle: 'C1' },
+      });
+      const sessao = autenticado(await entrarComo('ADMIN'));
+
+      await sessao
+        .patch(`/api/v1/catalogo/insumos/${insumoId}`)
+        .send({ listaDeControle: null })
+        .expect(400);
+
+      const depois = await prisma.insumo.findUniqueOrThrow({ where: { id: insumoId } });
+      expect(depois.listaDeControle).toBe('C1');
+    });
+
+    it('aceita quando a lista vem junto, e a guarda em maiúsculas', async () => {
+      const { insumoId } = await semearCatalogo();
+      const sessao = autenticado(await entrarComo('ADMIN'));
+
+      const resposta = await sessao
+        .patch(`/api/v1/catalogo/insumos/${insumoId}`)
+        .send({ controlado: true, listaDeControle: 'c1' })
+        .expect(200);
+
+      expect(resposta.body).toMatchObject({ controlado: true, listaDeControle: 'C1' });
+    });
+
+    /** Lista órfã voltaria a valer inteira se alguém remarcasse o controlado. */
+    it('limpa a lista ao deixar de ser controlado', async () => {
+      const { insumoId } = await semearCatalogo();
+      await prisma.insumo.update({
+        where: { id: insumoId },
+        data: { controlado: true, listaDeControle: 'C1' },
+      });
+      const sessao = autenticado(await entrarComo('ADMIN'));
+
+      await sessao
+        .patch(`/api/v1/catalogo/insumos/${insumoId}`)
+        .send({ controlado: false })
+        .expect(200);
+
+      const depois = await prisma.insumo.findUniqueOrThrow({ where: { id: insumoId } });
+      expect(depois.listaDeControle).toBeNull();
+    });
+  });
+
+  describe('correção do catálogo', () => {
+    it.each(['VETERINARIO', 'FARMACIA'] as const)('recusa %s alterando insumo', async (papel) => {
+      const { insumoId } = await semearCatalogo();
+      const sessao = autenticado(await entrarComo(papel));
+
+      await sessao
+        .patch(`/api/v1/catalogo/insumos/${insumoId}`)
+        .send({ markupEmCentesimos: 1 })
+        .expect(403);
+    });
+
+    it('altera só o que veio, e deixa o resto como estava', async () => {
+      const { insumoId } = await semearCatalogo();
+      const sessao = autenticado(await entrarComo('ADMIN'));
+
+      await sessao
+        .patch(`/api/v1/catalogo/insumos/${insumoId}`)
+        .send({ markupEmCentesimos: 700 })
+        .expect(200);
+
+      const depois = await prisma.insumo.findUniqueOrThrow({ where: { id: insumoId } });
+      expect(depois.markupEmCentesimos).toBe(700);
+      expect(depois.descricao).toBe('Gabapentina');
+      expect(depois.custoPorGramaEmMicro).toBe(35_120);
+    });
+
+    /** Markup zero virava preço zero em silêncio — corrigido na fase 3. */
+    it('não deixa zerar o markup pela correção', async () => {
+      const { insumoId } = await semearCatalogo();
+      const sessao = autenticado(await entrarComo('ADMIN'));
+
+      await sessao
+        .patch(`/api/v1/catalogo/insumos/${insumoId}`)
+        .send({ markupEmCentesimos: 0 })
+        .expect(400);
+    });
+
+    it('404 em insumo que não existe, em vez de criar um', async () => {
+      const sessao = autenticado(await entrarComo('ADMIN'));
+
+      await sessao
+        .patch('/api/v1/catalogo/insumos/3f2a1b4c-0000-4000-8000-000000000000')
+        .send({ descricao: 'Inventada' })
+        .expect(404);
+
+      expect(await prisma.insumo.count()).toBe(0);
+    });
+
+    /**
+     * O importador chuta `aceitaAroma` a partir do nome, porque o arquivo da
+     * farmácia traz só nomes. Sem esta rota, corrigir o chute exigia banco.
+     */
+    it('deixa o administrador corrigir se a forma aceita aroma', async () => {
+      const { formaId } = await semearCatalogo();
+      const sessao = autenticado(await entrarComo('ADMIN'));
+
+      const resposta = await sessao
+        .patch(`/api/v1/catalogo/formas/${formaId}`)
+        .send({ aceitaAroma: true })
+        .expect(200);
+
+      expect(resposta.body).toMatchObject({ nome: 'CÁPSULAS', aceitaAroma: true });
+    });
+
+    it('desativa a forma sem apagá-la, e some da lista de quem prescreve', async () => {
+      const { formaId } = await semearCatalogo();
+      const sessao = autenticado(await entrarComo('ADMIN'));
+
+      await sessao
+        .patch(`/api/v1/catalogo/formas/${formaId}`)
+        .send({ desativada: true })
+        .expect(200);
+
+      const lista = await sessao.get('/api/v1/catalogo/formas').expect(200);
+      expect(lista.body.formas.map((f: { nome: string }) => f.nome)).not.toContain('CÁPSULAS');
+      expect(await prisma.formaFarmaceutica.count()).toBe(2);
+    });
+
+    /** Reenviar o mesmo corpo não pode apagar quando a forma saiu de linha. */
+    it('não move a data ao desativar duas vezes', async () => {
+      const { formaId } = await semearCatalogo();
+      const sessao = autenticado(await entrarComo('ADMIN'));
+
+      await sessao.patch(`/api/v1/catalogo/formas/${formaId}`).send({ desativada: true });
+      const primeira = await prisma.formaFarmaceutica.findUniqueOrThrow({ where: { id: formaId } });
+
+      await sessao.patch(`/api/v1/catalogo/formas/${formaId}`).send({ desativada: true });
+      const segunda = await prisma.formaFarmaceutica.findUniqueOrThrow({ where: { id: formaId } });
+
+      expect(segunda.desativadaEm).toEqual(primeira.desativadaEm);
+    });
+
+    it('levanta uma proibição, e a forma volta a ser orçável', async () => {
+      const { insumoId, biscoitoId } = await semearCatalogo();
+      const sessao = autenticado(await entrarComo('ADMIN'));
+      await sessao
+        .post('/api/v1/catalogo/restricoes')
+        .send({ insumoId, formaId: biscoitoId, motivo: 'Não se manipula em biscoito.' })
+        .expect(204);
+
+      await sessao.delete(`/api/v1/catalogo/restricoes/${insumoId}/${biscoitoId}`).expect(204);
+
+      expect(await prisma.restricaoDeForma.count()).toBe(0);
+    });
+
+    /** Apagar o que não existe "dar certo" esconderia id errado. */
+    it('404 ao levantar proibição que não está cadastrada', async () => {
+      const { insumoId, biscoitoId } = await semearCatalogo();
+      const sessao = autenticado(await entrarComo('ADMIN'));
+
+      await sessao.delete(`/api/v1/catalogo/restricoes/${insumoId}/${biscoitoId}`).expect(404);
+    });
+
+    it.each(['VETERINARIO', 'FARMACIA'] as const)(
+      'recusa %s levantando proibição',
+      async (papel) => {
+        const { insumoId, biscoitoId } = await semearCatalogo();
+        await prisma.restricaoDeForma.create({
+          data: { insumoId, formaId: biscoitoId, motivo: 'Não faz.' },
+        });
+        const sessao = autenticado(await entrarComo(papel));
+
+        await sessao.delete(`/api/v1/catalogo/restricoes/${insumoId}/${biscoitoId}`).expect(403);
+
+        expect(await prisma.restricaoDeForma.count()).toBe(1);
+      },
+    );
   });
 });

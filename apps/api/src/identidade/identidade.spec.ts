@@ -236,6 +236,27 @@ describe('identidade (contra Postgres)', () => {
 
       await http.get('/api/v1/auth/eu').set('Cookie', `${COOKIE_SESSAO}=${sessao}`).expect(200);
     });
+
+    /**
+     * A frase é contrato com a tela: é a única coisa que distingue este 403 —
+     * que recarregar resolve — do 403 de papel, que não resolve. Enquanto as
+     * duas eram indistinguíveis, um ADMIN com permissão de sobra foi
+     * investigar permissão por causa de um cookie que não chegou.
+     */
+    it('diz que a falha é da sessão, e diz o que fazer', async () => {
+      await criar('admin@clinica.test');
+      const { sessao } = await entrar('admin@clinica.test');
+
+      const resposta = await http
+        .post('/api/v1/auth/sair')
+        .set('Cookie', `${COOKIE_SESSAO}=${sessao}`)
+        .expect(403);
+
+      const mensagem = (resposta.body as { message: string }).message;
+      expect(mensagem).toContain('sessão');
+      expect(mensagem).toContain('Recarregue');
+      expect(mensagem).not.toContain('papel');
+    });
   });
 
   describe('autorização por papel', () => {
@@ -455,6 +476,211 @@ describe('identidade (contra Postgres)', () => {
 
       expect(tudo).not.toContain('senha-secreta-que-nao-pode-vazar');
       expect(tudo).not.toContain(SENHA);
+    });
+  });
+
+  /**
+   * Desativar já valia desde a fase 2: o login recusa e a sessão aberta para de
+   * resolver. O que não existia era o caminho para acionar — `USUARIO_DESATIVADO`
+   * estava no enum de auditoria e nunca era emitido, porque só o acesso direto
+   * ao banco desligava alguém.
+   */
+  describe('alterar uma conta da equipe', () => {
+    async function comoAdmin(): Promise<{
+      id: string;
+      patch: (id: string) => ReturnType<typeof http.patch>;
+    }> {
+      const admin = await criar('admin@clinica.test');
+      const { sessao, csrf } = await entrar('admin@clinica.test');
+
+      return {
+        id: admin.id,
+        patch: (id: string) =>
+          http
+            .patch(`/api/v1/auth/usuarios/${id}`)
+            .set('Cookie', `${COOKIE_SESSAO}=${sessao}`)
+            .set(CABECALHO_CSRF, csrf),
+      };
+    }
+
+    it.each(['VETERINARIO', 'FARMACIA', 'CLINICA'] as const)(
+      'recusa %s alterando conta alheia',
+      async (papel) => {
+        const alvo = await criar('alvo@clinica.test', 'VETERINARIO');
+        await criar('outro@clinica.test', papel);
+        const { sessao, csrf } = await entrar('outro@clinica.test');
+
+        await http
+          .patch(`/api/v1/auth/usuarios/${alvo.id}`)
+          .set('Cookie', `${COOKIE_SESSAO}=${sessao}`)
+          .set(CABECALHO_CSRF, csrf)
+          .send({ nome: 'Invadido' })
+          .expect(403);
+      },
+    );
+
+    it('corrige o nome sem mexer no resto', async () => {
+      const alvo = await criar('vet@clinica.test', 'VETERINARIO');
+      const { patch } = await comoAdmin();
+
+      await patch(alvo.id).send({ nome: 'Renata Mattos' }).expect(200);
+
+      const depois = await prisma.usuario.findUniqueOrThrow({ where: { id: alvo.id } });
+      expect(depois.nome).toBe('Renata Mattos');
+      expect(depois.papel).toBe('VETERINARIO');
+      expect(depois.email).toBe('vet@clinica.test');
+    });
+
+    it('desativa, e a pessoa deixa de entrar mesmo com a senha certa', async () => {
+      const alvo = await criar('demitido@clinica.test', 'FARMACIA');
+      const { patch } = await comoAdmin();
+
+      await patch(alvo.id).send({ desativado: true }).expect(200);
+
+      await http
+        .post('/api/v1/auth/entrar')
+        .send({ email: 'demitido@clinica.test', senha: SENHA })
+        .expect(401);
+    });
+
+    /** Sessão aberta não sobrevive ao desligamento: ela para de resolver. */
+    it('derruba a sessão que a pessoa já tinha aberta', async () => {
+      const alvo = await criar('demitido@clinica.test', 'FARMACIA');
+      const dele = await entrar('demitido@clinica.test');
+      const { patch } = await comoAdmin();
+
+      await http
+        .get('/api/v1/auth/eu')
+        .set('Cookie', `${COOKIE_SESSAO}=${dele.sessao}`)
+        .expect(200);
+
+      await patch(alvo.id).send({ desativado: true }).expect(200);
+
+      await http
+        .get('/api/v1/auth/eu')
+        .set('Cookie', `${COOKIE_SESSAO}=${dele.sessao}`)
+        .expect(401);
+    });
+
+    it('religa quem tinha sido desativado', async () => {
+      const alvo = await criar('voltou@clinica.test', 'FARMACIA');
+      const { patch } = await comoAdmin();
+      await patch(alvo.id).send({ desativado: true }).expect(200);
+
+      await patch(alvo.id).send({ desativado: false }).expect(200);
+
+      await http
+        .post('/api/v1/auth/entrar')
+        .send({ email: 'voltou@clinica.test', senha: SENHA })
+        .expect(204);
+    });
+
+    it('registra o desligamento na auditoria', async () => {
+      const alvo = await criar('demitido@clinica.test', 'FARMACIA');
+      const { id: autorId, patch } = await comoAdmin();
+
+      await patch(alvo.id).send({ desativado: true }).expect(200);
+
+      const evento = await prisma.eventoDeAuditoria.findFirst({
+        where: { acao: 'USUARIO_DESATIVADO' },
+      });
+      expect(evento).toMatchObject({ usuarioId: autorId, alvo: `usuario:${alvo.id}` });
+    });
+
+    /** Reenviar o mesmo corpo não pode apagar quando a pessoa saiu. */
+    it('não move a data ao desativar duas vezes', async () => {
+      const alvo = await criar('demitido@clinica.test', 'FARMACIA');
+      const { patch } = await comoAdmin();
+
+      await patch(alvo.id).send({ desativado: true }).expect(200);
+      const primeira = await prisma.usuario.findUniqueOrThrow({ where: { id: alvo.id } });
+
+      await patch(alvo.id).send({ desativado: true }).expect(200);
+      const segunda = await prisma.usuario.findUniqueOrThrow({ where: { id: alvo.id } });
+
+      expect(segunda.desativadoEm).toEqual(primeira.desativadoEm);
+    });
+
+    it('desativado continua na lista, em vez de sumir', async () => {
+      const alvo = await criar('demitido@clinica.test', 'FARMACIA');
+      const { patch } = await comoAdmin();
+      await patch(alvo.id).send({ desativado: true }).expect(200);
+
+      const { sessao } = await entrar('admin@clinica.test');
+      const lista = await http
+        .get('/api/v1/auth/usuarios')
+        .set('Cookie', `${COOKIE_SESSAO}=${sessao}`)
+        .expect(200);
+
+      const corpo = lista.body as { usuarios: { id: string; desativado: boolean }[] };
+      expect(corpo.usuarios.find((u) => u.id === alvo.id)).toMatchObject({ desativado: true });
+    });
+
+    /**
+     * Sair pela porta e jogar a chave dentro: a sessão cai no mesmo instante, e
+     * o conserto passa a exigir o comando no servidor.
+     */
+    it('não deixa o administrador desativar a própria conta', async () => {
+      const { id, patch } = await comoAdmin();
+
+      await patch(id).send({ desativado: true }).expect(409);
+
+      const depois = await prisma.usuario.findUniqueOrThrow({ where: { id } });
+      expect(depois.desativadoEm).toBeNull();
+    });
+
+    /** Sem administrador ativo, ninguém administra a instalação. */
+    it('não deixa rebaixar o último administrador ativo', async () => {
+      const outro = await criar('admin2@clinica.test');
+      const { patch } = await comoAdmin();
+      await patch(outro.id).send({ desativado: true }).expect(200);
+
+      const sobrou = await prisma.usuario.findUniqueOrThrow({
+        where: { email: 'admin@clinica.test' },
+      });
+      await patch(sobrou.id).send({ papel: 'FARMACIA' }).expect(409);
+
+      const depois = await prisma.usuario.findUniqueOrThrow({ where: { id: sobrou.id } });
+      expect(depois.papel).toBe('ADMIN');
+    });
+
+    it('deixa rebaixar um administrador quando há outro ativo', async () => {
+      const outro = await criar('admin2@clinica.test');
+      const { patch } = await comoAdmin();
+
+      await patch(outro.id).send({ papel: 'FARMACIA' }).expect(200);
+
+      const depois = await prisma.usuario.findUniqueOrThrow({ where: { id: outro.id } });
+      expect(depois.papel).toBe('FARMACIA');
+    });
+
+    /**
+     * CRMV é credencial de quem assina receita. Pendurado num papel que não
+     * prescreve, reapareceria numa promoção futura como se ainda valesse.
+     */
+    it('limpa o CRMV quando a pessoa deixa de ser veterinária', async () => {
+      const vet = await app.get(IdentidadeService).criarUsuario(
+        {
+          email: 'vet@clinica.test',
+          nome: 'Renata',
+          papel: 'VETERINARIO',
+          senha: SENHA,
+          crmv: 'SP 28.114',
+        },
+        { id: null },
+      );
+      const { patch } = await comoAdmin();
+
+      await patch(vet.id).send({ papel: 'FARMACIA' }).expect(200);
+
+      const depois = await prisma.usuario.findUniqueOrThrow({ where: { id: vet.id } });
+      expect(depois.crmv).toBeNull();
+    });
+
+    it('404 em conta que não existe, em vez de criar uma', async () => {
+      const { patch } = await comoAdmin();
+
+      await patch('3f2a1b4c-0000-4000-8000-000000000000').send({ nome: 'Ninguém' }).expect(404);
     });
   });
 

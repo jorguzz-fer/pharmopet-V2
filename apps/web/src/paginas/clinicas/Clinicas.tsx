@@ -78,18 +78,33 @@ export function Clinicas() {
 
       {estado.situacao === 'carregando' ? <Carregando o="clínicas" /> : null}
       {estado.situacao === 'falha' ? <Falha motivo={estado.motivo} aoTentar={recarregar} /> : null}
-      {estado.situacao === 'ok' ? <Lista clinicas={visiveis} buscando={filtro !== ''} /> : null}
+      {estado.situacao === 'ok' ? (
+        <Lista clinicas={visiveis} buscando={filtro !== ''} podeCadastrar={ehAdmin} />
+      ) : null}
     </div>
   );
 }
 
-function Lista({ clinicas, buscando }: { clinicas: Clinica[]; buscando: boolean }) {
+function Lista({
+  clinicas,
+  buscando,
+  podeCadastrar,
+}: {
+  clinicas: Clinica[];
+  buscando: boolean;
+  podeCadastrar: boolean;
+}) {
   if (clinicas.length === 0) {
     return (
       <Vazio>
         {buscando
           ? 'Nenhuma clínica com esse nome ou CNPJ.'
-          : 'Nenhuma clínica cadastrada ainda. Comece por “Nova clínica”.'}
+          : // O texto do vazio depende do papel porque ele mandava todo mundo
+            // clicar num botão que só o ADMIN enxerga — quem não é ficava
+            // procurando na tela a ação que o próprio texto prometia.
+            podeCadastrar
+            ? 'Nenhuma clínica cadastrada ainda. Comece por “Nova clínica”.'
+            : 'Nenhuma clínica cadastrada ainda. Quem cadastra clínica parceira é a administração da Pharmopet.'}
       </Vazio>
     );
   }

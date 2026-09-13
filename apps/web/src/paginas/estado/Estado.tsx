@@ -1,8 +1,24 @@
+import { COOKIE_CSRF, lerCookie } from '@pharmopet/api-client';
 import { Botao } from '@/componentes/Botao';
 import { Cartao } from '@/componentes/Cartao';
 import { Selo } from '@/componentes/Selo';
 import { ambiente } from '@/config/ambiente';
 import { useSaudeDaApi } from './useSaudeDaApi';
+
+/**
+ * O host de uma URL, ou nulo se ela não for uma URL.
+ *
+ * Host e não origem: cookie ignora porta e ignora esquema. `localhost:5173` e
+ * `localhost:3000` compartilham cookie; `192.168.0.10:5173` e `localhost:3000`
+ * não, e é essa diferença que derruba o par anti-CSRF.
+ */
+function hostDe(url: string): string | null {
+  try {
+    return new URL(url).hostname;
+  } catch {
+    return null;
+  }
+}
 
 function formatarMomento(iso: string): string {
   // Data e hora no formato de quem usa, não no ISO do servidor.
@@ -78,6 +94,62 @@ export function Estado() {
           </div>
         ) : null}
       </Cartao>
+
+      <Sessao />
     </div>
+  );
+}
+
+/**
+ * Se o par anti-CSRF desta aba está fechado.
+ *
+ * Existe porque a falha é invisível até alguém tentar salvar algo: leitura
+ * passa, gravação leva 403, e o 403 é lido como falta de permissão. Quem abre
+ * esta tela depois de um deploy precisa descobrir isso aqui, e não no primeiro
+ * cadastro de tutor.
+ *
+ * Só a presença do token, nunca o valor: ele não dá acesso sozinho, mas uma
+ * tela de diagnóstico é justamente o lugar de onde se tira print.
+ */
+function Sessao() {
+  const temToken = lerCookie(COOKIE_CSRF) !== null;
+  const hostDaApi = hostDe(ambiente.VITE_API_URL);
+  const hostDaPagina = typeof window === 'undefined' ? null : window.location.hostname;
+  const mesmoHost = hostDaApi !== null && hostDaApi === hostDaPagina;
+
+  return (
+    <Cartao
+      titulo="Sessão"
+      acessorio={
+        temToken ? <Selo tom="sucesso">Verificada</Selo> : <Selo tom="controlado">Incompleta</Selo>
+      }
+    >
+      <dl className="flex flex-col gap-3">
+        <div className="flex flex-wrap items-baseline justify-between gap-2">
+          <dt className="text-sm text-neutro-500">Token anti-CSRF</dt>
+          <dd className="text-sm text-neutro-900">
+            {temToken ? 'Legível nesta página' : 'Ausente'}
+          </dd>
+        </div>
+        <div className="flex flex-wrap items-baseline justify-between gap-2">
+          <dt className="text-sm text-neutro-500">Host da página / da API</dt>
+          <dd className="font-mono text-sm text-neutro-900">
+            {hostDaPagina ?? '—'} / {hostDaApi ?? '—'}
+          </dd>
+        </div>
+      </dl>
+
+      {!temToken ? (
+        <div className="mt-4 rounded-controle bg-controlado-fundo p-3">
+          <p className="text-xs text-controlado-texto">
+            Sem este token, tudo que grava — cadastrar tutor, emitir receita, enviar pedido — vai
+            falhar com 403, mesmo com o papel certo.{' '}
+            {mesmoHost
+              ? 'Saia e entre de novo para a API emitir um token novo.'
+              : 'A página e a API estão em hosts diferentes, e o cookie nasce no host da API — o JavaScript daqui não o alcança. Sirva as duas pelo mesmo host.'}
+          </p>
+        </div>
+      ) : null}
+    </Cartao>
   );
 }

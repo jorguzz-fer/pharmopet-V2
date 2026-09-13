@@ -87,3 +87,59 @@ describe('Estado da instalação', () => {
     expect(await screen.findByText('A API respondeu 401.')).toBeInTheDocument();
   });
 });
+
+/**
+ * O par anti-CSRF só falha na hora de gravar: leitura passa, e o 403 da
+ * gravação é lido como falta de permissão. Quem abre esta tela depois de um
+ * deploy precisa descobrir aqui, e não no primeiro cadastro de tutor.
+ */
+describe('Estado da sessão', () => {
+  function comCookie(valor: string): void {
+    // jsdom aceita escrita em document.cookie; limpar é o afterEach de cada
+    // teste que define um, então cada um define o seu.
+    Object.defineProperty(document, 'cookie', { value: valor, writable: true, configurable: true });
+  }
+
+  it('avisa quando o token anti-CSRF não é legível, e diz o que fazer', async () => {
+    comCookie('');
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => respostaDeSaude('2026-09-12T13:45:07.000Z')),
+    );
+
+    render(<Estado />);
+
+    expect(await screen.findByText('Incompleta')).toBeInTheDocument();
+    expect(screen.getByText('Ausente')).toBeInTheDocument();
+    // No ambiente de teste a API é `api.teste` e a página é `localhost`: hosts
+    // diferentes, que é exatamente o caso em que o cookie não chega.
+    expect(screen.getByText(/hosts diferentes/)).toBeInTheDocument();
+  });
+
+  it('não alarma quando o token está lá', async () => {
+    comCookie('pharmopet_csrf=qualquercoisa');
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => respostaDeSaude('2026-09-12T13:45:07.000Z')),
+    );
+
+    render(<Estado />);
+
+    expect(await screen.findByText('Verificada')).toBeInTheDocument();
+    expect(screen.queryByText(/hosts diferentes/)).not.toBeInTheDocument();
+  });
+
+  /** O valor não aparece: é de uma tela de diagnóstico que se tira print. */
+  it('não imprime o token', async () => {
+    comCookie('pharmopet_csrf=segredo-que-nao-deve-vazar');
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => respostaDeSaude('2026-09-12T13:45:07.000Z')),
+    );
+
+    const { container } = render(<Estado />);
+    await screen.findByText('Verificada');
+
+    expect(container.textContent).not.toContain('segredo-que-nao-deve-vazar');
+  });
+});

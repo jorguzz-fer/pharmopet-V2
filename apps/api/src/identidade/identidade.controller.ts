@@ -1,4 +1,15 @@
-import { Body, Controller, Get, HttpCode, Post, Query, Req, Res } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  Param,
+  Patch,
+  Post,
+  Query,
+  Req,
+  Res,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Throttle } from '@nestjs/throttler';
 import {
@@ -14,6 +25,7 @@ import type { CookieOptions, Request, Response } from 'express';
 import type { Env } from '../config/env';
 import { Eu, Papeis, Publica } from './decoradores';
 import {
+  AlterarUsuarioDto,
   CriarUsuarioDto,
   EntrarDto,
   EuDto,
@@ -142,6 +154,7 @@ export class IdentidadeController {
         // Bloqueio é sempre por prazo; um instante já vencido não bloqueia
         // mais nada, e mostrar "bloqueado" nesse caso seria mentira.
         bloqueado: u.bloqueadoAte !== null && u.bloqueadoAte > agora,
+        desativado: u.desativadoEm !== null,
         criadoEm: u.criadoEm.toISOString(),
       })),
     };
@@ -168,6 +181,38 @@ export class IdentidadeController {
       email: criado.email,
       papel: criado.papel,
       crmv: criado.crmv,
+    };
+  }
+
+  /**
+   * Corrige uma conta da equipe.
+   *
+   * Desligar alguém já surtia efeito antes desta rota — o login recusa e a
+   * sessão aberta para de resolver. O que não existia era como acionar sem
+   * abrir o banco.
+   */
+  @Papeis('ADMIN')
+  @Patch('usuarios/:id')
+  @ApiOperation({ summary: 'Altera um usuário' })
+  @ApiOkResponse({ type: EuDto })
+  @ApiForbiddenResponse({ description: 'Só administrador altera usuário.' })
+  async alterarUsuario(
+    @Eu() autor: UsuarioAutenticado,
+    @Param('id') id: string,
+    @Body() corpo: AlterarUsuarioDto,
+    @Req() requisicao: Request,
+  ): Promise<EuDto> {
+    const alterado = await this.identidade.alterarUsuario(id, corpo, {
+      id: autor.id,
+      ...origemDa(requisicao),
+    });
+
+    return {
+      id: alterado.id,
+      nome: alterado.nome,
+      email: alterado.email,
+      papel: alterado.papel,
+      crmv: alterado.crmv,
     };
   }
 

@@ -134,6 +134,41 @@ export function classificar(bruta: unknown): Classificacao {
   };
 }
 
+/**
+ * Se duas descrições falam da mesma substância.
+ *
+ * Serve a uma pergunta só, na reimportação: este código continua sendo o mesmo
+ * produto? Restrição de forma e faixa terapêutica ficam penduradas na linha do
+ * insumo, e não no texto dela — um código reaproveitado transfere, em silêncio,
+ * uma proibição ou uma faixa de dose de uma substância para outra. A receita já
+ * emitida não corre risco, porque congela código e descrição na emissão; o que
+ * está pendurado no cadastro, sim.
+ *
+ * A regra é propositalmente boba: uma contém a outra, ignorando caixa, acento e
+ * pontuação. Só precisa separar "PANCREATINA 200MG" virando "Pancreatina", que
+ * é correção de cadastro, de "PANCREATINA 200MG" virando "Vitamina K2", que é
+ * outro produto no mesmo código. Erra para o lado de achar que é a mesma: um
+ * aviso a mais a cada export seria ignorado já no terceiro.
+ */
+export function mesmaSubstancia(antes: string, depois: string): boolean {
+  const a = normalizar(antes);
+  const b = normalizar(depois);
+
+  // Descrição vazia não afirma troca nenhuma, e acusar seria ruído.
+  if (a === '' || b === '') return true;
+
+  return a.includes(b) || b.includes(a);
+}
+
+function normalizar(texto: string): string {
+  return texto
+    .normalize('NFD')
+    .replace(/\p{Diacritic}/gu, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim();
+}
+
 export type Relatorio = {
   total: number;
   importaveis: InsumoConvertido[];

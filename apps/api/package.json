@@ -14,6 +14,7 @@
     "openapi": "nest build && node dist/openapi/gerar.js",
     "usuario:criar": "nest build && node --env-file-if-exists=.env dist/identidade/criar-usuario.cli.js",
     "catalogo:conferir": "nest build && node dist/catalogo/importacao/conferir.cli.js",
+    "catalogo:importar": "nest build && node --env-file-if-exists=.env dist/catalogo/importacao/importar.cli.js",
     "catalogo:restricoes": "nest build && node --env-file-if-exists=.env dist/catalogo/restricoes.cli.js"
   },
   "dependencies": {
