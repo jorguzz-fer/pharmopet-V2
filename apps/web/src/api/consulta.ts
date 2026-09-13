@@ -25,8 +25,13 @@ export function mensagemDeErro(erro: unknown): string {
         return extrairMensagem(erro.corpo) ?? 'Confira os dados enviados.';
       case 401:
         return 'Sua sessão expirou. Entre de novo.';
+      // A mensagem do servidor vem na frente porque 403 tem duas causas com
+      // remédios opostos: papel que não permite (nada a fazer na tela) e par
+      // anti-CSRF que não fechou (recarregar resolve). Dizer "seu perfil não
+      // tem acesso" nos dois casos mandou um ADMIN investigar permissão por um
+      // cookie ausente.
       case 403:
-        return 'Seu perfil não tem acesso a esta ação.';
+        return extrairMensagem(erro.corpo) ?? 'Seu perfil não tem acesso a esta ação.';
       case 404:
         return 'Não encontrado.';
       case 409:

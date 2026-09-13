@@ -5,8 +5,29 @@ import { api } from '@/api/cliente';
 import { useConsulta } from '@/api/consulta';
 import { Carregando, Falha, Vazio } from '@/componentes/Estados';
 import { Selo, type TomDoSelo } from '@/componentes/Selo';
+import type { Papel } from '@/sessao/papeis';
+import { usePapel } from '@/sessao/SessaoContexto';
 
 type Resumida = components['schemas']['ListaDeReceitasDto']['receitas'][number];
+
+/**
+ * O que dizer quando não há receita nenhuma.
+ *
+ * Depende do papel porque a frase única — "comece pela ficha de um tutor" —
+ * mandava a farmácia a uma aba que ela não enxerga, e o administrador a uma
+ * ação que só o veterinário pode fazer. Vazio que aponta para porta fechada é
+ * pior do que vazio mudo.
+ */
+function vazio(papel: Papel | null): string {
+  switch (papel) {
+    case 'VETERINARIO':
+      return 'Nenhuma receita ainda. Comece pela ficha de um tutor.';
+    case 'FARMACIA':
+      return 'Nenhuma receita ainda. Elas aparecem aqui quando um veterinário emitir.';
+    default:
+      return 'Nenhuma receita ainda. Quem prescreve é o veterinário, pela ficha do tutor.';
+  }
+}
 
 /** Como cada situação aparece. O texto carrega o sentido; a cor reforça. */
 const APARENCIA: Record<Resumida['situacao'], { tom: TomDoSelo; rotulo: string }> = {
@@ -19,6 +40,7 @@ const APARENCIA: Record<Resumida['situacao'], { tom: TomDoSelo; rotulo: string }
 export function Receitas() {
   const carregar = useCallback(() => exigir(api.GET('/api/v1/receituario/receitas')), []);
   const { estado, recarregar } = useConsulta('receitas', carregar);
+  const papel = usePapel();
 
   return (
     <div className="flex flex-col gap-6">
@@ -29,7 +51,7 @@ export function Receitas() {
 
       {estado.situacao === 'ok' ? (
         estado.dado.receitas.length === 0 ? (
-          <Vazio>Nenhuma receita ainda. Comece pela ficha de um tutor.</Vazio>
+          <Vazio>{vazio(papel)}</Vazio>
         ) : (
           <ul className="flex flex-col gap-2">
             {estado.dado.receitas.map((r) => (

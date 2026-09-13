@@ -236,6 +236,27 @@ describe('identidade (contra Postgres)', () => {
 
       await http.get('/api/v1/auth/eu').set('Cookie', `${COOKIE_SESSAO}=${sessao}`).expect(200);
     });
+
+    /**
+     * A frase é contrato com a tela: é a única coisa que distingue este 403 —
+     * que recarregar resolve — do 403 de papel, que não resolve. Enquanto as
+     * duas eram indistinguíveis, um ADMIN com permissão de sobra foi
+     * investigar permissão por causa de um cookie que não chegou.
+     */
+    it('diz que a falha é da sessão, e diz o que fazer', async () => {
+      await criar('admin@clinica.test');
+      const { sessao } = await entrar('admin@clinica.test');
+
+      const resposta = await http
+        .post('/api/v1/auth/sair')
+        .set('Cookie', `${COOKIE_SESSAO}=${sessao}`)
+        .expect(403);
+
+      const mensagem = (resposta.body as { message: string }).message;
+      expect(mensagem).toContain('sessão');
+      expect(mensagem).toContain('Recarregue');
+      expect(mensagem).not.toContain('papel');
+    });
   });
 
   describe('autorização por papel', () => {

@@ -48,7 +48,16 @@ export class SessaoGuard implements CanActivate {
     if (!METODOS_SEGUROS.has(requisicao.method)) {
       const recebido = requisicao.get(CABECALHO_CSRF);
       if (!this.sessoes.confereCsrf(usuario.csrfToken, recebido)) {
-        throw new ForbiddenException('Verificação anti-CSRF falhou.');
+        // A frase diz o que fazer, e não só o que falhou.
+        //
+        // Este 403 chega a quem tem sessão e tem permissão — é o par
+        // cookie+cabeçalho que não fechou, quase sempre porque a página e a
+        // API estão em hosts diferentes e o cookie não é legível de lá. Dito
+        // como "anti-CSRF falhou", vira caça a erro de papel: aconteceu com um
+        // ADMIN tentando cadastrar tutor, que foi procurar permissão.
+        throw new ForbiddenException(
+          'A verificação de segurança da sessão falhou. Recarregue a página e entre de novo.',
+        );
       }
     }
 

@@ -26,6 +26,9 @@ const abas: { para: string; rotulo: string; fim: boolean; papeis?: Papel[] }[] =
   // Fora do veterinário: ele vê a clínica pela receita, e uma aba que abre
   // vazia para todo autônomo é aba morta.
   { para: '/clinicas', rotulo: 'Clínicas', fim: false, papeis: ['ADMIN', 'CLINICA', 'FARMACIA'] },
+  // Era rota sem link: existe desde a fase 2 e só se chegava nela digitando a
+  // URL, o que é quase não existir para quem está diagnosticando um deploy.
+  { para: '/estado', rotulo: 'Estado', fim: false, papeis: ['ADMIN'] },
   { para: '/sistema', rotulo: 'Design system', fim: false, papeis: ['ADMIN'] },
 ];
 
