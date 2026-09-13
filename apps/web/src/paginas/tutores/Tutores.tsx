@@ -7,6 +7,7 @@ import { Botao } from '@/componentes/Botao';
 import { Campo } from '@/componentes/Campo';
 import { Cartao } from '@/componentes/Cartao';
 import { Carregando, Falha, Vazio } from '@/componentes/Estados';
+import { usePodeCadastrarFicha } from '@/sessao/SessaoContexto';
 
 type Tutor = components['schemas']['TutorDto'];
 
@@ -22,6 +23,7 @@ export function Tutores() {
   const [busca, setBusca] = useState('');
   const [cadastrando, setCadastrando] = useState(false);
   const buscaAtrasada = useAtrasado(busca);
+  const podeCadastrar = usePodeCadastrarFicha();
 
   const carregar = useCallback(
     () =>
@@ -39,12 +41,14 @@ export function Tutores() {
     <div className="flex flex-col gap-6">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <h1 className="font-titulo text-2xl font-extrabold tracking-tight">Tutores</h1>
-        <Botao
-          tom={cadastrando ? 'secundario' : 'primario'}
-          onClick={() => setCadastrando((c) => !c)}
-        >
-          {cadastrando ? 'Cancelar' : 'Novo tutor'}
-        </Botao>
+        {podeCadastrar ? (
+          <Botao
+            tom={cadastrando ? 'secundario' : 'primario'}
+            onClick={() => setCadastrando((c) => !c)}
+          >
+            {cadastrando ? 'Cancelar' : 'Novo tutor'}
+          </Botao>
+        ) : null}
       </div>
 
       {cadastrando ? (

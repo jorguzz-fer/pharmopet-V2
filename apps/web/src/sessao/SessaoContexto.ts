@@ -26,3 +26,23 @@ export function useSessao(): Sessao {
 
   return valor;
 }
+
+/** O papel de quem está dentro, ou `null` enquanto não se sabe. */
+export function usePapel(): Usuario['papel'] | null {
+  const { estado } = useSessao();
+
+  return estado.situacao === 'dentro' ? estado.usuario.papel : null;
+}
+
+/**
+ * Quem abre ficha de tutor e de paciente.
+ *
+ * Serve para a tela não oferecer um botão que a API vai recusar: a farmácia
+ * lê a clientela, mas não a cadastra. Continua sendo conveniência — os guards
+ * de `@Papeis` é que decidem, e quem chamar a rota direto leva 403.
+ */
+export function usePodeCadastrarFicha(): boolean {
+  const papel = usePapel();
+
+  return papel === 'ADMIN' || papel === 'VETERINARIO';
+}

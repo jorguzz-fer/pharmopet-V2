@@ -285,3 +285,52 @@ describe('montagem da receita', () => {
     expect(await screen.findByRole('alert')).toHaveTextContent('sem peso registrado');
   });
 });
+
+describe('o que cada papel enxerga', () => {
+  const FARMACIA = { ...VETERINARIO, papel: 'FARMACIA', crmv: null };
+
+  /**
+   * A farmácia lê a clientela — precisa, para manipular e entregar — mas não a
+   * cadastra. Oferecer o botão levaria a um 403 da API: o dado fica protegido,
+   * e a pessoa fica com um botão que nunca funciona.
+   *
+   * Achado no navegador, digitando /tutores na mão. O menu já escondia a aba;
+   * a tela, aberta direto, não escondia o botão.
+   */
+  it('esconde o cadastro de tutor para a farmácia', async () => {
+    const { fetchFalso } = apiFalsa({
+      '/auth/eu': FARMACIA,
+      '/receituario/tutores': { tutores: [] },
+    });
+    vi.stubGlobal('fetch', fetchFalso);
+
+    montar('/tutores');
+
+    await screen.findByRole('heading', { name: 'Tutores' });
+    expect(screen.queryByRole('button', { name: 'Novo tutor' })).not.toBeInTheDocument();
+  });
+
+  it('mostra o cadastro de tutor para quem prescreve', async () => {
+    const { fetchFalso } = apiFalsa({ '/receituario/tutores': { tutores: [] } });
+    vi.stubGlobal('fetch', fetchFalso);
+
+    montar('/tutores');
+
+    expect(await screen.findByRole('button', { name: 'Novo tutor' })).toBeInTheDocument();
+  });
+
+  it('não oferece “Prescrever” a quem não prescreve', async () => {
+    const { fetchFalso } = apiFalsa({
+      '/auth/eu': FARMACIA,
+      '/receituario/tutores/': TUTOR,
+      '/receituario/pacientes': { pacientes: [PACIENTE] },
+    });
+    vi.stubGlobal('fetch', fetchFalso);
+
+    montar(`/tutores/${TUTOR.id}`);
+
+    await screen.findByText('Tobias');
+    expect(screen.queryByRole('link', { name: 'Prescrever' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Novo paciente' })).not.toBeInTheDocument();
+  });
+});

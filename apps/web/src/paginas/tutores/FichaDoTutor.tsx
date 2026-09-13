@@ -9,6 +9,7 @@ import { Campo } from '@/componentes/Campo';
 import { Cartao } from '@/componentes/Cartao';
 import { Carregando, Falha, Vazio } from '@/componentes/Estados';
 import { Selo } from '@/componentes/Selo';
+import { usePapel, usePodeCadastrarFicha } from '@/sessao/SessaoContexto';
 
 type Paciente = components['schemas']['PacienteDto'];
 
@@ -25,6 +26,7 @@ const ESPECIES = [
 export function FichaDoTutor() {
   const { id = '' } = useParams();
   const [cadastrando, setCadastrando] = useState(false);
+  const podeCadastrar = usePodeCadastrarFicha();
 
   const carregar = useCallback(
     async () => ({
@@ -62,12 +64,14 @@ export function FichaDoTutor() {
       <Cartao
         titulo="Pacientes"
         acessorio={
-          <Botao
-            tom={cadastrando ? 'secundario' : 'primario'}
-            onClick={() => setCadastrando((c) => !c)}
-          >
-            {cadastrando ? 'Cancelar' : 'Novo paciente'}
-          </Botao>
+          podeCadastrar ? (
+            <Botao
+              tom={cadastrando ? 'secundario' : 'primario'}
+              onClick={() => setCadastrando((c) => !c)}
+            >
+              {cadastrando ? 'Cancelar' : 'Novo paciente'}
+            </Botao>
+          ) : null
         }
       >
         {cadastrando ? (
@@ -96,6 +100,8 @@ export function FichaDoTutor() {
 
 function LinhaDePaciente({ paciente }: { paciente: Paciente }) {
   const especie = ESPECIES.find((e) => e.valor === paciente.especie);
+  // Só quem prescreve abre receita; para a farmácia o atalho levaria a um 403.
+  const podePrescrever = usePapel() === 'VETERINARIO';
 
   return (
     <div className="flex flex-wrap items-center gap-x-4 gap-y-2 rounded-card border border-neutro-200 px-4 py-3">
@@ -113,7 +119,7 @@ function LinhaDePaciente({ paciente }: { paciente: Paciente }) {
 
       {paciente.obito ? <Selo tom="controlado">óbito</Selo> : null}
 
-      {!paciente.obito ? (
+      {!paciente.obito && podePrescrever ? (
         <Link
           to={`/receitas/nova?paciente=${paciente.id}`}
           className="ml-auto text-sm font-semibold text-turquesa-700 hover:underline"
