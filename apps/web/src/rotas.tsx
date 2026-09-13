@@ -3,7 +3,12 @@ import { Layout } from '@/Layout';
 import { Estado } from '@/paginas/estado/Estado';
 import { Login } from '@/paginas/login/Login';
 import { NaoEncontrada } from '@/paginas/NaoEncontrada';
+import { NovaReceita } from '@/paginas/receitas/NovaReceita';
+import { Receita } from '@/paginas/receitas/Receita';
+import { Receitas } from '@/paginas/receitas/Receitas';
 import { Sistema } from '@/paginas/sistema/Sistema';
+import { FichaDoTutor } from '@/paginas/tutores/FichaDoTutor';
+import { Tutores } from '@/paginas/tutores/Tutores';
 import { ExigeSessao } from '@/sessao/ExigeSessao';
 
 /**
@@ -16,6 +21,11 @@ import { ExigeSessao } from '@/sessao/ExigeSessao';
  * Tudo que não for a de entrada nasce dentro do `ExigeSessao`, pelo mesmo motivo
  * de a API negar por padrão: esquecer de proteger não deve ser possível por
  * omissão.
+ *
+ * O que cada papel pode fazer é decidido pela API, e não aqui. A navegação
+ * esconde o que não serve àquele papel, mas esconder não é proteger: quem
+ * digitar a URL de uma tela que não lhe cabe recebe a recusa do servidor, que
+ * é onde a regra mora.
  */
 export const rotas: RouteObject[] = [
   { path: '/entrar', element: <Login /> },
@@ -26,7 +36,16 @@ export const rotas: RouteObject[] = [
         path: '/',
         element: <Layout />,
         children: [
-          { index: true, element: <Estado /> },
+          // A lista de receitas é a primeira tela: é o que a farmácia abre para
+          // trabalhar e o que o veterinário abre para continuar de onde parou.
+          { index: true, element: <Receitas /> },
+          { path: 'tutores', element: <Tutores /> },
+          { path: 'tutores/:id', element: <FichaDoTutor /> },
+          { path: 'receitas', element: <Receitas /> },
+          // Antes de `receitas/:id`, senão "nova" seria lido como um id.
+          { path: 'receitas/nova', element: <NovaReceita /> },
+          { path: 'receitas/:id', element: <Receita /> },
+          { path: 'estado', element: <Estado /> },
           { path: 'sistema', element: <Sistema /> },
           { path: '*', element: <NaoEncontrada /> },
         ],

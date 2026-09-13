@@ -7,6 +7,7 @@
 
 export * from './dinheiro.js';
 export * from './documento.js';
+export * from './peso.js';
 export * from './posologia.js';
 export * from './precificacao.js';
 export * from './faixa-terapeutica.js';

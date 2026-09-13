@@ -25,6 +25,21 @@ function json(corpo: unknown, status = 200): Response {
 const semConteudo = () => new Response(null, { status: 204 });
 const semSessao = () => json({ message: 'Sessão ausente ou expirada.' }, 401);
 
+/**
+ * Resposta conforme a rota chamada.
+ *
+ * A tela inicial lista receitas, então "estar logado" não é mais uma chamada
+ * só: devolver o usuário para toda URL faria a lista receber um corpo sem
+ * `receitas` e quebrar dentro do componente, escondendo o que o teste queria
+ * verificar.
+ */
+function comoAApi(entrada: RequestInfo | URL): Response {
+  const url = String(entrada instanceof Request ? entrada.url : entrada);
+
+  if (url.includes('/receituario/receitas')) return json({ receitas: [] });
+  return json(USUARIO);
+}
+
 /** Sobe a aplicação de verdade — rotas, provedor e telas — numa rota dada. */
 function montar(caminho = '/') {
   const router = createMemoryRouter(rotas, { initialEntries: [caminho] });
@@ -71,14 +86,12 @@ describe('porta das rotas internas', () => {
   it('mostra a tela interna para quem tem sessão', async () => {
     vi.stubGlobal(
       'fetch',
-      vi.fn<Fetch>(async () => json(USUARIO)),
+      vi.fn<Fetch>(async (entrada) => comoAApi(entrada)),
     );
 
     montar('/');
 
-    expect(
-      await screen.findByRole('heading', { name: 'Estado da instalação' }),
-    ).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: 'Receitas' })).toBeInTheDocument();
   });
 });
 
@@ -165,8 +178,10 @@ describe('saída', () => {
   it('volta para o login ao sair', async () => {
     const fetchFalso = vi
       .fn<Fetch>()
-      .mockResolvedValueOnce(json(USUARIO))
-      .mockResolvedValue(semConteudo());
+      .mockImplementationOnce(async (entrada) => comoAApi(entrada))
+      .mockImplementation(async (entrada) =>
+        String(entrada).includes('/receituario/') ? comoAApi(entrada) : semConteudo(),
+      );
     vi.stubGlobal('fetch', fetchFalso);
 
     montar('/');
@@ -184,8 +199,11 @@ describe('saída', () => {
   it('desloga mesmo quando a chamada de saída falha', async () => {
     const fetchFalso = vi
       .fn<Fetch>()
-      .mockResolvedValueOnce(json(USUARIO))
-      .mockRejectedValue(new TypeError('Failed to fetch'));
+      .mockImplementationOnce(async (entrada) => comoAApi(entrada))
+      .mockImplementation(async (entrada) => {
+        if (String(entrada).includes('/receituario/')) return comoAApi(entrada);
+        throw new TypeError('Failed to fetch');
+      });
     vi.stubGlobal('fetch', fetchFalso);
 
     montar('/');
