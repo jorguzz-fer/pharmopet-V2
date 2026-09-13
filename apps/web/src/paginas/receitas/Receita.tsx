@@ -120,6 +120,11 @@ function Detalhe({ receita, aoMudar }: { receita: ReceitaDto; aoMudar: () => voi
         <dl className="grid gap-x-6 gap-y-2 text-sm sm:grid-cols-2">
           <Linha rotulo="Prescritor" valor={receita.veterinarioNome} />
           <Linha rotulo="CRMV" valor={receita.crmv ?? '—'} />
+          {/* O nome congelado na emissão, e não o do cadastro de hoje: a
+              clínica pode ter mudado de nome desde então, e o papel na mão do
+              tutor diz o de antes. */}
+          <Linha rotulo="Clínica" valor={receita.clinicaNome ?? '—'} />
+          <Linha rotulo="CNPJ da clínica" valor={receita.clinicaCnpj ?? '—'} />
           <Linha
             rotulo="Emitida em"
             valor={receita.emitidaEm ? new Date(receita.emitidaEm).toLocaleString('pt-BR') : '—'}

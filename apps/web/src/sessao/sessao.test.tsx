@@ -26,6 +26,18 @@ const semConteudo = () => new Response(null, { status: 204 });
 const semSessao = () => json({ message: 'Sessão ausente ou expirada.' }, 401);
 
 /**
+ * O endereço chamado.
+ *
+ * O openapi-fetch passa um `Request`, e `String(request)` devolve
+ * "[object Request]" — não a URL. Cada teste extraindo isso na mão é um lugar
+ * a mais para errar, e foi o que aconteceu: um `String(entrada).includes(...)`
+ * nunca casava, e a rota errada respondia sem ninguém notar.
+ */
+function urlDe(entrada: RequestInfo | URL): string {
+  return String(entrada instanceof Request ? entrada.url : entrada);
+}
+
+/**
  * Resposta conforme a rota chamada.
  *
  * A tela inicial lista receitas, então "estar logado" não é mais uma chamada
@@ -34,9 +46,7 @@ const semSessao = () => json({ message: 'Sessão ausente ou expirada.' }, 401);
  * verificar.
  */
 function comoAApi(entrada: RequestInfo | URL): Response {
-  const url = String(entrada instanceof Request ? entrada.url : entrada);
-
-  if (url.includes('/receituario/receitas')) return json({ receitas: [] });
+  if (urlDe(entrada).includes('/receituario/receitas')) return json({ receitas: [] });
   return json(USUARIO);
 }
 
@@ -180,7 +190,7 @@ describe('saída', () => {
       .fn<Fetch>()
       .mockImplementationOnce(async (entrada) => comoAApi(entrada))
       .mockImplementation(async (entrada) =>
-        String(entrada).includes('/receituario/') ? comoAApi(entrada) : semConteudo(),
+        urlDe(entrada).includes('/receituario/') ? comoAApi(entrada) : semConteudo(),
       );
     vi.stubGlobal('fetch', fetchFalso);
 
@@ -201,7 +211,7 @@ describe('saída', () => {
       .fn<Fetch>()
       .mockImplementationOnce(async (entrada) => comoAApi(entrada))
       .mockImplementation(async (entrada) => {
-        if (String(entrada).includes('/receituario/')) return comoAApi(entrada);
+        if (urlDe(entrada).includes('/receituario/')) return comoAApi(entrada);
         throw new TypeError('Failed to fetch');
       });
     vi.stubGlobal('fetch', fetchFalso);

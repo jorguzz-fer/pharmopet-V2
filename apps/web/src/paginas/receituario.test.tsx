@@ -175,6 +175,9 @@ describe('montagem da receita', () => {
       formas: [{ id: 'ff55f4e0-0000-4000-8000-000000000001', nome: 'CÁPSULAS' }],
     },
     '/catalogo/insumos': { insumos: [INSUMO] },
+    // Veterinário sem vínculo: é o caso do autônomo, e a escolha de clínica
+    // não aparece. Os testes com clínica vivem em `clinicas.test.tsx`.
+    '/clinicas': { clinicas: [] },
   };
 
   async function montarFormula() {

@@ -5,6 +5,7 @@ import { Test } from '@nestjs/testing';
 import type { INestApplication } from '@nestjs/common';
 import type { NestExpressApplication } from '@nestjs/platform-express';
 import { AppModule } from '../app.module';
+import { limitesDeCorpo } from '../http/corpo';
 import { PrismaService } from '../prisma/prisma.service';
 
 /**
@@ -31,6 +32,7 @@ export async function subirAplicacao(): Promise<{ app: INestApplication; prisma:
 
   const app = modulo.createNestApplication<NestExpressApplication>({ logger: false });
   app.use(cookieParser());
+  app.use(limitesDeCorpo());
   app.set('trust proxy', 1);
   app.setGlobalPrefix('api/v1');
   app.useGlobalPipes(new ZodValidationPipe());
@@ -67,6 +69,7 @@ export function cliente(app: INestApplication, ip: string = ipDeTeste()) {
     post: (caminho: string) => comOrigem(request(servidor).post(caminho)),
     put: (caminho: string) => comOrigem(request(servidor).put(caminho)),
     patch: (caminho: string) => comOrigem(request(servidor).patch(caminho)),
+    delete: (caminho: string) => comOrigem(request(servidor).delete(caminho)),
   };
 }
 

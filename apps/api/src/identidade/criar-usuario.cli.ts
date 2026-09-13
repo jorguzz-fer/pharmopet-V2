@@ -24,7 +24,7 @@ import type { Papel } from '@prisma/client';
  * gera uma e mostra uma única vez.
  */
 
-const PAPEIS: readonly Papel[] = ['ADMIN', 'VETERINARIO', 'FARMACIA'];
+const PAPEIS: readonly Papel[] = ['ADMIN', 'VETERINARIO', 'FARMACIA', 'CLINICA'];
 
 function senhaAleatoria(): string {
   // 24 bytes em base64url: ~192 bits, longe do alcance de qualquer força bruta.

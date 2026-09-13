@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { CatalogoModule } from '../catalogo/catalogo.module';
+import { ClinicasModule } from '../clinicas/clinicas.module';
 import { IdentidadeModule } from '../identidade/identidade.module';
 import { CadastroController } from './cadastro.controller';
 import { CadastroService } from './cadastro.service';
@@ -15,7 +16,7 @@ import { ReceitaService } from './receita.service';
  * sem tocar em nada daqui.
  */
 @Module({
-  imports: [CatalogoModule, IdentidadeModule],
+  imports: [CatalogoModule, ClinicasModule, IdentidadeModule],
   controllers: [CadastroController, ReceitaController],
   providers: [CadastroService, ReceitaService],
   exports: [CadastroService, ReceitaService],

@@ -26,6 +26,7 @@
     "@pharmopet/shared": "workspace:*",
     "@prisma/client": "^6.16.2",
     "cookie-parser": "^1.4.7",
+    "express": "^5.2.1",
     "helmet": "^8.1.0",
     "nestjs-zod": "^5.5.0",
     "reflect-metadata": "^0.2.2",

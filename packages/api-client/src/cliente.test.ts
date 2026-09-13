@@ -82,4 +82,18 @@ describe('exigir', () => {
     expect((erro as ErroDeApi).status).toBe(401);
     expect((erro as ErroDeApi).corpo).toEqual({ message: 'sem sessão' });
   });
+
+  /**
+   * 204 é sucesso sem corpo, e metade das rotas de escrita responde assim.
+   *
+   * Achado no navegador: o envio do logotipo funcionava e a tela dizia "o
+   * sistema respondeu 204". Valia igual para vincular, desvincular e sair — o
+   * dublê dos testes de tela devolvia 200 com corpo, e escondia o problema.
+   */
+  it('aceita 204 sem corpo como sucesso', async () => {
+    const fetchFalso = async () => new Response(null, { status: 204 });
+    const cliente = criarClienteApi({ baseUrl: 'https://api.exemplo', fetch: fetchFalso });
+
+    await expect(exigir(cliente.POST('/api/v1/auth/sair'))).resolves.toBeUndefined();
+  });
 });

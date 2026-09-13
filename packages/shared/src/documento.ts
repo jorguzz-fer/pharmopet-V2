@@ -95,3 +95,44 @@ export function formatarTelefone(bruto: string): string {
 
   return `(${ddd}) ${assinante.slice(0, corte)}-${assinante.slice(corte)}`;
 }
+
+/**
+ * Confere os dois dígitos verificadores do CNPJ.
+ *
+ * Mesma ideia do CPF, com pesos diferentes: a sequência de multiplicadores vai
+ * de 2 a 9 e reinicia, em vez de contar para trás. Não diz que a empresa
+ * existe — diz que o número é internamente consistente, que é o que pega o
+ * dígito trocado na digitação.
+ */
+export function cnpjValido(bruto: string): boolean {
+  const digitos = apenasDigitos(bruto);
+  if (digitos.length !== 14) return false;
+
+  // Os quatorze repetidos fecham a aritmética, como no CPF.
+  if (/^(\d)\1{13}$/.test(digitos)) return false;
+
+  for (const posicao of [12, 13]) {
+    let soma = 0;
+    let peso = posicao - 7;
+
+    for (let i = 0; i < posicao; i += 1) {
+      soma += Number(digitos[i]) * peso;
+      peso = peso === 2 ? 9 : peso - 1;
+    }
+
+    const resto = soma % 11;
+    const esperado = resto < 2 ? 0 : 11 - resto;
+
+    if (esperado !== Number(digitos[posicao])) return false;
+  }
+
+  return true;
+}
+
+/** `11222333000181` vira `11.222.333/0001-81`. */
+export function formatarCnpj(bruto: string): string {
+  const d = apenasDigitos(bruto);
+  if (d.length !== 14) return bruto;
+
+  return `${d.slice(0, 2)}.${d.slice(2, 5)}.${d.slice(5, 8)}/${d.slice(8, 12)}-${d.slice(12)}`;
+}

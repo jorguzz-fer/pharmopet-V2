@@ -68,6 +68,14 @@ type Resultado<T> = { data?: T; error?: unknown; response: Response };
  */
 export async function exigir<T>(chamada: Promise<Resultado<T>>): Promise<T> {
   const { data, error, response } = await chamada;
-  if (data !== undefined) return data;
-  throw new ErroDeApi(response.status, error);
+
+  // Quem decide se deu certo é o status, não a presença de corpo.
+  //
+  // Rota que responde 204 não manda corpo, então `data` vem indefinido — e
+  // tratar isso como falha fazia a tela dizer "o sistema respondeu 204" em
+  // cima de uma operação que tinha funcionado. Apareceu no envio do logotipo,
+  // mas valia igual para vincular, desvincular e sair.
+  if (!response.ok) throw new ErroDeApi(response.status, error);
+
+  return data as T;
 }

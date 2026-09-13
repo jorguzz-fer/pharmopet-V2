@@ -276,6 +276,63 @@ describe('identidade (contra Postgres)', () => {
     });
   });
 
+  describe('lista de usuários', () => {
+    it('devolve a equipe, filtrada por papel e por busca', async () => {
+      await criar('admin@clinica.test');
+      await criar('ana@clinica.test', 'VETERINARIO');
+      await criar('bruno@clinica.test', 'FARMACIA');
+      const { sessao } = await entrar('admin@clinica.test');
+      const comSessao = `${COOKIE_SESSAO}=${sessao}`;
+
+      const todos = await http.get('/api/v1/auth/usuarios').set('Cookie', comSessao).expect(200);
+      expect(todos.body.usuarios).toHaveLength(3);
+
+      const vets = await http
+        .get('/api/v1/auth/usuarios?papel=VETERINARIO')
+        .set('Cookie', comSessao)
+        .expect(200);
+      expect(vets.body.usuarios).toHaveLength(1);
+      expect(vets.body.usuarios[0].email).toBe('ana@clinica.test');
+
+      const porTexto = await http
+        .get('/api/v1/auth/usuarios?busca=bruno')
+        .set('Cookie', comSessao)
+        .expect(200);
+      expect(porTexto.body.usuarios).toHaveLength(1);
+      expect(porTexto.body.usuarios[0].email).toBe('bruno@clinica.test');
+    });
+
+    it('não devolve hash de senha nem contagem de tentativas', async () => {
+      await criar('admin@clinica.test');
+      const { sessao } = await entrar('admin@clinica.test');
+
+      const resposta = await http
+        .get('/api/v1/auth/usuarios')
+        .set('Cookie', `${COOKIE_SESSAO}=${sessao}`)
+        .expect(200);
+
+      // O corpo inteiro, e não campo a campo: um dia alguém devolve a entidade
+      // do Prisma direto, e uma checagem por nome de campo não perceberia.
+      const cru = JSON.stringify(resposta.body);
+      expect(cru).not.toContain('senhaHash');
+      expect(cru).not.toContain('$argon2');
+      expect(cru).not.toContain('tentativasFalhas');
+    });
+
+    it.each(['VETERINARIO', 'FARMACIA', 'CLINICA'] as const)(
+      'recusa %s listando usuários',
+      async (papel) => {
+        await criar('pessoa@clinica.test', papel);
+        const { sessao } = await entrar('pessoa@clinica.test');
+
+        await http
+          .get('/api/v1/auth/usuarios')
+          .set('Cookie', `${COOKIE_SESSAO}=${sessao}`)
+          .expect(403);
+      },
+    );
+  });
+
   describe('revogação', () => {
     it('derruba a sessão ao sair', async () => {
       await criar('admin@clinica.test');

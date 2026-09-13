@@ -8,6 +8,7 @@ import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
 import { AppModule } from './app.module';
 import { validarEnv } from './config/env';
+import { limitesDeCorpo } from './http/corpo';
 import { criarDocumentoOpenApi } from './openapi/documento';
 
 async function bootstrap(): Promise<void> {
@@ -18,6 +19,8 @@ async function bootstrap(): Promise<void> {
 
   app.use(helmet());
   app.use(cookieParser());
+
+  app.use(limitesDeCorpo());
 
   // Atrás de proxy reverso, req.ip seria sempre o IP do proxy — e o limite por
   // IP viraria um limite global, com um cliente hostil derrubando todos os

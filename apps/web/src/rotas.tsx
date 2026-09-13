@@ -1,5 +1,8 @@
 import type { RouteObject } from 'react-router';
 import { Layout } from '@/Layout';
+import { Clinicas } from '@/paginas/clinicas/Clinicas';
+import { FichaDaClinica } from '@/paginas/clinicas/FichaDaClinica';
+import { NovaClinica } from '@/paginas/clinicas/NovaClinica';
 import { Estado } from '@/paginas/estado/Estado';
 import { Login } from '@/paginas/login/Login';
 import { NaoEncontrada } from '@/paginas/NaoEncontrada';
@@ -45,6 +48,10 @@ export const rotas: RouteObject[] = [
           // Antes de `receitas/:id`, senão "nova" seria lido como um id.
           { path: 'receitas/nova', element: <NovaReceita /> },
           { path: 'receitas/:id', element: <Receita /> },
+          { path: 'clinicas', element: <Clinicas /> },
+          // Antes de `clinicas/:id`, pelo mesmo motivo de `receitas/nova`.
+          { path: 'clinicas/nova', element: <NovaClinica /> },
+          { path: 'clinicas/:id', element: <FichaDaClinica /> },
           { path: 'estado', element: <Estado /> },
           { path: 'sistema', element: <Sistema /> },
           { path: '*', element: <NaoEncontrada /> },

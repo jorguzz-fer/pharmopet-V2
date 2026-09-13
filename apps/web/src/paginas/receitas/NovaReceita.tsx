@@ -15,6 +15,7 @@ import { Selo } from '@/componentes/Selo';
 // daqui mantém o tipo amarrado ao contrato, em vez de recriá-lo à mão.
 type Insumo = components['schemas']['ListaDeInsumosDto']['insumos'][number];
 type Orcamento = components['schemas']['OrcamentoDto'];
+type Clinica = components['schemas']['ClinicaDto'];
 
 /** Um ativo da fórmula, do jeito que a tela o guarda enquanto se monta. */
 type ItemEmEdicao = { insumo: Insumo; doseMg: string };
@@ -48,6 +49,9 @@ export function NovaReceita() {
         api.GET('/api/v1/receituario/pacientes/{id}', { params: { path: { id: pacienteId } } }),
       ),
       formas: await exigir(api.GET('/api/v1/catalogo/formas')),
+      // As clínicas onde quem prescreve atende. A API já devolve só os
+      // vínculos ativos (ADR 0012) — a tela não repete a regra.
+      clinicas: await exigir(api.GET('/api/v1/clinicas', {})),
     }),
     [pacienteId],
   );
@@ -60,7 +64,7 @@ export function NovaReceita() {
   if (estado.situacao === 'carregando') return <Carregando o="o paciente" />;
   if (estado.situacao === 'falha') return <Falha motivo={estado.motivo} aoTentar={recarregar} />;
 
-  const { paciente, formas } = estado.dado;
+  const { paciente, formas, clinicas } = estado.dado;
 
   if (paciente.pesoEmGramas === null) {
     return (
@@ -77,6 +81,7 @@ export function NovaReceita() {
     <Montagem
       paciente={paciente}
       formas={formas.formas}
+      clinicas={clinicas.clinicas}
       aoSalvar={(id) => navegar(`/receitas/${id}`)}
     />
   );
@@ -85,13 +90,18 @@ export function NovaReceita() {
 function Montagem({
   paciente,
   formas,
+  clinicas,
   aoSalvar,
 }: {
   paciente: components['schemas']['PacienteDto'];
   formas: { id: string; nome: string }[];
+  clinicas: Clinica[];
   aoSalvar: (id: string) => void;
 }) {
   const [formaId, setFormaId] = useState(formas[0]?.id ?? '');
+  // Com uma clínica só, já vem escolhida: perguntar o óbvio a cada receita é
+  // um clique por prescrição sem nenhuma decisão por trás.
+  const [clinicaId, setClinicaId] = useState(clinicas.length === 1 ? clinicas[0]!.id : '');
   const [itens, setItens] = useState<ItemEmEdicao[]>([]);
   const [frequenciaHoras, setFrequencia] = useState<24 | 12 | 8 | 6>(12);
   const [dias, setDias] = useState('10');
@@ -111,13 +121,17 @@ function Montagem({
     [itens],
   );
 
+  // `clinicaId` entra na chave porque muda o preço: o desconto e a taxa de
+  // manipulação são do acordo daquela clínica. Trocar de clínica sem recotar
+  // deixaria na tela um valor que a emissão não vai confirmar.
   const chave = useAtrasado(
-    JSON.stringify({ formaId, itensProntos, quantidade, peso: paciente.pesoEmGramas }),
+    JSON.stringify({ formaId, clinicaId, itensProntos, quantidade, peso: paciente.pesoEmGramas }),
   );
 
   const cotar = useCallback(async (): Promise<Orcamento | null> => {
     const pedido = JSON.parse(chave) as {
       formaId: string;
+      clinicaId: string;
       itensProntos: { insumoId: string; doseMg: number }[];
       quantidade: number;
       peso: number | null;
@@ -129,6 +143,7 @@ function Montagem({
       api.POST('/api/v1/catalogo/orcamento', {
         body: {
           formaId: pedido.formaId,
+          ...(pedido.clinicaId ? { clinicaId: pedido.clinicaId } : {}),
           itens: pedido.itensProntos.map((i) => ({ ...i, quantidade: pedido.quantidade })),
           ...(pedido.peso === null
             ? {}
@@ -142,7 +157,12 @@ function Montagem({
 
   const orcamento = cotacao.situacao === 'ok' ? cotacao.dado : null;
   const impedido = (orcamento?.impedimentos.length ?? 0) > 0;
-  const podeSalvar = itensProntos.length > 0 && quantidade > 0 && !impedido && !salvando;
+  // Com mais de uma clínica, escolher é obrigatório. Deixar em branco sairia
+  // sem logotipo e com o preço de tabela — silenciosamente a receita errada,
+  // e a emissão congela a clínica sem volta.
+  const faltaClinica = clinicas.length > 1 && clinicaId === '';
+  const podeSalvar =
+    itensProntos.length > 0 && quantidade > 0 && !impedido && !faltaClinica && !salvando;
 
   async function salvar() {
     setErro(null);
@@ -153,6 +173,7 @@ function Montagem({
         api.POST('/api/v1/receituario/receitas', {
           body: {
             pacienteId: paciente.id,
+            ...(clinicaId ? { clinicaId } : {}),
             formulacoes: [
               {
                 formaId,
@@ -191,6 +212,8 @@ function Montagem({
           {paciente.pesoEmGramas === null ? 'sem peso' : formatarPeso(paciente.pesoEmGramas)}
         </p>
       </div>
+
+      <EscolhaDaClinica clinicas={clinicas} escolhida={clinicaId} aoEscolher={setClinicaId} />
 
       <Cartao titulo="Fórmula">
         <div className="flex flex-col gap-5">
@@ -276,9 +299,70 @@ function Montagem({
         {salvando ? 'Salvando…' : 'Salvar rascunho'}
       </Botao>
       <p className="-mt-4 text-center text-xs text-neutro-500">
-        O rascunho pode ser alterado. A emissão é o passo seguinte, e congela a receita.
+        {faltaClinica
+          ? 'Escolha a clínica para poder salvar.'
+          : 'O rascunho pode ser alterado. A emissão é o passo seguinte, e congela a receita.'}
       </p>
     </div>
+  );
+}
+
+/**
+ * De qual clínica é esta receita.
+ *
+ * Decide três coisas: o logotipo e os dados do cabeçalho, o preço (cada
+ * parceiro tem seu acordo) e quem mais enxerga a ficha depois. Some quando não
+ * há o que decidir — sem vínculo nenhum, é receita de autônomo; com um só, já
+ * vem escolhida e a tela apenas informa qual.
+ */
+function EscolhaDaClinica({
+  clinicas,
+  escolhida,
+  aoEscolher,
+}: {
+  clinicas: Clinica[];
+  escolhida: string;
+  aoEscolher: (id: string) => void;
+}) {
+  if (clinicas.length === 0) return null;
+
+  if (clinicas.length === 1) {
+    return (
+      <Cartao titulo="Clínica">
+        <p className="text-sm text-neutro-700">
+          {clinicas[0]!.nomeFantasia}
+          <span className="ml-2 text-neutro-500">
+            — o cabeçalho e o preço da receita vêm daqui.
+          </span>
+        </p>
+      </Cartao>
+    );
+  }
+
+  return (
+    <Cartao titulo="Clínica">
+      <div className="flex flex-col gap-1">
+        <label htmlFor="clinica" className="text-sm font-semibold text-neutro-700">
+          Onde este atendimento acontece
+        </label>
+        <select
+          id="clinica"
+          className="min-h-[var(--altura-controle)] w-full rounded-controle border border-neutro-200 bg-neutro-0 px-3 text-base"
+          value={escolhida}
+          onChange={(e) => aoEscolher(e.target.value)}
+        >
+          <option value="">Escolha…</option>
+          {clinicas.map((c) => (
+            <option key={c.id} value={c.id}>
+              {c.nomeFantasia}
+            </option>
+          ))}
+        </select>
+        <p className="text-xs text-neutro-500">
+          Define o cabeçalho da receita e o preço. Depois de emitida, não muda.
+        </p>
+      </div>
+    </Cartao>
   );
 }
 

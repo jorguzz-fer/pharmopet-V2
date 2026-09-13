@@ -78,7 +78,12 @@ export class CatalogoController {
   @ApiOperation({ summary: 'Calcula o preço de uma formulação' })
   @ApiOkResponse({ type: OrcamentoDto })
   async orcamento(@Body() corpo: PrecificarDto): Promise<OrcamentoDto> {
-    const completo = await this.catalogo.orcar(corpo.itens, corpo.formaId, corpo.paciente);
+    const completo = await this.catalogo.orcar(
+      corpo.itens,
+      corpo.formaId,
+      corpo.paciente,
+      corpo.clinicaId,
+    );
 
     return resumir(completo);
   }
@@ -94,7 +99,12 @@ export class CatalogoController {
   @ApiOkResponse({ type: OrcamentoDetalhadoDto })
   @ApiForbiddenResponse({ description: 'A composição do preço não é visível para o prescritor.' })
   async orcamentoDetalhado(@Body() corpo: PrecificarDto): Promise<OrcamentoDetalhadoDto> {
-    const completo = await this.catalogo.orcar(corpo.itens, corpo.formaId, corpo.paciente);
+    const completo = await this.catalogo.orcar(
+      corpo.itens,
+      corpo.formaId,
+      corpo.paciente,
+      corpo.clinicaId,
+    );
     const { calculo } = completo;
 
     return {

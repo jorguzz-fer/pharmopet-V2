@@ -40,15 +40,38 @@ export const euSchema = z.object({
   id: z.uuid(),
   nome: z.string(),
   email: z.email(),
-  papel: z.enum(['ADMIN', 'VETERINARIO', 'FARMACIA']),
+  papel: z.enum(['ADMIN', 'VETERINARIO', 'FARMACIA', 'CLINICA']),
   crmv: z.string().nullable(),
 });
 export class EuDto extends createZodDto(euSchema) {}
 
+/**
+ * Alguém da equipe, na visão de quem administra.
+ *
+ * Estende o `euSchema` com só o que uma lista precisa: se a conta está
+ * bloqueada, e desde quando existe. Nada de hash, token ou contagem de
+ * tentativas — a lista não usa, e o que a tela recebe é público para quem
+ * abrir o inspetor do navegador.
+ */
+export const usuarioSchema = euSchema.extend({
+  bloqueado: z.boolean(),
+  criadoEm: z.iso.datetime(),
+});
+export class ListaDeUsuariosDto extends createZodDto(
+  z.object({ usuarios: z.array(usuarioSchema) }),
+) {}
+
+export const filtroDeUsuariosSchema = z.object({
+  papel: z.enum(['ADMIN', 'VETERINARIO', 'FARMACIA', 'CLINICA']).optional(),
+  /** Casa com pedaço do nome ou do e-mail, sem diferenciar maiúsculas. */
+  busca: z.string().trim().max(160).optional(),
+});
+export class FiltroDeUsuariosDto extends createZodDto(filtroDeUsuariosSchema) {}
+
 export const criarUsuarioSchema = z.object({
   email: z.email('Informe um e-mail válido.'),
   nome: z.string().min(2, 'Informe o nome.').max(160),
-  papel: z.enum(['ADMIN', 'VETERINARIO', 'FARMACIA']),
+  papel: z.enum(['ADMIN', 'VETERINARIO', 'FARMACIA', 'CLINICA']),
   senha: senhaSchema,
   crmv: z.string().max(40).nullable().optional(),
 });

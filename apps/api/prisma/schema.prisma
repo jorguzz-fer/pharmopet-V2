@@ -21,6 +21,12 @@ enum Papel {
   VETERINARIO
   /// Manipula: vê a fila de pedidos e move o estado da produção.
   FARMACIA
+  /// Opera uma clínica parceira: vê as receitas dela e quem prescreve nela.
+  ///
+  /// É papel, e não outra tabela de senha. O v1 guardava `senha_hash` dentro
+  /// de `Clinica`, com fluxo de recuperação próprio — três armazéns de
+  /// credencial no total. A ADR 0012 mantém as três áreas e unifica a entrada.
+  CLINICA
 }
 
 /// Quem entra no sistema.
@@ -60,6 +66,7 @@ model Usuario {
   eventos  EventoDeAuditoria[]
   tutores  Tutor[]
   receitas Receita[]
+  clinicas ClinicaUsuario[]
 
   @@index([papel])
   @@map("usuario")
@@ -109,6 +116,10 @@ enum AcaoAuditada {
   USUARIO_DESATIVADO
   RECEITA_EMITIDA
   RECEITA_CANCELADA
+  CLINICA_CRIADA
+  CLINICA_ALTERADA
+  VINCULO_CRIADO
+  VINCULO_REMOVIDO
 }
 
 /// O que aconteceu, quem fez e quando.
@@ -277,8 +288,13 @@ model FaixaTerapeutica {
 /// isto vira uma linha por clínica — e o motor de precificação não muda, porque
 /// já recebe as condições por parâmetro.
 model CondicoesComerciais {
-  /// Sempre "padrao". Um enum de um valor só, para o banco garantir a linha única.
-  id String @id @default("padrao")
+  /// "padrao" na linha da casa; uuid nas linhas de clínica.
+  id String @id @default(uuid())
+
+  /// Nulo é a condição padrão da farmácia, a que vale para quem não tem
+  /// termo negociado. Única por clínica: uma clínica tem um acordo, não dois.
+  clinicaId String?  @unique @db.Uuid
+  clinica   Clinica? @relation(fields: [clinicaId], references: [id], onDelete: Cascade)
 
   taxaDeManipulacaoEmCentavos   Int @default(0)
   custoDeEmbalagensEmCentavos   Int @default(0)
@@ -345,10 +361,17 @@ model Tutor {
 
   observacoes String?
 
-  /// Quem abriu a ficha. É por aqui que a visibilidade se resolve: um
-  /// veterinário não enxerga a clientela de outro.
+  /// Quem abriu a ficha, e por qual clínica.
+  ///
+  /// A ADR 0012 mudou o eixo da visibilidade: ficha com clínica é da clínica,
+  /// e todos que atendem nela a enxergam — dois veterinários do mesmo lugar
+  /// atendem o mesmo tutor. Sem clínica, vale a regra antiga da ADR 0011 e só
+  /// quem cadastrou enxerga.
   cadastradoPorId String  @db.Uuid
   cadastradoPor   Usuario @relation(fields: [cadastradoPorId], references: [id])
+
+  clinicaId String?  @db.Uuid
+  clinica   Clinica? @relation(fields: [clinicaId], references: [id], onDelete: SetNull)
 
   desativadoEm DateTime? @db.Timestamptz(3)
 
@@ -359,6 +382,7 @@ model Tutor {
 
   @@index([nome])
   @@index([cadastradoPorId])
+  @@index([clinicaId])
   @@map("tutor")
 }
 
@@ -423,6 +447,18 @@ model Receita {
   pacienteId String   @db.Uuid
   paciente   Paciente @relation(fields: [pacienteId], references: [id], onDelete: Restrict)
 
+  /// A clínica que pediu a receita. Nula quando o veterinário atende por
+  /// conta própria — aí o documento sai no nome da farmácia.
+  clinicaId String?  @db.Uuid
+  clinica   Clinica? @relation(fields: [clinicaId], references: [id], onDelete: Restrict)
+
+  /// Congelados na emissão, como o resto: o cabeçalho do documento não muda
+  /// quando o cadastro da clínica muda. O logotipo segue por relação — é
+  /// marca, não identificação, e guardar uma cópia da imagem por receita
+  /// pesaria sem necessidade.
+  clinicaNome String?
+  clinicaCnpj String?
+
   /// Congelado na emissão: é o CRMV que estava na assinatura.
   crmvDoVeterinario String?
 
@@ -449,6 +485,7 @@ model Receita {
 
   @@index([veterinarioId, criadaEm])
   @@index([pacienteId])
+  @@index([clinicaId])
   @@index([estado])
   @@map("receita")
 }
@@ -517,4 +554,97 @@ model ItemDaFormulacao {
   @@unique([formulacaoId, insumoId])
   @@index([insumoId])
   @@map("item_da_formulacao")
+}
+
+// ---------------------------------------------------------------------------
+// Clínicas parceiras
+//
+// A ADR 0012 explica por que existem: o logotipo da receita vem do cadastro da
+// clínica, e o preço depende do acordo dela. Instalação continua única — uma
+// farmácia, um banco, um catálogo —, mas os parceiros agora têm cadastro.
+// ---------------------------------------------------------------------------
+
+enum SituacaoDaClinica {
+  /// Cadastrada, ainda sem aval da farmácia. Não recebe receita.
+  PENDENTE
+  ATIVA
+  SUSPENSA
+}
+
+model Clinica {
+  id String @id @default(uuid()) @db.Uuid
+
+  razaoSocial       String
+  nomeFantasia      String
+  /// Só dígitos, conferido antes de gravar.
+  cnpj              String  @unique
+  inscricaoEstadual String?
+
+  email    String
+  telefone String?
+  whatsapp String?
+
+  cep         String?
+  logradouro  String?
+  numero      String?
+  complemento String?
+  bairro      String?
+  cidade      String?
+  uf          String? @db.Char(2)
+
+  /// O logotipo impresso no cabeçalho da receita.
+  ///
+  /// No banco, e não em serviço de arquivo: são dezenas de quilobytes, um por
+  /// clínica, e o contêiner não tem volume persistente. A ADR 0012 pesa a
+  /// alternativa — documentos da clínica, que são muitos e maiores, pedirão
+  /// outra decisão quando existirem.
+  logotipo     Bytes?
+  logotipoTipo String?
+
+  responsavelLegal String
+  /// Só dígitos.
+  cpfDoResponsavel String?
+
+  situacao SituacaoDaClinica @default(PENDENTE)
+
+  observacoesInternas String?
+
+  criadaEm     DateTime @default(now()) @db.Timestamptz(3)
+  atualizadaEm DateTime @updatedAt @db.Timestamptz(3)
+
+  usuarios  ClinicaUsuario[]
+  receitas  Receita[]
+  tutores   Tutor[]
+  condicoes CondicoesComerciais?
+
+  @@index([nomeFantasia])
+  @@index([situacao])
+  @@map("clinica")
+}
+
+/// Quem atende ou opera numa clínica.
+///
+/// Muitos-para-muitos, como no v1: um veterinário atende em mais de uma
+/// clínica, e a receita registra em qual delas foi emitida. Vale também para o
+/// papel CLINICA — é por este vínculo que a pessoa enxerga a clínica dela.
+model ClinicaUsuario {
+  id String @id @default(uuid()) @db.Uuid
+
+  clinicaId String  @db.Uuid
+  clinica   Clinica @relation(fields: [clinicaId], references: [id], onDelete: Cascade)
+
+  usuarioId String  @db.Uuid
+  usuario   Usuario @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+
+  cargo String?
+
+  /// Sem exclusão física: o vínculo desfeito precisa continuar existindo para
+  /// as receitas emitidas sob ele continuarem fazendo sentido.
+  encerradoEm DateTime? @db.Timestamptz(3)
+
+  criadoEm DateTime @default(now()) @db.Timestamptz(3)
+
+  @@unique([clinicaId, usuarioId])
+  @@index([usuarioId])
+  @@map("clinica_usuario")
 }
