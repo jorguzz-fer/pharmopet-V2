@@ -42,7 +42,9 @@ export function Restricoes() {
         <p className="text-sm text-neutro-500">
           {restricoes.length === 1 ? '1 proibição' : `${restricoes.length} proibições`}
         </p>
-        {!adicionando ? <Botao onClick={() => setAdicionando(true)}>Proibir combinação</Botao> : null}
+        {!adicionando ? (
+          <Botao onClick={() => setAdicionando(true)}>Proibir combinação</Botao>
+        ) : null}
       </div>
 
       {adicionando ? (

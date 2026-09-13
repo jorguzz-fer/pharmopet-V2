@@ -611,7 +611,10 @@ describe('catálogo (contra Postgres)', () => {
       const { formaId } = await semearCatalogo();
       const sessao = autenticado(await entrarComo('ADMIN'));
 
-      await sessao.patch(`/api/v1/catalogo/formas/${formaId}`).send({ desativada: true }).expect(200);
+      await sessao
+        .patch(`/api/v1/catalogo/formas/${formaId}`)
+        .send({ desativada: true })
+        .expect(200);
 
       const lista = await sessao.get('/api/v1/catalogo/formas').expect(200);
       expect(lista.body.formas.map((f: { nome: string }) => f.nome)).not.toContain('CÁPSULAS');
@@ -640,9 +643,7 @@ describe('catálogo (contra Postgres)', () => {
         .send({ insumoId, formaId: biscoitoId, motivo: 'Não se manipula em biscoito.' })
         .expect(204);
 
-      await sessao
-        .delete(`/api/v1/catalogo/restricoes/${insumoId}/${biscoitoId}`)
-        .expect(204);
+      await sessao.delete(`/api/v1/catalogo/restricoes/${insumoId}/${biscoitoId}`).expect(204);
 
       expect(await prisma.restricaoDeForma.count()).toBe(0);
     });

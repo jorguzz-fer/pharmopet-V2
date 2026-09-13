@@ -62,8 +62,7 @@ export function Insumo({
   const { estado, recarregar } = useConsulta(`insumo:${id}`, carregar);
 
   if (estado.situacao === 'carregando') return <Carregando o="o insumo" />;
-  if (estado.situacao === 'falha')
-    return <Falha motivo={estado.motivo} aoTentar={recarregar} />;
+  if (estado.situacao === 'falha') return <Falha motivo={estado.motivo} aoTentar={recarregar} />;
 
   return <Formulario insumo={estado.dado} aoFechar={aoFechar} aoSalvar={aoSalvar} />;
 }
@@ -101,7 +100,10 @@ function Formulario({
   const faltaLista = controlado && lista.trim() === '';
 
   const impedido =
-    custoEmMicro === null || referenciaEmMicro === null || markupEmCentesimos === null || faltaLista;
+    custoEmMicro === null ||
+    referenciaEmMicro === null ||
+    markupEmCentesimos === null ||
+    faltaLista;
 
   async function salvar() {
     if (impedido) return;
@@ -209,7 +211,11 @@ function Formulario({
               value={lista}
               onChange={(e) => setLista(e.target.value)}
               ajuda="É ela que define o prazo de validade da receita: 30 dias nas listas da 344/98, 10 no antimicrobiano."
-              erro={faltaLista ? 'Sem a lista, a receita ganharia os 180 dias do prazo comum.' : undefined}
+              erro={
+                faltaLista
+                  ? 'Sem a lista, a receita ganharia os 180 dias do prazo comum.'
+                  : undefined
+              }
             />
           ) : null}
         </div>
