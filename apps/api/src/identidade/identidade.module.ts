@@ -1,7 +1,9 @@
 import { Module } from '@nestjs/common';
 import { AuditoriaService } from './auditoria.service';
+import { EmailService } from './email.service';
 import { IdentidadeController } from './identidade.controller';
 import { IdentidadeService } from './identidade.service';
+import { RedefinicaoService } from './redefinicao.service';
 import { SenhaService } from './senha.service';
 import { SessaoService } from './sessao.service';
 
@@ -14,7 +16,14 @@ import { SessaoService } from './sessao.service';
  */
 @Module({
   controllers: [IdentidadeController],
-  providers: [SenhaService, SessaoService, AuditoriaService, IdentidadeService],
+  providers: [
+    SenhaService,
+    SessaoService,
+    AuditoriaService,
+    IdentidadeService,
+    EmailService,
+    RedefinicaoService,
+  ],
   exports: [SenhaService, SessaoService, AuditoriaService, IdentidadeService],
 })
 export class IdentidadeModule {}

@@ -62,15 +62,45 @@ model Usuario {
   criadoEm     DateTime @default(now()) @db.Timestamptz(3)
   atualizadoEm DateTime @updatedAt @db.Timestamptz(3)
 
-  sessoes  Sessao[]
-  eventos  EventoDeAuditoria[]
-  tutores  Tutor[]
-  receitas Receita[]
-  clinicas ClinicaUsuario[]
-  pedidos  Pedido[]
+  sessoes      Sessao[]
+  redefinicoes TokenDeRedefinicao[]
+  eventos      EventoDeAuditoria[]
+  tutores      Tutor[]
+  receitas     Receita[]
+  clinicas     ClinicaUsuario[]
+  pedidos      Pedido[]
 
   @@index([papel])
   @@map("usuario")
+}
+
+/// Pedido de redefinição de senha.
+///
+/// O token é guardado como hash, e não em claro — a v1 guardava o valor.
+/// Quem lê esta tabela num vazamento de banco não ganha um link de redefinição
+/// funcionando: ganha o hash, que não volta. É a mesma disciplina do
+/// `senhaHash`, e aqui o prêmio é o mesmo — a conta.
+///
+/// SHA-256 e não Argon2id de propósito: o token nasce com 32 bytes de entropia,
+/// então não há dicionário para o atacante tentar. Argon2 protege segredo que a
+/// pessoa escolheu; aqui só se quer que o valor não seja reversível.
+model TokenDeRedefinicao {
+  id String @id @default(uuid()) @db.Uuid
+
+  usuarioId String  @db.Uuid
+  usuario   Usuario @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+
+  /// SHA-256 do token, em hexadecimal.
+  tokenHash String @unique
+
+  expiraEm DateTime  @db.Timestamptz(3)
+  /// Quando foi usado. Nulo é "ainda vale"; usar é um caminho só de ida.
+  usadoEm  DateTime? @db.Timestamptz(3)
+
+  criadoEm DateTime @default(now()) @db.Timestamptz(3)
+
+  @@index([usuarioId])
+  @@map("token_de_redefinicao")
 }
 
 /// Sessão de navegador.
@@ -113,6 +143,7 @@ enum AcaoAuditada {
   CONTA_BLOQUEADA
   SAIDA
   SENHA_ALTERADA
+  REDEFINICAO_PEDIDA
   USUARIO_CRIADO
   USUARIO_DESATIVADO
   RECEITA_EMITIDA
