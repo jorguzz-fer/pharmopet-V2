@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState, type ReactNode } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router';
 import { exigir, type components } from '@pharmopet/api-client';
 import {
@@ -17,6 +17,9 @@ import { Campo } from '@/componentes/Campo';
 import { Cartao } from '@/componentes/Cartao';
 import { Carregando, Falha } from '@/componentes/Estados';
 import { Selo } from '@/componentes/Selo';
+import { PassoDoPaciente } from '@/paginas/receitas/PassoDoPaciente';
+import { PassoDoTutor } from '@/paginas/receitas/PassoDoTutor';
+import { PassosDaReceita } from '@/paginas/receitas/PassosDaReceita';
 
 // O insumo não tem schema próprio no contrato: vive dentro da lista. Indexar
 // daqui mantém o tipo amarrado ao contrato, em vez de recriá-lo à mão.
@@ -54,9 +57,56 @@ const FREQUENCIAS = [
  * cada tecla encheria o banco de receita que ninguém quis.
  */
 export function NovaReceita() {
-  const [params] = useSearchParams();
+  const [params, setParams] = useSearchParams();
   const pacienteId = params.get('paciente') ?? '';
+  const tutorId = params.get('tutor') ?? '';
+
+  if (pacienteId) return <Prescricao pacienteId={pacienteId} />;
+
+  if (tutorId) {
+    return (
+      <Passo numero={2}>
+        <PassoDoPaciente
+          tutorId={tutorId}
+          // `replace` para o botão "voltar" do navegador não devolver a
+          // pessoa ao passo que ela acabou de deixar para trás.
+          aoVoltar={() => setParams({}, { replace: true })}
+          aoEscolher={(p) => setParams({ paciente: p.id })}
+        />
+      </Passo>
+    );
+  }
+
+  return (
+    <Passo numero={1}>
+      <PassoDoTutor aoEscolher={(t) => setParams({ tutor: t.id })} />
+    </Passo>
+  );
+}
+
+/**
+ * A moldura comum dos passos: título, onde estamos, e o conteúdo.
+ *
+ * O indicador aparece nos três primeiros e na tela da receita não — lá o
+ * documento já se anuncia sozinho, e repetir a trilha sobre uma receita
+ * pronta sugeriria que ainda falta algo a preencher.
+ */
+function Passo({ numero, children }: { numero: 1 | 2 | 3; children: ReactNode }) {
+  return (
+    <div className="flex flex-col gap-6">
+      <div className="flex flex-col gap-3">
+        <h1 className="font-titulo text-2xl font-extrabold tracking-tight">Nova receita</h1>
+        <PassosDaReceita atual={numero} />
+      </div>
+      {children}
+    </div>
+  );
+}
+
+/** Passo 3: a fórmula, com preço e conferência de dose ao vivo. */
+function Prescricao({ pacienteId }: { pacienteId: string }) {
   const navegar = useNavigate();
+  const [, setParams] = useSearchParams();
 
   const carregarBase = useCallback(
     async () => ({
@@ -73,32 +123,57 @@ export function NovaReceita() {
 
   const { estado, recarregar } = useConsulta(`nova:${pacienteId}`, carregarBase);
 
-  if (!pacienteId) {
-    return <Falha motivo="Escolha um paciente na ficha do tutor para começar a receita." />;
+  if (estado.situacao === 'carregando') {
+    return (
+      <Passo numero={3}>
+        <Carregando o="o paciente" />
+      </Passo>
+    );
   }
-  if (estado.situacao === 'carregando') return <Carregando o="o paciente" />;
-  if (estado.situacao === 'falha') return <Falha motivo={estado.motivo} aoTentar={recarregar} />;
+  if (estado.situacao === 'falha') {
+    return (
+      <Passo numero={3}>
+        <Falha motivo={estado.motivo} aoTentar={recarregar} />
+      </Passo>
+    );
+  }
 
   const { paciente, formas, clinicas } = estado.dado;
 
   if (paciente.pesoEmGramas === null) {
     return (
-      <div className="flex flex-col gap-4">
-        <Falha motivo="Este paciente está sem peso registrado, e a dose é conferida contra o peso." />
-        <Link to={`/tutores/${paciente.tutorId}`} className="text-sm text-turquesa-700 underline">
-          Registrar o peso na ficha
-        </Link>
-      </div>
+      <Passo numero={3}>
+        <div className="flex flex-col gap-4">
+          <Falha motivo="Este paciente está sem peso registrado, e a dose é conferida contra o peso." />
+          <Link to={`/tutores/${paciente.tutorId}`} className="text-sm text-turquesa-700 underline">
+            Registrar o peso na ficha
+          </Link>
+        </div>
+      </Passo>
     );
   }
 
   return (
-    <Montagem
-      paciente={paciente}
-      formas={formas.formas}
-      clinicas={clinicas.clinicas}
-      aoSalvar={(id) => navegar(`/receitas/${id}`)}
-    />
+    <Passo numero={3}>
+      {/*
+        Voltar ao passo 2 tira só o paciente e mantém o tutor: quem errou o
+        bicho quase sempre errou dentro da mesma ficha, e limpar os dois faria
+        refazer a busca do tutor sem motivo.
+      */}
+      <button
+        type="button"
+        onClick={() => setParams({ tutor: paciente.tutorId }, { replace: true })}
+        className="-mt-2 self-start text-sm text-turquesa-700 hover:underline"
+      >
+        ← Trocar o paciente
+      </button>
+      <Montagem
+        paciente={paciente}
+        formas={formas.formas}
+        clinicas={clinicas.clinicas}
+        aoSalvar={(id) => navegar(`/receitas/${id}`)}
+      />
+    </Passo>
   );
 }
 

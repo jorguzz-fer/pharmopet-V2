@@ -5,8 +5,9 @@ import { api } from '@/api/cliente';
 import { useConsulta } from '@/api/consulta';
 import { Carregando, Falha, Vazio } from '@/componentes/Estados';
 import { Selo, type TomDoSelo } from '@/componentes/Selo';
+import { aparenciaDeBotao } from '@/componentes/Botao';
 import type { Papel } from '@/sessao/papeis';
-import { usePapel } from '@/sessao/SessaoContexto';
+import { usePapel, usePodePrescrever } from '@/sessao/SessaoContexto';
 
 type Resumida = components['schemas']['ListaDeReceitasDto']['receitas'][number];
 
@@ -21,7 +22,7 @@ type Resumida = components['schemas']['ListaDeReceitasDto']['receitas'][number];
 function vazio(papel: Papel | null): string {
   switch (papel) {
     case 'VETERINARIO':
-      return 'Nenhuma receita ainda. Comece pela ficha de um tutor.';
+      return 'Nenhuma receita ainda. Comece por “Nova receita”.';
     case 'FARMACIA':
       return 'Nenhuma receita ainda. Elas aparecem aqui quando um veterinário emitir.';
     default:
@@ -41,10 +42,23 @@ export function Receitas() {
   const carregar = useCallback(() => exigir(api.GET('/api/v1/receituario/receitas')), []);
   const { estado, recarregar } = useConsulta('receitas', carregar);
   const papel = usePapel();
+  const podePrescrever = usePodePrescrever();
 
   return (
     <div className="flex flex-col gap-6">
-      <h1 className="font-titulo text-2xl font-extrabold tracking-tight">Receitas</h1>
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <h1 className="font-titulo text-2xl font-extrabold tracking-tight">Receitas</h1>
+        {/*
+          O caminho para prescrever começava só dentro da ficha de um tutor:
+          quem abria "Receitas" para escrever uma não tinha por onde. Agora
+          começa aqui, e o wizard pergunta o tutor no primeiro passo.
+        */}
+        {podePrescrever ? (
+          <Link to="/receitas/nova" className={aparenciaDeBotao()}>
+            Nova receita
+          </Link>
+        ) : null}
+      </div>
 
       {estado.situacao === 'carregando' ? <Carregando o="receitas" /> : null}
       {estado.situacao === 'falha' ? <Falha motivo={estado.motivo} aoTentar={recarregar} /> : null}
