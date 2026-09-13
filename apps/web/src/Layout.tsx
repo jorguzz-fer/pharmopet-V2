@@ -23,6 +23,9 @@ const abas: { para: string; rotulo: string; fim: boolean; papeis?: Papel[] }[] =
   // atende. `usePodeCadastrarFicha` é que esconde o botão de cadastro.
   { para: '/tutores', rotulo: 'Tutores', fim: false, papeis: ['ADMIN', 'VETERINARIO', 'CLINICA'] },
   { para: '/pedidos', rotulo: 'Pedidos', fim: false },
+  // Referência clínica, e portanto para todo mundo: não há custo nem clientela
+  // no bulário, e escondê-lo do veterinário não protegeria nada (ADR 0015).
+  { para: '/bulario', rotulo: 'Bulário', fim: false },
   // Fora do veterinário: ele vê a clínica pela receita, e uma aba que abre
   // vazia para todo autônomo é aba morta.
   { para: '/clinicas', rotulo: 'Clínicas', fim: false, papeis: ['ADMIN', 'CLINICA', 'FARMACIA'] },

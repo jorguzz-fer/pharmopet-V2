@@ -294,6 +294,116 @@
         ]
       }
     },
+    "/api/v1/bulario": {
+      "get": {
+        "operationId": "BularioController_listar",
+        "parameters": [
+          {
+            "name": "busca",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "maxLength": 160,
+              "type": "string"
+            }
+          },
+          {
+            "name": "linhaTerapeutica",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "maxLength": 120,
+              "type": "string"
+            }
+          },
+          {
+            "name": "especie",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "CANINO",
+                "FELINO",
+                "EQUINO",
+                "AVE",
+                "ROEDOR",
+                "REPTIL"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListaDoBularioDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Busca formulações por doença, ativo ou nome",
+        "tags": [
+          "bulário"
+        ]
+      }
+    },
+    "/api/v1/bulario/linhas": {
+      "get": {
+        "operationId": "BularioController_linhas",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LinhasDoBularioDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "As linhas terapêuticas, com quantas formulações cada uma tem",
+        "tags": [
+          "bulário"
+        ]
+      }
+    },
+    "/api/v1/bulario/{id}": {
+      "get": {
+        "operationId": "BularioController_achar",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FormulacaoDoBularioDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Uma formulação inteira, como o guia a escreve",
+        "tags": [
+          "bulário"
+        ]
+      }
+    },
     "/api/v1/catalogo/insumos": {
       "get": {
         "operationId": "CatalogoController_insumos",
@@ -2084,6 +2194,229 @@
         "required": [
           "token",
           "senhaNova"
+        ]
+      },
+      "ListaDoBularioDto": {
+        "type": "object",
+        "properties": {
+          "formulacoes": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "format": "uuid",
+                  "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                },
+                "numero": {
+                  "type": "string"
+                },
+                "titulo": {
+                  "type": "string"
+                },
+                "linhaTerapeutica": {
+                  "type": "string"
+                },
+                "linhaExclusiva": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "formaFarmaceutica": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "indicacao": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "especies": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "enum": [
+                      "CANINO",
+                      "FELINO",
+                      "EQUINO",
+                      "AVE",
+                      "ROEDOR",
+                      "REPTIL"
+                    ]
+                  }
+                }
+              },
+              "required": [
+                "id",
+                "numero",
+                "titulo",
+                "linhaTerapeutica",
+                "linhaExclusiva",
+                "formaFarmaceutica",
+                "indicacao",
+                "especies"
+              ]
+            }
+          },
+          "total": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": [
+          "formulacoes",
+          "total"
+        ]
+      },
+      "LinhasDoBularioDto": {
+        "type": "object",
+        "properties": {
+          "linhas": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "nome": {
+                  "type": "string"
+                },
+                "quantidade": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                }
+              },
+              "required": [
+                "nome",
+                "quantidade"
+              ]
+            }
+          }
+        },
+        "required": [
+          "linhas"
+        ]
+      },
+      "FormulacaoDoBularioDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "numero": {
+            "type": "string"
+          },
+          "titulo": {
+            "type": "string"
+          },
+          "linhaTerapeutica": {
+            "type": "string"
+          },
+          "linhaExclusiva": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "formaFarmaceutica": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "indicacao": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "especies": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "CANINO",
+                "FELINO",
+                "EQUINO",
+                "AVE",
+                "ROEDOR",
+                "REPTIL"
+              ]
+            }
+          },
+          "diferencial": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "composicao": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "modoDeUsar": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "observacoes": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "numero",
+          "titulo",
+          "linhaTerapeutica",
+          "linhaExclusiva",
+          "formaFarmaceutica",
+          "indicacao",
+          "especies",
+          "diferencial",
+          "composicao",
+          "modoDeUsar",
+          "observacoes"
         ]
       },
       "ListaDeInsumosDto": {

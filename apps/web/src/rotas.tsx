@@ -1,5 +1,6 @@
 import type { RouteObject } from 'react-router';
 import { Layout } from '@/Layout';
+import { Bulario } from '@/paginas/bulario/Bulario';
 import { Catalogo } from '@/paginas/catalogo/Catalogo';
 import { Clinicas } from '@/paginas/clinicas/Clinicas';
 import { FichaDaClinica } from '@/paginas/clinicas/FichaDaClinica';
@@ -69,6 +70,7 @@ export const rotas: RouteObject[] = [
           // Antes de `clinicas/:id`, pelo mesmo motivo de `receitas/nova`.
           { path: 'clinicas/nova', element: <NovaClinica /> },
           { path: 'clinicas/:id', element: <FichaDaClinica /> },
+          { path: 'bulario', element: <Bulario /> },
           { path: 'catalogo', element: <Catalogo /> },
           { path: 'equipe', element: <Equipe /> },
           { path: 'estado', element: <Estado /> },
