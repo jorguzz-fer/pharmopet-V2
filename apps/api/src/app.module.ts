@@ -4,6 +4,7 @@ import { APP_GUARD } from '@nestjs/core';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { CatalogoModule } from './catalogo/catalogo.module';
 import { ClinicasModule } from './clinicas/clinicas.module';
+import { DocumentoModule } from './documento/documento.module';
 import { HealthModule } from './health/health.module';
 import { IdentidadeModule } from './identidade/identidade.module';
 import { PapeisGuard } from './identidade/papeis.guard';
@@ -30,6 +31,7 @@ import { validarEnv } from './config/env';
     CatalogoModule,
     ClinicasModule,
     ReceituarioModule,
+    DocumentoModule,
     HealthModule,
   ],
   /**

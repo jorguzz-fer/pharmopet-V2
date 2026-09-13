@@ -236,6 +236,14 @@ export const receitaSchema = z.object({
   canceladaEm: z.iso.datetime().nullable(),
   motivoDoCancelamento: z.string().nullable(),
   observacoes: z.string().nullable(),
+  /**
+   * O segredo que abre a receita sem login. Nulo enquanto é rascunho.
+   *
+   * Vai só aqui, na receita inteira, e nunca na listagem: quem abre a ficha já
+   * podia ver esta receita, e uma listagem carregaria dezenas de links de uma
+   * vez para uma tela que não usa nenhum.
+   */
+  tokenPublico: z.string().nullable(),
   formulacoes: z.array(formulacaoSchema),
   valorTotalEmCentavos: z.int().nonnegative(),
   criadaEm: z.iso.datetime(),

@@ -153,6 +153,7 @@ export class ReceitaController {
       canceladaEm: receita.canceladaEm?.toISOString() ?? null,
       motivoDoCancelamento: receita.motivoDoCancelamento,
       observacoes: receita.observacoes,
+      tokenPublico: receita.tokenPublico,
       formulacoes,
       valorTotalEmCentavos: somar(formulacoes),
       criadaEm: receita.criadaEm.toISOString(),

@@ -11,6 +11,7 @@ import { Cartao } from '@/componentes/Cartao';
 import { Carregando, Falha } from '@/componentes/Estados';
 import { Selo, type TomDoSelo } from '@/componentes/Selo';
 import { useSessao } from '@/sessao/SessaoContexto';
+import { Entrega } from './Entrega';
 
 type ReceitaDto = components['schemas']['ReceitaDto'];
 
@@ -152,6 +153,10 @@ function Detalhe({ receita, aoMudar }: { receita: ReceitaDto; aoMudar: () => voi
           </span>
         </p>
       </Cartao>
+
+      {receita.tokenPublico !== null ? (
+        <Entrega receitaId={receita.id} tokenPublico={receita.tokenPublico} />
+      ) : null}
 
       <Acoes
         receita={receita}

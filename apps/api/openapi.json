@@ -1276,6 +1276,88 @@
         ]
       }
     },
+    "/api/v1/receituario/receitas/{id}/pdf": {
+      "get": {
+        "operationId": "DocumentoController_pdf",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "A receita emitida em PDF, para imprimir ou anexar",
+        "tags": [
+          "receituário"
+        ]
+      }
+    },
+    "/api/v1/publico/receitas/{token}": {
+      "get": {
+        "operationId": "PublicoController_consultar",
+        "parameters": [
+          {
+            "name": "token",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReceitaPublicaDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Link inválido, ou receita ainda não emitida."
+          }
+        },
+        "summary": "A receita que o tutor abre pelo link",
+        "tags": [
+          "público"
+        ]
+      }
+    },
+    "/api/v1/publico/receitas/{token}/pdf": {
+      "get": {
+        "operationId": "PublicoController_pdf",
+        "parameters": [
+          {
+            "name": "token",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "404": {
+            "description": "Link inválido, ou receita ainda não emitida."
+          }
+        },
+        "summary": "O PDF da receita, pelo mesmo link",
+        "tags": [
+          "público"
+        ]
+      }
+    },
     "/api/v1/health": {
       "get": {
         "operationId": "HealthController_verificar",
@@ -4396,6 +4478,16 @@
               }
             ]
           },
+          "tokenPublico": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "formulacoes": {
             "type": "array",
             "items": {
@@ -4597,6 +4689,7 @@
           "canceladaEm",
           "motivoDoCancelamento",
           "observacoes",
+          "tokenPublico",
           "formulacoes",
           "valorTotalEmCentavos",
           "criadaEm"
@@ -4713,6 +4806,176 @@
         },
         "required": [
           "motivo"
+        ]
+      },
+      "ReceitaPublicaDto": {
+        "type": "object",
+        "properties": {
+          "numero": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "situacao": {
+            "type": "string",
+            "enum": [
+              "rascunho",
+              "valida",
+              "vencida",
+              "cancelada"
+            ]
+          },
+          "emitidaEm": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+          },
+          "validaAte": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+          },
+          "prazoMotivo": {
+            "type": "string"
+          },
+          "motivoDoCancelamento": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "clinicaNome": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "veterinarioNome": {
+            "type": "string"
+          },
+          "crmv": {
+            "type": "string"
+          },
+          "tutorNome": {
+            "type": "string"
+          },
+          "tutorCpf": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "pacienteNome": {
+            "type": "string"
+          },
+          "pacienteEspecie": {
+            "type": "string"
+          },
+          "formulacoes": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "forma": {
+                  "type": "string"
+                },
+                "quantidade": {
+                  "type": "integer",
+                  "minimum": -9007199254740991,
+                  "maximum": 9007199254740991
+                },
+                "frequenciaHoras": {
+                  "type": "integer",
+                  "minimum": -9007199254740991,
+                  "maximum": 9007199254740991
+                },
+                "dias": {
+                  "type": "integer",
+                  "minimum": -9007199254740991,
+                  "maximum": 9007199254740991
+                },
+                "orientacao": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "valorEmCentavos": {
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "itens": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "descricao": {
+                        "type": "string"
+                      },
+                      "doseMg": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "descricao",
+                      "doseMg"
+                    ]
+                  }
+                }
+              },
+              "required": [
+                "forma",
+                "quantidade",
+                "frequenciaHoras",
+                "dias",
+                "orientacao",
+                "valorEmCentavos",
+                "itens"
+              ]
+            }
+          },
+          "valorTotalEmCentavos": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": [
+          "numero",
+          "situacao",
+          "emitidaEm",
+          "validaAte",
+          "prazoMotivo",
+          "motivoDoCancelamento",
+          "clinicaNome",
+          "veterinarioNome",
+          "crmv",
+          "tutorNome",
+          "tutorCpf",
+          "pacienteNome",
+          "pacienteEspecie",
+          "formulacoes",
+          "valorTotalEmCentavos"
         ]
       },
       "SaudeDto": {
