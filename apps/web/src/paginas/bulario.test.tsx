@@ -138,6 +138,55 @@ describe('bulário', () => {
   });
 
   /**
+   * Apareceu na conferência no navegador, e não aqui: as linhas vinham na mesma
+   * consulta da lista, e o `useConsulta` volta para "carregando" quando a chave
+   * muda. A cada tecla digitada o seletor ficava só com "Todas" — quem
+   * estivesse escolhendo uma linha perdia a opção no meio do clique.
+   *
+   * Duas versões deste teste não pegavam o defeito, porque o dublê respondia na
+   * hora e a janela do piscar durava menos de um milissegundo. O que o
+   * reproduz: contar as idas a `/bulario/linhas` e **segurar da segunda em
+   * diante**. Sem o defeito não existe segunda ida — as linhas têm chave fixa —,
+   * então nada fica pendurado e o seletor continua cheio. Com o defeito, a
+   * segunda ida trava e o seletor esvazia, que é o que se quer proibir.
+   */
+  it('não busca as linhas de novo a cada tecla, nem perde o seletor', async () => {
+    let idasAsLinhas = 0;
+
+    const fetchFalso = vi.fn<Fetch>(async (entrada) => {
+      const url = String(entrada instanceof Request ? entrada.url : entrada);
+
+      if (url.includes('/auth/eu')) return json(EU);
+      if (url.includes('/bulario/linhas')) {
+        idasAsLinhas += 1;
+        // A primeira responde e enche o seletor. Qualquer outra fica pendurada.
+        if (idasAsLinhas > 1) await new Promise<void>(() => {});
+
+        return json({ linhas: [{ nome: 'Dermatológica', quantidade: 87 }] });
+      }
+      return json({ formulacoes: [OTOLOGICA], total: 1 });
+    });
+    vi.stubGlobal('fetch', fetchFalso);
+
+    montar();
+    await screen.findByRole('option', { name: 'Dermatológica (87)' });
+
+    await userEvent.type(screen.getByLabelText('Buscar'), 'otite');
+    // `c[0]` é um `Request`, e `String(Request)` dá "[object Request]" — a URL
+    // sai de `.url`. Errar isto faz a espera nunca casar e o teste falhar por
+    // motivo errado, o que aconteceu aqui antes.
+    await vi.waitFor(() => {
+      const urls = fetchFalso.mock.calls.map((c) =>
+        c[0] instanceof Request ? c[0].url : String(c[0]),
+      );
+      expect(urls.some((u) => u.includes('busca=otite'))).toBe(true);
+    });
+
+    expect(idasAsLinhas).toBe(1);
+    expect(screen.getByRole('option', { name: 'Dermatológica (87)' })).toBeInTheDocument();
+  });
+
+  /**
    * O servidor devolve no máximo cinquenta. Dizer "50 formulações" quando são
    * 87 seria número errado numa tela cuja função é dizer o que existe.
    */

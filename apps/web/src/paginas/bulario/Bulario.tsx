@@ -40,8 +40,8 @@ export function Bulario() {
   const buscaAtrasada = useAtrasado(busca);
 
   const carregar = useCallback(
-    async () => ({
-      lista: await exigir(
+    () =>
+      exigir(
         api.GET('/api/v1/bulario', {
           params: {
             query: {
@@ -52,8 +52,6 @@ export function Bulario() {
           },
         }),
       ),
-      linhas: (await exigir(api.GET('/api/v1/bulario/linhas'))).linhas,
-    }),
     [buscaAtrasada, linha, especie],
   );
 
@@ -61,6 +59,23 @@ export function Bulario() {
     `bulario:${buscaAtrasada}:${linha}:${especie}`,
     carregar,
   );
+
+  /**
+   * As linhas terapêuticas vêm numa consulta própria, de chave fixa.
+   *
+   * Na mesma consulta da lista, elas sumiam a cada tecla digitada: o
+   * `useConsulta` volta para "carregando" quando a chave muda, e o seletor
+   * ficava só com "Todas" enquanto a lista recarregava. O filtro piscava, e
+   * quem estivesse escolhendo uma linha perdia a opção no meio do clique —
+   * apareceu na conferência no navegador, não nos testes.
+   *
+   * E elas não dependem de filtro nenhum: são as dezenove linhas do bulário
+   * com a contagem de cada uma. Rebuscá-las a cada tecla era trabalho jogado
+   * fora, além do piscar.
+   */
+  const carregarLinhas = useCallback(() => exigir(api.GET('/api/v1/bulario/linhas')), []);
+  const { estado: estadoDasLinhas } = useConsulta('bulario:linhas', carregarLinhas);
+  const linhasDisponiveis = estadoDasLinhas.situacao === 'ok' ? estadoDasLinhas.dado.linhas : [];
 
   return (
     <div className="flex flex-col gap-6">
@@ -86,14 +101,10 @@ export function Bulario() {
           valor={linha}
           aoMudar={setLinha}
           vazio="Todas"
-          opcoes={
-            estado.situacao === 'ok'
-              ? estado.dado.linhas.map((l) => ({
-                  valor: l.nome,
-                  rotulo: `${l.nome} (${l.quantidade})`,
-                }))
-              : []
-          }
+          opcoes={linhasDisponiveis.map((l) => ({
+            valor: l.nome,
+            rotulo: `${l.nome} (${l.quantidade})`,
+          }))}
         />
         <Seletor
           rotulo="Espécie"
@@ -109,7 +120,7 @@ export function Bulario() {
       {estado.situacao === 'falha' ? <Falha motivo={estado.motivo} aoTentar={recarregar} /> : null}
 
       {estado.situacao === 'ok' ? (
-        estado.dado.lista.formulacoes.length === 0 ? (
+        estado.dado.formulacoes.length === 0 ? (
           <Vazio>
             {busca.trim() || linha || especie
               ? 'Nenhuma formulação com esses critérios. Tente um termo mais curto.'
@@ -118,18 +129,16 @@ export function Bulario() {
         ) : (
           <>
             <p className="text-sm text-neutro-500">
-              {estado.dado.lista.total === 1
-                ? '1 formulação'
-                : `${estado.dado.lista.total} formulações`}
+              {estado.dado.total === 1 ? '1 formulação' : `${estado.dado.total} formulações`}
               {/* O teto é do servidor, e calar sobre ele faria a lista parecer
                   completa quando não está. */}
-              {estado.dado.lista.total > estado.dado.lista.formulacoes.length
-                ? ` — mostrando as ${estado.dado.lista.formulacoes.length} primeiras`
+              {estado.dado.total > estado.dado.formulacoes.length
+                ? ` — mostrando as ${estado.dado.formulacoes.length} primeiras`
                 : ''}
             </p>
 
             <ul className="flex flex-col gap-2">
-              {estado.dado.lista.formulacoes.map((f) => (
+              {estado.dado.formulacoes.map((f) => (
                 <li key={f.id}>
                   {aberta === f.id ? (
                     <Formulacao id={f.id} aoFechar={() => setAberta(null)} />
