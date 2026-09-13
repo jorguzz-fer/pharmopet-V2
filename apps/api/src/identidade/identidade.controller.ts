@@ -3,6 +3,7 @@ import {
   Controller,
   Get,
   HttpCode,
+  NotFoundException,
   Param,
   Patch,
   Post,
@@ -31,9 +32,12 @@ import {
   EuDto,
   FiltroDeUsuariosDto,
   ListaDeUsuariosDto,
+  PedirRedefinicaoDto,
+  RedefinirSenhaDto,
   TrocarSenhaDto,
 } from './identidade.dto';
 import { IdentidadeService } from './identidade.service';
+import { RedefinicaoService } from './redefinicao.service';
 import { COOKIE_CSRF, COOKIE_SESSAO, origemDa } from './requisicao';
 import type { UsuarioAutenticado } from './sessao.service';
 
@@ -42,6 +46,7 @@ import type { UsuarioAutenticado } from './sessao.service';
 export class IdentidadeController {
   constructor(
     private readonly identidade: IdentidadeService,
+    private readonly redefinicao: RedefinicaoService,
     private readonly config: ConfigService<Env, true>,
   ) {}
 
@@ -214,6 +219,77 @@ export class IdentidadeController {
       papel: alterado.papel,
       crmv: alterado.crmv,
     };
+  }
+
+  /**
+   * "Esqueci a senha": manda o link, ou finge que mandou.
+   *
+   * Responde 204 tanto para quem tem conta quanto para quem não tem, e o
+   * corpo é o mesmo. Distinguir entregaria a lista de quem está cadastrado —
+   * e aqui o e-mail do veterinário é o identificador, então seria vazar a
+   * carteira de clientes da farmácia. É a mesma regra do login.
+   *
+   * Limite apertado, e por IP: esta rota é pública e dispara e-mail. Sem
+   * teto, ela vira uma máquina de mandar mensagem em nome do domínio da
+   * farmácia para qualquer endereço que alguém digite.
+   */
+  @Publica()
+  @Throttle({ default: { limit: 5, ttl: 60_000 } })
+  @Post('senha/esqueci')
+  @HttpCode(204)
+  @ApiOperation({ summary: 'Pede o link de redefinição de senha' })
+  @ApiNoContentResponse({ description: 'Pedido recebido. A resposta não diz se a conta existe.' })
+  async pedirRedefinicao(
+    @Body() corpo: PedirRedefinicaoDto,
+    @Req() requisicao: Request,
+  ): Promise<void> {
+    await this.redefinicao.pedir(corpo.email, origemDa(requisicao));
+  }
+
+  /**
+   * Se o link ainda abre a tela.
+   *
+   * Serve para não pedir uma senha nova a quem veio por um link vencido e só
+   * descobriria isso depois de digitar duas vezes. Não diz de quem é o token.
+   */
+  @Publica()
+  @Throttle({ default: { limit: 20, ttl: 60_000 } })
+  @Get('senha/redefinir/:token')
+  @HttpCode(204)
+  @ApiOperation({ summary: 'Confere se o link de redefinição ainda vale' })
+  @ApiNoContentResponse({ description: 'O link vale.' })
+  async conferirToken(@Param('token') token: string): Promise<void> {
+    if (!(await this.redefinicao.vale(token))) {
+      throw new NotFoundException('Este link expirou ou já foi usado. Peça outro.');
+    }
+  }
+
+  /**
+   * Troca a senha pelo link, e derruba todas as sessões.
+   *
+   * Derrubar é o ponto: quem redefine costuma estar redefinindo porque
+   * desconfia que alguém mais entrou. Trocar a fechadura e deixar a sessão do
+   * outro de pé não resolveria nada.
+   */
+  @Publica()
+  @Throttle({ default: { limit: 10, ttl: 60_000 } })
+  @Post('senha/redefinir')
+  @HttpCode(204)
+  @ApiOperation({ summary: 'Redefine a senha usando o link do e-mail' })
+  @ApiNoContentResponse({ description: 'Senha trocada; é preciso entrar de novo.' })
+  async redefinirSenha(
+    @Body() corpo: RedefinirSenhaDto,
+    @Req() requisicao: Request,
+  ): Promise<void> {
+    const trocou = await this.redefinicao.redefinir(
+      corpo.token,
+      corpo.senhaNova,
+      origemDa(requisicao),
+    );
+
+    if (!trocou) {
+      throw new NotFoundException('Este link expirou ou já foi usado. Peça outro.');
+    }
   }
 
   /**

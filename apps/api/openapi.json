@@ -220,6 +220,80 @@
         ]
       }
     },
+    "/api/v1/auth/senha/esqueci": {
+      "post": {
+        "operationId": "IdentidadeController_pedirRedefinicao",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PedirRedefinicaoDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Pedido recebido. A resposta não diz se a conta existe."
+          }
+        },
+        "summary": "Pede o link de redefinição de senha",
+        "tags": [
+          "identidade"
+        ]
+      }
+    },
+    "/api/v1/auth/senha/redefinir/{token}": {
+      "get": {
+        "operationId": "IdentidadeController_conferirToken",
+        "parameters": [
+          {
+            "name": "token",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "O link vale."
+          }
+        },
+        "summary": "Confere se o link de redefinição ainda vale",
+        "tags": [
+          "identidade"
+        ]
+      }
+    },
+    "/api/v1/auth/senha/redefinir": {
+      "post": {
+        "operationId": "IdentidadeController_redefinirSenha",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RedefinirSenhaDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Senha trocada; é preciso entrar de novo."
+          }
+        },
+        "summary": "Redefine a senha usando o link do e-mail",
+        "tags": [
+          "identidade"
+        ]
+      }
+    },
     "/api/v1/bulario": {
       "get": {
         "operationId": "BularioController_listar",
@@ -1877,9 +1951,7 @@
         "type": "object",
         "properties": {
           "email": {
-            "type": "string",
-            "format": "email",
-            "pattern": "^(?:[A-Za-z0-9_'+\\-]+\\.)*[A-Za-z0-9_'+\\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
+            "type": "string"
           },
           "senha": {
             "type": "string",
@@ -2022,9 +2094,7 @@
         "type": "object",
         "properties": {
           "email": {
-            "type": "string",
-            "format": "email",
-            "pattern": "^(?:[A-Za-z0-9_'+\\-]+\\.)*[A-Za-z0-9_'+\\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
+            "type": "string"
           },
           "nome": {
             "type": "string",
@@ -2096,6 +2166,35 @@
             "type": "boolean"
           }
         }
+      },
+      "PedirRedefinicaoDto": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "email"
+        ]
+      },
+      "RedefinirSenhaDto": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string",
+            "minLength": 1
+          },
+          "senhaNova": {
+            "type": "string",
+            "minLength": 12,
+            "maxLength": 200
+          }
+        },
+        "required": [
+          "token",
+          "senhaNova"
+        ]
       },
       "ListaDoBularioDto": {
         "type": "object",

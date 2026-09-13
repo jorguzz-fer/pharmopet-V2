@@ -10,6 +10,8 @@ import { Estado } from '@/paginas/estado/Estado';
 import { Login } from '@/paginas/login/Login';
 import { NaoEncontrada } from '@/paginas/NaoEncontrada';
 import { ReceitaPublica } from '@/paginas/publico/ReceitaPublica';
+import { EsqueciSenha } from '@/paginas/senha/EsqueciSenha';
+import { RedefinirSenha } from '@/paginas/senha/RedefinirSenha';
 import { Pedidos } from '@/paginas/pedidos/Pedidos';
 import { NovaReceita } from '@/paginas/receitas/NovaReceita';
 import { Receita } from '@/paginas/receitas/Receita';
@@ -37,6 +39,11 @@ import { ExigeSessao } from '@/sessao/ExigeSessao';
  */
 export const rotas: RouteObject[] = [
   { path: '/entrar', element: <Login /> },
+  // Anônimas pelo mesmo motivo da entrada: quem chega aqui é justamente quem
+  // não consegue abrir sessão. O que autoriza a troca é o token do e-mail,
+  // conferido pela API.
+  { path: '/esqueci-senha', element: <EsqueciSenha /> },
+  { path: '/redefinir-senha', element: <RedefinirSenha /> },
   // Fora do `ExigeSessao` de propósito, e a única assim: é o link que o tutor
   // abre, e ele não tem nem vai ter login (ADR 0013). Quem autoriza é o token
   // da URL, conferido pela API. O caminho é curto porque vai inteiro numa

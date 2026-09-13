@@ -107,6 +107,57 @@ export interface paths {
         patch: operations["IdentidadeController_alterarUsuario"];
         trace?: never;
     };
+    "/api/v1/auth/senha/esqueci": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Pede o link de redefinição de senha */
+        post: operations["IdentidadeController_pedirRedefinicao"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/senha/redefinir/{token}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Confere se o link de redefinição ainda vale */
+        get: operations["IdentidadeController_conferirToken"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/senha/redefinir": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Redefine a senha usando o link do e-mail */
+        post: operations["IdentidadeController_redefinirSenha"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/bulario": {
         parameters: {
             query?: never;
@@ -706,7 +757,6 @@ export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
         EntrarDto: {
-            /** Format: email */
             email: string;
             senha: string;
         };
@@ -741,7 +791,6 @@ export interface components {
             }[];
         };
         CriarUsuarioDto: {
-            /** Format: email */
             email: string;
             nome: string;
             /** @enum {string} */
@@ -755,6 +804,13 @@ export interface components {
             papel?: "ADMIN" | "VETERINARIO" | "FARMACIA" | "CLINICA";
             crmv?: string | null;
             desativado?: boolean;
+        };
+        PedirRedefinicaoDto: {
+            email: string;
+        };
+        RedefinirSenhaDto: {
+            token: string;
+            senhaNova: string;
         };
         ListaDoBularioDto: {
             formulacoes: {
@@ -1657,6 +1713,70 @@ export interface operations {
             };
             /** @description Só administrador altera usuário. */
             403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    IdentidadeController_pedirRedefinicao: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PedirRedefinicaoDto"];
+            };
+        };
+        responses: {
+            /** @description Pedido recebido. A resposta não diz se a conta existe. */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    IdentidadeController_conferirToken: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                token: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description O link vale. */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    IdentidadeController_redefinirSenha: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RedefinirSenhaDto"];
+            };
+        };
+        responses: {
+            /** @description Senha trocada; é preciso entrar de novo. */
+            204: {
                 headers: {
                     [name: string]: unknown;
                 };

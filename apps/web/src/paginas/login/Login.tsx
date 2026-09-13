@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react';
-import { Navigate, useLocation } from 'react-router';
+import { Link, Navigate, useLocation } from 'react-router';
 import { ErroDeApi } from '@pharmopet/api-client';
 import { Botao } from '@/componentes/Botao';
 import { Campo } from '@/componentes/Campo';
@@ -115,9 +115,10 @@ export function Login() {
             </Botao>
           </form>
 
-          <p className="mt-6 text-xs text-neutro-500">
-            Esqueceu a senha? Fale com a administração — por segurança, a redefinição não é
-            automática.
+          <p className="mt-6 text-sm">
+            <Link to="/esqueci-senha" className="font-semibold text-turquesa-700 underline">
+              Esqueci minha senha
+            </Link>
           </p>
         </div>
       </div>
