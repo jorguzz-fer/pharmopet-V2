@@ -3,6 +3,7 @@ import { Navigate, useLocation } from 'react-router';
 import { ErroDeApi } from '@pharmopet/api-client';
 import { Botao } from '@/componentes/Botao';
 import { Campo } from '@/componentes/Campo';
+import { CampoDeSenha } from '@/componentes/CampoDeSenha';
 import { Marca } from '@/componentes/Marca';
 import { useSessao } from '@/sessao/SessaoContexto';
 
@@ -89,9 +90,8 @@ export function Login() {
               onChange={(e) => setEmail(e.target.value)}
             />
 
-            <Campo
+            <CampoDeSenha
               rotulo="Senha"
-              type="password"
               name="senha"
               autoComplete="current-password"
               required
