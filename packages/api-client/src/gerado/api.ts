@@ -107,6 +107,57 @@ export interface paths {
         patch: operations["IdentidadeController_alterarUsuario"];
         trace?: never;
     };
+    "/api/v1/bulario": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Busca formulações por doença, ativo ou nome */
+        get: operations["BularioController_listar"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/bulario/linhas": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** As linhas terapêuticas, com quantas formulações cada uma tem */
+        get: operations["BularioController_linhas"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/bulario/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Uma formulação inteira, como o guia a escreve */
+        get: operations["BularioController_achar"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/catalogo/insumos": {
         parameters: {
             query?: never;
@@ -704,6 +755,41 @@ export interface components {
             papel?: "ADMIN" | "VETERINARIO" | "FARMACIA" | "CLINICA";
             crmv?: string | null;
             desativado?: boolean;
+        };
+        ListaDoBularioDto: {
+            formulacoes: {
+                /** Format: uuid */
+                id: string;
+                numero: string;
+                titulo: string;
+                linhaTerapeutica: string;
+                linhaExclusiva: string | null;
+                formaFarmaceutica: string | null;
+                indicacao: string | null;
+                especies: ("CANINO" | "FELINO" | "EQUINO" | "AVE" | "ROEDOR" | "REPTIL")[];
+            }[];
+            total: number;
+        };
+        LinhasDoBularioDto: {
+            linhas: {
+                nome: string;
+                quantidade: number;
+            }[];
+        };
+        FormulacaoDoBularioDto: {
+            /** Format: uuid */
+            id: string;
+            numero: string;
+            titulo: string;
+            linhaTerapeutica: string;
+            linhaExclusiva: string | null;
+            formaFarmaceutica: string | null;
+            indicacao: string | null;
+            especies: ("CANINO" | "FELINO" | "EQUINO" | "AVE" | "ROEDOR" | "REPTIL")[];
+            diferencial: string | null;
+            composicao: string | null;
+            modoDeUsar: string | null;
+            observacoes: string | null;
         };
         ListaDeInsumosDto: {
             insumos: {
@@ -1575,6 +1661,69 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    BularioController_listar: {
+        parameters: {
+            query?: {
+                busca?: string;
+                linhaTerapeutica?: string;
+                especie?: "CANINO" | "FELINO" | "EQUINO" | "AVE" | "ROEDOR" | "REPTIL";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ListaDoBularioDto"];
+                };
+            };
+        };
+    };
+    BularioController_linhas: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LinhasDoBularioDto"];
+                };
+            };
+        };
+    };
+    BularioController_achar: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FormulacaoDoBularioDto"];
+                };
             };
         };
     };

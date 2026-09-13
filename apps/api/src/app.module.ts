@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
+import { BularioModule } from './bulario/bulario.module';
 import { CatalogoModule } from './catalogo/catalogo.module';
 import { ClinicasModule } from './clinicas/clinicas.module';
 import { DocumentoModule } from './documento/documento.module';
@@ -29,6 +30,7 @@ import { validarEnv } from './config/env';
     ThrottlerModule.forRoot([{ name: 'default', ttl: 60_000, limit: 120 }]),
     PrismaModule,
     IdentidadeModule,
+    BularioModule,
     CatalogoModule,
     ClinicasModule,
     ReceituarioModule,
