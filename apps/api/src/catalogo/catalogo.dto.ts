@@ -27,6 +27,11 @@ export const itemDaFormulaSchema = z.object({
 
 export const precificarSchema = z.object({
   formaId: z.uuid(),
+  /**
+   * De quem é o acordo comercial. Sem ela, valem as condições da casa — a
+   * ADR 0012 explica por que o preço tem dono.
+   */
+  clinicaId: z.uuid().nullable().optional(),
   itens: z.array(itemDaFormulaSchema).min(1, 'A fórmula precisa de pelo menos um insumo.').max(20),
   /** Informado, a resposta confere cada dose contra a faixa terapêutica. */
   paciente: z

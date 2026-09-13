@@ -79,7 +79,8 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get?: never;
+        /** Lista os usuários */
+        get: operations["IdentidadeController_listarUsuarios"];
         put?: never;
         /** Cria um usuário */
         post: operations["IdentidadeController_criarUsuario"];
@@ -223,6 +224,95 @@ export interface paths {
         put?: never;
         post?: never;
         delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/clinicas": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Clínicas visíveis para quem perguntou */
+        get: operations["ClinicasController_listar"];
+        put?: never;
+        /** Cadastra uma clínica parceira */
+        post: operations["ClinicasController_criar"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/clinicas/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Cadastro da clínica */
+        get: operations["ClinicasController_achar"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Altera o cadastro, inclusive a situação */
+        patch: operations["ClinicasController_alterar"];
+        trace?: never;
+    };
+    "/api/v1/clinicas/{id}/logotipo": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Baixa o logotipo da clínica */
+        get: operations["ClinicasController_baixarLogotipo"];
+        /** Grava o logotipo impresso no cabeçalho da receita */
+        put: operations["ClinicasController_enviarLogotipo"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/clinicas/{id}/usuarios": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Quem atende ou opera nesta clínica */
+        get: operations["ClinicasController_listarVinculos"];
+        put?: never;
+        /** Vincula alguém à clínica */
+        post: operations["ClinicasController_vincular"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/clinicas/{id}/usuarios/{usuarioId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Encerra o vínculo */
+        delete: operations["ClinicasController_desvincular"];
         options?: never;
         head?: never;
         patch?: never;
@@ -403,19 +493,34 @@ export interface components {
             /** Format: email */
             email: string;
             /** @enum {string} */
-            papel: "ADMIN" | "VETERINARIO" | "FARMACIA";
+            papel: "ADMIN" | "VETERINARIO" | "FARMACIA" | "CLINICA";
             crmv: string | null;
         };
         TrocarSenhaDto: {
             senhaAtual: string;
             senhaNova: string;
         };
+        ListaDeUsuariosDto: {
+            usuarios: {
+                /** Format: uuid */
+                id: string;
+                nome: string;
+                /** Format: email */
+                email: string;
+                /** @enum {string} */
+                papel: "ADMIN" | "VETERINARIO" | "FARMACIA" | "CLINICA";
+                crmv: string | null;
+                bloqueado: boolean;
+                /** Format: date-time */
+                criadoEm: string;
+            }[];
+        };
         CriarUsuarioDto: {
             /** Format: email */
             email: string;
             nome: string;
             /** @enum {string} */
-            papel: "ADMIN" | "VETERINARIO" | "FARMACIA";
+            papel: "ADMIN" | "VETERINARIO" | "FARMACIA" | "CLINICA";
             senha: string;
             crmv?: string | null;
         };
@@ -447,6 +552,7 @@ export interface components {
         PrecificarDto: {
             /** Format: uuid */
             formaId: string;
+            clinicaId?: string | null;
             itens: {
                 /** Format: uuid */
                 insumoId: string;
@@ -581,6 +687,126 @@ export interface components {
             adicionalDeEntregaEmCentavos: number;
             adicionalDeBiscoitoEmCentavos: number;
         };
+        ListaDeClinicasDto: {
+            clinicas: {
+                /** Format: uuid */
+                id: string;
+                razaoSocial: string;
+                nomeFantasia: string;
+                cnpj: string;
+                inscricaoEstadual: string | null;
+                email: string;
+                telefone: string | null;
+                whatsapp: string | null;
+                cep: string | null;
+                logradouro: string | null;
+                numero: string | null;
+                complemento: string | null;
+                bairro: string | null;
+                cidade: string | null;
+                uf: string | null;
+                responsavelLegal: string;
+                cpfDoResponsavel: string | null;
+                /** @enum {string} */
+                situacao: "PENDENTE" | "ATIVA" | "SUSPENSA";
+                observacoesInternas: string | null;
+                temLogotipo: boolean;
+                /** Format: date-time */
+                atualizadaEm: string;
+                quantidadeDeUsuarios: number;
+            }[];
+        };
+        ClinicaDto: {
+            /** Format: uuid */
+            id: string;
+            razaoSocial: string;
+            nomeFantasia: string;
+            cnpj: string;
+            inscricaoEstadual: string | null;
+            email: string;
+            telefone: string | null;
+            whatsapp: string | null;
+            cep: string | null;
+            logradouro: string | null;
+            numero: string | null;
+            complemento: string | null;
+            bairro: string | null;
+            cidade: string | null;
+            uf: string | null;
+            responsavelLegal: string;
+            cpfDoResponsavel: string | null;
+            /** @enum {string} */
+            situacao: "PENDENTE" | "ATIVA" | "SUSPENSA";
+            observacoesInternas: string | null;
+            temLogotipo: boolean;
+            /** Format: date-time */
+            atualizadaEm: string;
+            quantidadeDeUsuarios: number;
+        };
+        CriarClinicaDto: {
+            razaoSocial: string;
+            nomeFantasia: string;
+            cnpj: string;
+            inscricaoEstadual?: string | null;
+            /** Format: email */
+            email: string;
+            telefone?: string | null;
+            whatsapp?: string | null;
+            cep?: string | null;
+            logradouro?: string | null;
+            numero?: string | null;
+            complemento?: string | null;
+            bairro?: string | null;
+            cidade?: string | null;
+            uf?: string | null;
+            responsavelLegal: string;
+            cpfDoResponsavel?: string | null;
+            observacoesInternas?: string | null;
+        };
+        AlterarClinicaDto: {
+            razaoSocial?: string;
+            nomeFantasia?: string;
+            cnpj?: string;
+            inscricaoEstadual?: string | null;
+            /** Format: email */
+            email?: string;
+            telefone?: string | null;
+            whatsapp?: string | null;
+            cep?: string | null;
+            logradouro?: string | null;
+            numero?: string | null;
+            complemento?: string | null;
+            bairro?: string | null;
+            cidade?: string | null;
+            uf?: string | null;
+            responsavelLegal?: string;
+            cpfDoResponsavel?: string | null;
+            observacoesInternas?: string | null;
+            /** @enum {string} */
+            situacao?: "PENDENTE" | "ATIVA" | "SUSPENSA";
+        };
+        EnviarLogotipoDto: {
+            /** @enum {string} */
+            tipo: "image/png" | "image/jpeg" | "image/webp" | "image/svg+xml";
+            conteudoBase64: string;
+        };
+        ListaDeVinculosDto: {
+            vinculos: {
+                /** Format: uuid */
+                usuarioId: string;
+                nome: string;
+                email: string;
+                /** @enum {string} */
+                papel: "ADMIN" | "VETERINARIO" | "FARMACIA" | "CLINICA";
+                crmv: string | null;
+                cargo: string | null;
+            }[];
+        };
+        VincularDto: {
+            /** Format: uuid */
+            usuarioId: string;
+            cargo?: string | null;
+        };
         CriarTutorDto: {
             nome: string;
             cpf?: string | null;
@@ -710,6 +936,7 @@ export interface components {
         SalvarReceitaDto: {
             /** Format: uuid */
             pacienteId: string;
+            clinicaId?: string | null;
             observacoes?: string | null;
             formulacoes: {
                 /** Format: uuid */
@@ -741,6 +968,9 @@ export interface components {
             pacienteId: string;
             pacienteNome: string;
             tutorNome: string;
+            clinicaId: string | null;
+            clinicaNome: string | null;
+            clinicaCnpj: string | null;
             pesoDoPacienteEmGramas: number | null;
             emitidaEm: string | null;
             validaAte: string | null;
@@ -911,6 +1141,35 @@ export interface operations {
             };
             /** @description Senha atual incorreta. */
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    IdentidadeController_listarUsuarios: {
+        parameters: {
+            query?: {
+                papel?: "ADMIN" | "VETERINARIO" | "FARMACIA" | "CLINICA";
+                busca?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ListaDeUsuariosDto"];
+                };
+            };
+            /** @description Só administrador lista usuários. */
+            403: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -1191,6 +1450,215 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["FaixaDto"][];
                 };
+            };
+        };
+    };
+    ClinicasController_listar: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ListaDeClinicasDto"];
+                };
+            };
+        };
+    };
+    ClinicasController_criar: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CriarClinicaDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ClinicaDto"];
+                };
+            };
+        };
+    };
+    ClinicasController_achar: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ClinicaDto"];
+                };
+            };
+            /** @description Não existe, ou não é visível para quem perguntou. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ClinicasController_alterar: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AlterarClinicaDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ClinicaDto"];
+                };
+            };
+        };
+    };
+    ClinicasController_baixarLogotipo: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description O arquivo do logotipo. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description A clínica não tem logotipo. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ClinicasController_enviarLogotipo: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EnviarLogotipoDto"];
+            };
+        };
+        responses: {
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ClinicasController_listarVinculos: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ListaDeVinculosDto"];
+                };
+            };
+        };
+    };
+    ClinicasController_vincular: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["VincularDto"];
+            };
+        };
+        responses: {
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ClinicasController_desvincular: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+                usuarioId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };

@@ -73,29 +73,45 @@ export class CatalogoService {
   }
 
   /**
-   * As condições comerciais da instalação.
+   * As condições comerciais que valem para uma clínica.
    *
-   * Cria a linha zerada na primeira leitura: sem isso, uma instalação nova
-   * responderia 404 ao precificar, e o erro apareceria como "sem orçamento" em
-   * vez de "ninguém configurou ainda".
+   * A da clínica prevalece; sem ela, vale a da casa. É a ADR 0012 em uma
+   * linha: o acordo tem dono, e quem não tem acordo cai no padrão.
+   *
+   * A linha padrão nasce zerada na primeira leitura. Sem isso, uma instalação
+   * nova responderia 404 ao precificar, e o erro chegaria como "sem orçamento"
+   * em vez de "ninguém configurou ainda".
    */
-  async condicoes(): Promise<CondicoesComerciais> {
+  async condicoes(clinicaId?: string | null): Promise<CondicoesComerciais> {
+    if (clinicaId) {
+      const daClinica = await this.prisma.condicoesComerciais.findUnique({ where: { clinicaId } });
+      if (daClinica) return extrair(daClinica);
+    }
+
     const linha = await this.prisma.condicoesComerciais.upsert({
       where: { id: 'padrao' },
       update: {},
       create: { id: 'padrao' },
     });
 
-    return {
-      taxaDeManipulacaoEmCentavos: linha.taxaDeManipulacaoEmCentavos,
-      custoDeEmbalagensEmCentavos: linha.custoDeEmbalagensEmCentavos,
-      descontoEmPontosBase: linha.descontoEmPontosBase,
-      adicionalDeEntregaEmCentavos: linha.adicionalDeEntregaEmCentavos,
-      adicionalDeBiscoitoEmCentavos: linha.adicionalDeBiscoitoEmCentavos,
-    };
+    return extrair(linha);
   }
 
-  async definirCondicoes(novas: CondicoesComerciais): Promise<CondicoesComerciais> {
+  /** Grava as condições da casa, ou as de uma clínica quando informada. */
+  async definirCondicoes(
+    novas: CondicoesComerciais,
+    clinicaId?: string | null,
+  ): Promise<CondicoesComerciais> {
+    if (clinicaId) {
+      await this.prisma.condicoesComerciais.upsert({
+        where: { clinicaId },
+        update: novas,
+        create: { clinicaId, ...novas },
+      });
+
+      return novas;
+    }
+
     await this.prisma.condicoesComerciais.upsert({
       where: { id: 'padrao' },
       update: novas,
@@ -116,6 +132,7 @@ export class CatalogoService {
     itensPedidos: readonly ItemPedido[],
     formaId: string,
     paciente?: PacientePedido,
+    clinicaId?: string | null,
   ): Promise<OrcamentoCompleto> {
     const forma = await this.prisma.formaFarmaceutica.findUnique({ where: { id: formaId } });
     if (!forma || forma.desativadaEm !== null) {
@@ -155,7 +172,11 @@ export class CatalogoService {
       });
     }
 
-    const calculo = precificar({ itens, forma: forma.nome, condicoes: await this.condicoes() });
+    const calculo = precificar({
+      itens,
+      forma: forma.nome,
+      condicoes: await this.condicoes(clinicaId),
+    });
 
     // O motor identifica o insumo pelo código da farmácia, que é o que a equipe
     // usa; a tela precisa do id para apontar a linha. A tradução é aqui.
@@ -198,6 +219,23 @@ export class CatalogoService {
       idPorCodigo,
     };
   }
+}
+
+/** Só os campos que o motor conhece — a linha do banco tem mais do que ele usa. */
+function extrair(linha: {
+  taxaDeManipulacaoEmCentavos: number;
+  custoDeEmbalagensEmCentavos: number;
+  descontoEmPontosBase: number;
+  adicionalDeEntregaEmCentavos: number;
+  adicionalDeBiscoitoEmCentavos: number;
+}): CondicoesComerciais {
+  return {
+    taxaDeManipulacaoEmCentavos: linha.taxaDeManipulacaoEmCentavos,
+    custoDeEmbalagensEmCentavos: linha.custoDeEmbalagensEmCentavos,
+    descontoEmPontosBase: linha.descontoEmPontosBase,
+    adicionalDeEntregaEmCentavos: linha.adicionalDeEntregaEmCentavos,
+    adicionalDeBiscoitoEmCentavos: linha.adicionalDeBiscoitoEmCentavos,
+  };
 }
 
 function paraCalculo(registro: InsumoComRestricoes): InsumoParaCalculo {

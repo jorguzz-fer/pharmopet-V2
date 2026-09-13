@@ -1,13 +1,16 @@
 import { NavLink, Outlet } from 'react-router';
-import type { components } from '@pharmopet/api-client';
 import { Marca } from '@/componentes/Marca';
+import type { Papel } from '@/sessao/papeis';
 import { QuemEsta } from '@/sessao/QuemEsta';
 import { useSessao } from '@/sessao/SessaoContexto';
 
-type Papel = components['schemas']['EuDto']['papel'];
-
 /**
  * As abas, e quem vê cada uma.
+ *
+ * São três áreas de produto sobre um login só (ADR 0012): quem prescreve,
+ * quem administra a clínica parceira e quem administra a Pharmopet. O que
+ * separa as três é o papel, não a URL — a V1 tinha três telas de login e três
+ * fluxos paralelos, e manter isso significaria manter três cópias de tudo.
  *
  * `papeis` esconde o que não serve àquele perfil — a farmácia não cadastra
  * tutor, então a aba só ocuparia espaço e levaria a um 403. Esconder é
@@ -16,7 +19,12 @@ type Papel = components['schemas']['EuDto']['papel'];
  */
 const abas: { para: string; rotulo: string; fim: boolean; papeis?: Papel[] }[] = [
   { para: '/', rotulo: 'Receitas', fim: true },
-  { para: '/tutores', rotulo: 'Tutores', fim: false, papeis: ['ADMIN', 'VETERINARIO'] },
+  // A clínica lê a clientela dela, mas não a cadastra: quem abre ficha é quem
+  // atende. `usePodeCadastrarFicha` é que esconde o botão de cadastro.
+  { para: '/tutores', rotulo: 'Tutores', fim: false, papeis: ['ADMIN', 'VETERINARIO', 'CLINICA'] },
+  // Fora do veterinário: ele vê a clínica pela receita, e uma aba que abre
+  // vazia para todo autônomo é aba morta.
+  { para: '/clinicas', rotulo: 'Clínicas', fim: false, papeis: ['ADMIN', 'CLINICA', 'FARMACIA'] },
   { para: '/sistema', rotulo: 'Design system', fim: false, papeis: ['ADMIN'] },
 ];
 

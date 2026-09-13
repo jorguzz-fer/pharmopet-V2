@@ -1,12 +1,7 @@
 import { useState } from 'react';
 import { Botao } from '@/componentes/Botao';
+import { rotuloDoPapel } from './papeis';
 import { useSessao } from './SessaoContexto';
-
-const rotuloDoPapel = {
-  ADMIN: 'Administração',
-  VETERINARIO: 'Veterinário',
-  FARMACIA: 'Farmácia',
-} as const;
 
 /** Iniciais para o disco. "Maria Silva" → "MS"; "Ana" → "A". */
 function iniciais(nome: string): string {

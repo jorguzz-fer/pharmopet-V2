@@ -150,6 +150,11 @@ export const formulacaoEntradaSchema = z.object({
 
 export const salvarReceitaSchema = z.object({
   pacienteId: z.uuid(),
+  /**
+   * A clínica que pediu a receita. Nula quando o veterinário atende por conta
+   * própria — aí o documento sai no nome da farmácia (ADR 0012).
+   */
+  clinicaId: z.uuid().nullable().optional(),
   observacoes: textoOpcional(2_000),
   formulacoes: z
     .array(formulacaoEntradaSchema)
@@ -218,6 +223,10 @@ export const receitaSchema = z.object({
   pacienteId: z.uuid(),
   pacienteNome: z.string(),
   tutorNome: z.string(),
+  clinicaId: z.uuid().nullable(),
+  /** Congelado na emissão. Nulo quando a receita saiu no nome da farmácia. */
+  clinicaNome: z.string().nullable(),
+  clinicaCnpj: z.string().nullable(),
   /** O peso contra o qual a dose foi conferida. Congelado na emissão. */
   pesoDoPacienteEmGramas: z.int().nullable(),
   emitidaEm: z.iso.datetime().nullable(),

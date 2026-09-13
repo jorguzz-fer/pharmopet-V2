@@ -14,9 +14,10 @@ import {
   venceEm,
 } from '@pharmopet/shared';
 import { CatalogoService, type AvisoDoOrcamento } from '../catalogo/catalogo.service';
+import { ClinicasService } from '../clinicas/clinicas.service';
 import { AuditoriaService } from '../identidade/auditoria.service';
 import { PrismaService } from '../prisma/prisma.service';
-import { escopoDeReceita, type Ator } from './escopo';
+import { escopoDeReceita, veTudo, type Ator } from './escopo';
 
 /** O que o controller manda; já validado pelo schema. */
 export type FormulacaoPedida = {
@@ -36,6 +37,7 @@ export type Prescritor = Ator & { crmv: string | null };
 
 export type ReceitaPedida = {
   pacienteId: string;
+  clinicaId?: string | null;
   observacoes?: string | null;
   formulacoes: FormulacaoPedida[];
 };
@@ -76,6 +78,7 @@ export type FormulacaoResolvida = {
 const COM_TUDO = {
   paciente: { include: { tutor: { select: { id: true, nome: true } } } },
   veterinario: { select: { id: true, nome: true, crmv: true } },
+  clinica: { select: { id: true, nomeFantasia: true, cnpj: true } },
   formulacoes: {
     orderBy: { ordem: 'asc' },
     include: {
@@ -106,15 +109,22 @@ export class ReceitaService {
     private readonly prisma: PrismaService,
     private readonly catalogo: CatalogoService,
     private readonly auditoria: AuditoriaService,
+    private readonly clinicas: ClinicasService,
   ) {}
+
+  private async clinicasDe(ator: Ator): Promise<string[]> {
+    return veTudo(ator) ? [] : this.clinicas.idsVisiveis(ator.id);
+  }
 
   async criar(pedido: ReceitaPedida, ator: Ator): Promise<ReceitaCompleta> {
     const paciente = await this.pacienteVisivel(pedido.pacienteId, ator);
+    await this.exigirVinculo(pedido.clinicaId ?? null, ator);
 
     const criada = await this.prisma.receita.create({
       data: {
         veterinarioId: ator.id,
         pacienteId: paciente.id,
+        clinicaId: pedido.clinicaId ?? null,
         observacoes: pedido.observacoes ?? null,
         formulacoes: { create: this.montarFormulacoes(pedido.formulacoes) },
       },
@@ -130,6 +140,7 @@ export class ReceitaService {
     this.exigirRascunhoDoAutor(atual, ator);
 
     await this.pacienteVisivel(pedido.pacienteId, ator);
+    await this.exigirVinculo(pedido.clinicaId ?? null, ator);
 
     return this.prisma.$transaction(async (tx) => {
       // Apaga e recria em vez de casar item a item: a fórmula é um bloco, e
@@ -141,6 +152,7 @@ export class ReceitaService {
         where: { id },
         data: {
           pacienteId: pedido.pacienteId,
+          clinicaId: pedido.clinicaId ?? null,
           observacoes: pedido.observacoes ?? null,
           formulacoes: { create: this.montarFormulacoes(pedido.formulacoes) },
         },
@@ -151,7 +163,7 @@ export class ReceitaService {
 
   async achar(id: string, ator: Ator): Promise<ReceitaCompleta> {
     const receita = await this.prisma.receita.findFirst({
-      where: { id, ...escopoDeReceita(ator) },
+      where: { id, ...escopoDeReceita(ator, await this.clinicasDe(ator)) },
       include: COM_TUDO,
     });
 
@@ -166,7 +178,7 @@ export class ReceitaService {
   ): Promise<ReceitaCompleta[]> {
     return this.prisma.receita.findMany({
       where: {
-        ...escopoDeReceita(ator),
+        ...escopoDeReceita(ator, await this.clinicasDe(ator)),
         ...(filtro.pacienteId ? { pacienteId: filtro.pacienteId } : {}),
         ...(filtro.estado ? { estado: filtro.estado } : {}),
       },
@@ -258,6 +270,10 @@ export class ReceitaService {
           prazoMotivo: prazo.motivo,
           crmvDoVeterinario: ator.crmv,
           pesoDoPacienteEmGramas: peso,
+          // O cabeçalho do documento não muda quando o cadastro da clínica
+          // mudar. O logotipo segue por relação: é marca, não identificação.
+          clinicaNome: receita.clinica?.nomeFantasia ?? null,
+          clinicaCnpj: receita.clinica?.cnpj ?? null,
         },
         include: COM_TUDO,
       });
@@ -375,6 +391,9 @@ export class ReceitaService {
         })),
         formulacao.formaId,
         peso === null ? undefined : { especie: receita.paciente.especie, pesoEmGramas: peso },
+        // O preço depende de quem pediu: a mesma fórmula sai por valores
+        // diferentes em clínicas com acordos diferentes (ADR 0012).
+        receita.clinicaId,
       );
 
       const avisos: AvisoDaReceita[] = [...orcamento.avisos];
@@ -454,6 +473,21 @@ export class ReceitaService {
         },
       };
     });
+  }
+
+  /**
+   * Recusa emitir por uma clínica a que a pessoa não está vinculada.
+   *
+   * Sem isto, informar o id de outra clínica faria a receita sair com o
+   * logotipo e o preço dela — e o preço é acordo comercial.
+   */
+  private async exigirVinculo(clinicaId: string | null, ator: Ator): Promise<void> {
+    if (clinicaId === null) return;
+
+    const visiveis = await this.clinicas.idsVisiveis(ator.id);
+    if (!visiveis.includes(clinicaId)) {
+      throw new NotFoundException('Clínica não encontrada.');
+    }
   }
 
   private async pacienteVisivel(id: string, ator: Ator) {

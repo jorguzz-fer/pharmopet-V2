@@ -149,6 +149,29 @@ export class IdentidadeService {
     });
   }
 
+  /** A equipe, em ordem de nome. Só o administrador chega aqui. */
+  async listarUsuarios(filtro: { papel?: Papel; busca?: string }): Promise<Usuario[]> {
+    const busca = filtro.busca?.trim();
+
+    return this.prisma.usuario.findMany({
+      where: {
+        ...(filtro.papel ? { papel: filtro.papel } : {}),
+        ...(busca
+          ? {
+              OR: [
+                { nome: { contains: busca, mode: 'insensitive' } },
+                { email: { contains: busca, mode: 'insensitive' } },
+              ],
+            }
+          : {}),
+      },
+      orderBy: { nome: 'asc' },
+      // Teto para a lista não virar varredura da base inteira numa instalação
+      // grande. Quem procura alguém específico usa a busca.
+      take: 200,
+    });
+  }
+
   /** Cria um usuário. Só o administrador chega aqui, e o comando de bootstrap. */
   async criarUsuario(
     dados: { email: string; nome: string; papel: Papel; senha: string; crmv?: string | null },

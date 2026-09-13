@@ -9,7 +9,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import type { EstadoDaReceita } from '@prisma/client';
-import { situacaoDaReceita } from '@pharmopet/shared';
+import { formatarCnpj, situacaoDaReceita } from '@pharmopet/shared';
 import { Eu, Papeis } from '../identidade/decoradores';
 import type { RequisicaoComUsuario } from '../identidade/requisicao';
 import type { UsuarioAutenticado } from '../identidade/sessao.service';
@@ -138,6 +138,13 @@ export class ReceitaController {
       pacienteId: receita.pacienteId,
       pacienteNome: receita.paciente.nome,
       tutorNome: receita.paciente.tutor.nome,
+      clinicaId: receita.clinicaId,
+      // Congelado quando existe; o cadastro atual enquanto é rascunho.
+      clinicaNome: receita.clinicaNome ?? receita.clinica?.nomeFantasia ?? null,
+      // Guardado sem máscara para o índice único casar; devolvido com, porque
+      // isto sai no cabeçalho de um documento que o tutor guarda — e catorze
+      // dígitos corridos não se leem como CNPJ.
+      clinicaCnpj: mascarar(receita.clinicaCnpj ?? receita.clinica?.cnpj ?? null),
       pesoDoPacienteEmGramas: receita.pesoDoPacienteEmGramas ?? receita.paciente.pesoEmGramas,
       emitidaEm: receita.emitidaEm?.toISOString() ?? null,
       validaAte: receita.validaAte?.toISOString() ?? null,
@@ -162,6 +169,11 @@ export class ReceitaController {
  */
 function somar(formulacoes: FormulacaoResolvida[]): number {
   return formulacoes.reduce((total, f) => total + (f.valorEmCentavos ?? 0), 0);
+}
+
+/** Sem clínica é ausência, não string vazia — e `formatarCnpj` só recebe dígitos. */
+function mascarar(cnpj: string | null): string | null {
+  return cnpj === null ? null : formatarCnpj(cnpj);
 }
 
 function contextoDe(requisicao: RequisicaoComUsuario): {

@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpCode, Post, Req, Res } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, Post, Query, Req, Res } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Throttle } from '@nestjs/throttler';
 import {
@@ -13,7 +13,14 @@ import {
 import type { CookieOptions, Request, Response } from 'express';
 import type { Env } from '../config/env';
 import { Eu, Papeis, Publica } from './decoradores';
-import { CriarUsuarioDto, EntrarDto, EuDto, TrocarSenhaDto } from './identidade.dto';
+import {
+  CriarUsuarioDto,
+  EntrarDto,
+  EuDto,
+  FiltroDeUsuariosDto,
+  ListaDeUsuariosDto,
+  TrocarSenhaDto,
+} from './identidade.dto';
 import { IdentidadeService } from './identidade.service';
 import { COOKIE_CSRF, COOKIE_SESSAO, origemDa } from './requisicao';
 import type { UsuarioAutenticado } from './sessao.service';
@@ -107,6 +114,37 @@ export class IdentidadeController {
     // se achando logada e levar 401 na próxima chamada.
     resposta.clearCookie(COOKIE_SESSAO, this.opcoesDoCookie(new Date(0), true));
     resposta.clearCookie(COOKIE_CSRF, this.opcoesDoCookie(new Date(0), false));
+  }
+
+  /**
+   * A equipe da Pharmopet e dos parceiros.
+   *
+   * Só administrador: é uma lista de e-mails de pessoas reais, e entregá-la a
+   * quem quer que esteja logado seria dar de graça o alvo de qualquer tentativa
+   * de adivinhar senha.
+   */
+  @Papeis('ADMIN')
+  @Get('usuarios')
+  @ApiOperation({ summary: 'Lista os usuários' })
+  @ApiOkResponse({ type: ListaDeUsuariosDto })
+  @ApiForbiddenResponse({ description: 'Só administrador lista usuários.' })
+  async listarUsuarios(@Query() filtro: FiltroDeUsuariosDto): Promise<ListaDeUsuariosDto> {
+    const usuarios = await this.identidade.listarUsuarios(filtro);
+    const agora = new Date();
+
+    return {
+      usuarios: usuarios.map((u) => ({
+        id: u.id,
+        nome: u.nome,
+        email: u.email,
+        papel: u.papel,
+        crmv: u.crmv,
+        // Bloqueio é sempre por prazo; um instante já vencido não bloqueia
+        // mais nada, e mostrar "bloqueado" nesse caso seria mentira.
+        bloqueado: u.bloqueadoAte !== null && u.bloqueadoAte > agora,
+        criadoEm: u.criadoEm.toISOString(),
+      })),
+    };
   }
 
   @Papeis('ADMIN')

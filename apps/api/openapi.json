@@ -95,6 +95,53 @@
       }
     },
     "/api/v1/auth/usuarios": {
+      "get": {
+        "operationId": "IdentidadeController_listarUsuarios",
+        "parameters": [
+          {
+            "name": "papel",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "ADMIN",
+                "VETERINARIO",
+                "FARMACIA",
+                "CLINICA"
+              ]
+            }
+          },
+          {
+            "name": "busca",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "maxLength": 160,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListaDeUsuariosDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Só administrador lista usuários."
+          }
+        },
+        "summary": "Lista os usuários",
+        "tags": [
+          "identidade"
+        ]
+      },
       "post": {
         "operationId": "IdentidadeController_criarUsuario",
         "parameters": [],
@@ -449,6 +496,285 @@
         "summary": "Faixas terapêuticas de um insumo",
         "tags": [
           "catálogo"
+        ]
+      }
+    },
+    "/api/v1/clinicas": {
+      "get": {
+        "operationId": "ClinicasController_listar",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListaDeClinicasDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Clínicas visíveis para quem perguntou",
+        "tags": [
+          "clínicas"
+        ]
+      },
+      "post": {
+        "operationId": "ClinicasController_criar",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CriarClinicaDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClinicaDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Cadastra uma clínica parceira",
+        "tags": [
+          "clínicas"
+        ]
+      }
+    },
+    "/api/v1/clinicas/{id}": {
+      "get": {
+        "operationId": "ClinicasController_achar",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClinicaDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Não existe, ou não é visível para quem perguntou."
+          }
+        },
+        "summary": "Cadastro da clínica",
+        "tags": [
+          "clínicas"
+        ]
+      },
+      "patch": {
+        "operationId": "ClinicasController_alterar",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AlterarClinicaDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClinicaDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Altera o cadastro, inclusive a situação",
+        "tags": [
+          "clínicas"
+        ]
+      }
+    },
+    "/api/v1/clinicas/{id}/logotipo": {
+      "put": {
+        "operationId": "ClinicasController_enviarLogotipo",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EnviarLogotipoDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "summary": "Grava o logotipo impresso no cabeçalho da receita",
+        "tags": [
+          "clínicas"
+        ]
+      },
+      "get": {
+        "operationId": "ClinicasController_baixarLogotipo",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "O arquivo do logotipo."
+          },
+          "404": {
+            "description": "A clínica não tem logotipo."
+          }
+        },
+        "summary": "Baixa o logotipo da clínica",
+        "tags": [
+          "clínicas"
+        ]
+      }
+    },
+    "/api/v1/clinicas/{id}/usuarios": {
+      "get": {
+        "operationId": "ClinicasController_listarVinculos",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListaDeVinculosDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Quem atende ou opera nesta clínica",
+        "tags": [
+          "clínicas"
+        ]
+      },
+      "post": {
+        "operationId": "ClinicasController_vincular",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VincularDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "summary": "Vincula alguém à clínica",
+        "tags": [
+          "clínicas"
+        ]
+      }
+    },
+    "/api/v1/clinicas/{id}/usuarios/{usuarioId}": {
+      "delete": {
+        "operationId": "ClinicasController_desvincular",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "usuarioId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "summary": "Encerra o vínculo",
+        "tags": [
+          "clínicas"
         ]
       }
     },
@@ -1022,7 +1348,8 @@
             "enum": [
               "ADMIN",
               "VETERINARIO",
-              "FARMACIA"
+              "FARMACIA",
+              "CLINICA"
             ]
           },
           "crmv": {
@@ -1062,6 +1389,67 @@
           "senhaNova"
         ]
       },
+      "ListaDeUsuariosDto": {
+        "type": "object",
+        "properties": {
+          "usuarios": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "format": "uuid",
+                  "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                },
+                "nome": {
+                  "type": "string"
+                },
+                "email": {
+                  "type": "string",
+                  "format": "email",
+                  "pattern": "^(?:[A-Za-z0-9_'+\\-]+\\.)*[A-Za-z0-9_'+\\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
+                },
+                "papel": {
+                  "type": "string",
+                  "enum": [
+                    "ADMIN",
+                    "VETERINARIO",
+                    "FARMACIA",
+                    "CLINICA"
+                  ]
+                },
+                "crmv": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "bloqueado": {
+                  "type": "boolean"
+                },
+                "criadoEm": {
+                  "type": "string",
+                  "format": "date-time",
+                  "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                }
+              },
+              "required": [
+                "id",
+                "nome",
+                "email",
+                "papel",
+                "crmv",
+                "bloqueado",
+                "criadoEm"
+              ]
+            }
+          }
+        },
+        "required": [
+          "usuarios"
+        ]
+      },
       "CriarUsuarioDto": {
         "type": "object",
         "properties": {
@@ -1080,7 +1468,8 @@
             "enum": [
               "ADMIN",
               "VETERINARIO",
-              "FARMACIA"
+              "FARMACIA",
+              "CLINICA"
             ]
           },
           "senha": {
@@ -1219,6 +1608,18 @@
             "type": "string",
             "format": "uuid",
             "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "clinicaId": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "itens": {
             "minItems": 1,
@@ -1956,6 +2357,785 @@
           "descontoEmPontosBase",
           "adicionalDeEntregaEmCentavos",
           "adicionalDeBiscoitoEmCentavos"
+        ]
+      },
+      "ListaDeClinicasDto": {
+        "type": "object",
+        "properties": {
+          "clinicas": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "format": "uuid",
+                  "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                },
+                "razaoSocial": {
+                  "type": "string"
+                },
+                "nomeFantasia": {
+                  "type": "string"
+                },
+                "cnpj": {
+                  "type": "string"
+                },
+                "inscricaoEstadual": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "email": {
+                  "type": "string"
+                },
+                "telefone": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "whatsapp": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "cep": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "logradouro": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "numero": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "complemento": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "bairro": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "cidade": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "uf": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "responsavelLegal": {
+                  "type": "string"
+                },
+                "cpfDoResponsavel": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "situacao": {
+                  "type": "string",
+                  "enum": [
+                    "PENDENTE",
+                    "ATIVA",
+                    "SUSPENSA"
+                  ]
+                },
+                "observacoesInternas": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "temLogotipo": {
+                  "type": "boolean"
+                },
+                "atualizadaEm": {
+                  "type": "string",
+                  "format": "date-time",
+                  "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                },
+                "quantidadeDeUsuarios": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                }
+              },
+              "required": [
+                "id",
+                "razaoSocial",
+                "nomeFantasia",
+                "cnpj",
+                "inscricaoEstadual",
+                "email",
+                "telefone",
+                "whatsapp",
+                "cep",
+                "logradouro",
+                "numero",
+                "complemento",
+                "bairro",
+                "cidade",
+                "uf",
+                "responsavelLegal",
+                "cpfDoResponsavel",
+                "situacao",
+                "observacoesInternas",
+                "temLogotipo",
+                "atualizadaEm",
+                "quantidadeDeUsuarios"
+              ]
+            }
+          }
+        },
+        "required": [
+          "clinicas"
+        ]
+      },
+      "ClinicaDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "razaoSocial": {
+            "type": "string"
+          },
+          "nomeFantasia": {
+            "type": "string"
+          },
+          "cnpj": {
+            "type": "string"
+          },
+          "inscricaoEstadual": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "email": {
+            "type": "string"
+          },
+          "telefone": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "whatsapp": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "cep": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "logradouro": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "numero": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "complemento": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "bairro": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "cidade": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "uf": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "responsavelLegal": {
+            "type": "string"
+          },
+          "cpfDoResponsavel": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "situacao": {
+            "type": "string",
+            "enum": [
+              "PENDENTE",
+              "ATIVA",
+              "SUSPENSA"
+            ]
+          },
+          "observacoesInternas": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "temLogotipo": {
+            "type": "boolean"
+          },
+          "atualizadaEm": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+          },
+          "quantidadeDeUsuarios": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": [
+          "id",
+          "razaoSocial",
+          "nomeFantasia",
+          "cnpj",
+          "inscricaoEstadual",
+          "email",
+          "telefone",
+          "whatsapp",
+          "cep",
+          "logradouro",
+          "numero",
+          "complemento",
+          "bairro",
+          "cidade",
+          "uf",
+          "responsavelLegal",
+          "cpfDoResponsavel",
+          "situacao",
+          "observacoesInternas",
+          "temLogotipo",
+          "atualizadaEm",
+          "quantidadeDeUsuarios"
+        ]
+      },
+      "CriarClinicaDto": {
+        "type": "object",
+        "properties": {
+          "razaoSocial": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 160
+          },
+          "nomeFantasia": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 120
+          },
+          "cnpj": {
+            "type": "string"
+          },
+          "inscricaoEstadual": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 40
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "email": {
+            "type": "string",
+            "maxLength": 160,
+            "format": "email",
+            "pattern": "^(?:[A-Za-z0-9_'+\\-]+\\.)*[A-Za-z0-9_'+\\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
+          },
+          "telefone": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "whatsapp": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "cep": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "logradouro": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 160
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "numero": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 20
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "complemento": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 80
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "bairro": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 80
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "cidade": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 80
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "uf": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 2,
+                "maxLength": 2
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "responsavelLegal": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 120
+          },
+          "cpfDoResponsavel": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 20
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "observacoesInternas": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 2000
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "razaoSocial",
+          "nomeFantasia",
+          "cnpj",
+          "email",
+          "responsavelLegal"
+        ]
+      },
+      "AlterarClinicaDto": {
+        "type": "object",
+        "properties": {
+          "razaoSocial": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 160
+          },
+          "nomeFantasia": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 120
+          },
+          "cnpj": {
+            "type": "string"
+          },
+          "inscricaoEstadual": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 40
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "email": {
+            "type": "string",
+            "maxLength": 160,
+            "format": "email",
+            "pattern": "^(?:[A-Za-z0-9_'+\\-]+\\.)*[A-Za-z0-9_'+\\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
+          },
+          "telefone": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "whatsapp": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "cep": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "logradouro": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 160
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "numero": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 20
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "complemento": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 80
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "bairro": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 80
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "cidade": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 80
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "uf": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 2,
+                "maxLength": 2
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "responsavelLegal": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 120
+          },
+          "cpfDoResponsavel": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 20
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "observacoesInternas": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 2000
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "situacao": {
+            "type": "string",
+            "enum": [
+              "PENDENTE",
+              "ATIVA",
+              "SUSPENSA"
+            ]
+          }
+        }
+      },
+      "EnviarLogotipoDto": {
+        "type": "object",
+        "properties": {
+          "tipo": {
+            "type": "string",
+            "enum": [
+              "image/png",
+              "image/jpeg",
+              "image/webp",
+              "image/svg+xml"
+            ]
+          },
+          "conteudoBase64": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 699067
+          }
+        },
+        "required": [
+          "tipo",
+          "conteudoBase64"
+        ]
+      },
+      "ListaDeVinculosDto": {
+        "type": "object",
+        "properties": {
+          "vinculos": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "usuarioId": {
+                  "type": "string",
+                  "format": "uuid",
+                  "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                },
+                "nome": {
+                  "type": "string"
+                },
+                "email": {
+                  "type": "string"
+                },
+                "papel": {
+                  "type": "string",
+                  "enum": [
+                    "ADMIN",
+                    "VETERINARIO",
+                    "FARMACIA",
+                    "CLINICA"
+                  ]
+                },
+                "crmv": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "cargo": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                }
+              },
+              "required": [
+                "usuarioId",
+                "nome",
+                "email",
+                "papel",
+                "crmv",
+                "cargo"
+              ]
+            }
+          }
+        },
+        "required": [
+          "vinculos"
+        ]
+      },
+      "VincularDto": {
+        "type": "object",
+        "properties": {
+          "usuarioId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "cargo": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 80
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "usuarioId"
         ]
       },
       "CriarTutorDto": {
@@ -2913,6 +4093,18 @@
             "format": "uuid",
             "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
           },
+          "clinicaId": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "observacoes": {
             "anyOf": [
               {
@@ -3081,6 +4273,38 @@
           },
           "tutorNome": {
             "type": "string"
+          },
+          "clinicaId": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "clinicaNome": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "clinicaCnpj": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "pesoDoPacienteEmGramas": {
             "anyOf": [
@@ -3362,6 +4586,9 @@
           "pacienteId",
           "pacienteNome",
           "tutorNome",
+          "clinicaId",
+          "clinicaNome",
+          "clinicaCnpj",
           "pesoDoPacienteEmGramas",
           "emitidaEm",
           "validaAte",

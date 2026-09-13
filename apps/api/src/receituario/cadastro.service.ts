@@ -1,7 +1,8 @@
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import type { Paciente, Prisma, Tutor } from '@prisma/client';
+import { ClinicasService } from '../clinicas/clinicas.service';
 import { PrismaService } from '../prisma/prisma.service';
-import { escopoDePaciente, escopoDeTutor, type Ator } from './escopo';
+import { escopoDePaciente, escopoDeTutor, veTudo, type Ator } from './escopo';
 
 type TutorComContagem = Tutor & { _count: { pacientes: number } };
 type PacienteComTutor = Paciente & { tutor: { id: string; nome: string } };
@@ -15,7 +16,20 @@ type PacienteComTutor = Paciente & { tutor: { id: string; nome: string } };
  */
 @Injectable()
 export class CadastroService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly clinicas: ClinicasService,
+  ) {}
+
+  /**
+   * Os vínculos ativos de quem está perguntando.
+   *
+   * Quem vê tudo não precisa deles, e poupar a consulta importa: é uma ida ao
+   * banco em toda listagem.
+   */
+  private async clinicasDe(ator: Ator): Promise<string[]> {
+    return veTudo(ator) ? [] : this.clinicas.idsVisiveis(ator.id);
+  }
 
   // --- Tutor ---
 
@@ -36,7 +50,7 @@ export class CadastroService {
 
     return this.prisma.tutor.findMany({
       where: {
-        ...escopoDeTutor(ator),
+        ...escopoDeTutor(ator, await this.clinicasDe(ator)),
         desativadoEm: null,
         ...(termo
           ? {
@@ -58,7 +72,7 @@ export class CadastroService {
 
   async acharTutor(id: string, ator: Ator): Promise<TutorComContagem> {
     const tutor = await this.prisma.tutor.findFirst({
-      where: { id, ...escopoDeTutor(ator), desativadoEm: null },
+      where: { id, ...escopoDeTutor(ator, await this.clinicasDe(ator)), desativadoEm: null },
       include: { _count: { select: { pacientes: true } } },
     });
 
@@ -125,7 +139,7 @@ export class CadastroService {
 
     return this.prisma.paciente.findMany({
       where: {
-        ...escopoDePaciente(ator),
+        ...escopoDePaciente(ator, await this.clinicasDe(ator)),
         ...(filtro.tutorId ? { tutorId: filtro.tutorId } : {}),
         ...(termo ? { nome: { contains: termo, mode: 'insensitive' } } : {}),
       },
@@ -137,7 +151,7 @@ export class CadastroService {
 
   async acharPaciente(id: string, ator: Ator): Promise<PacienteComTutor> {
     const paciente = await this.prisma.paciente.findFirst({
-      where: { id, ...escopoDePaciente(ator) },
+      where: { id, ...escopoDePaciente(ator, await this.clinicasDe(ator)) },
       include: { tutor: { select: { id: true, nome: true } } },
     });
 

@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import {
+  cnpjValido,
   cpfValido,
+  formatarCnpj,
   formatarCpf,
   formatarTelefone,
   normalizarTelefone,
@@ -108,5 +110,40 @@ describe('formatarTelefone', () => {
 
   it('devolve intacto o que não passa na conferência', () => {
     expect(formatarTelefone('123')).toBe('123');
+  });
+});
+
+describe('cnpjValido', () => {
+  it('aceita um CNPJ consistente, com ou sem máscara', () => {
+    expect(cnpjValido('11.222.333/0001-81')).toBe(true);
+    expect(cnpjValido('11222333000181')).toBe(true);
+    // O CNPJ dos Correios, que é público e serve de caso real.
+    expect(cnpjValido('34.028.316/0001-03')).toBe(true);
+  });
+
+  it('recusa dígito verificador trocado', () => {
+    expect(cnpjValido('11222333000182')).toBe(false);
+  });
+
+  it('recusa comprimento errado', () => {
+    expect(cnpjValido('1122233300018')).toBe(false);
+    expect(cnpjValido('112223330001811')).toBe(false);
+  });
+
+  it.each(['00000000000000', '11111111111111', '99999999999999'])(
+    'recusa %s, que fecha a conta mas não é CNPJ',
+    (repetido) => {
+      expect(cnpjValido(repetido)).toBe(false);
+    },
+  );
+});
+
+describe('formatarCnpj', () => {
+  it('põe a máscara', () => {
+    expect(formatarCnpj('11222333000181')).toBe('11.222.333/0001-81');
+  });
+
+  it('devolve intacto o que não tem quatorze dígitos', () => {
+    expect(formatarCnpj('123')).toBe('123');
   });
 });
