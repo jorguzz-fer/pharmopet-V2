@@ -26,6 +26,8 @@ const abas: { para: string; rotulo: string; fim: boolean; papeis?: Papel[] }[] =
   // Fora do veterinário: ele vê a clínica pela receita, e uma aba que abre
   // vazia para todo autônomo é aba morta.
   { para: '/clinicas', rotulo: 'Clínicas', fim: false, papeis: ['ADMIN', 'CLINICA', 'FARMACIA'] },
+  // A equipe é da administração: é aqui que se cria conta sem abrir o servidor.
+  { para: '/equipe', rotulo: 'Equipe', fim: false, papeis: ['ADMIN'] },
   // O catálogo é da administração da farmácia: é lá que se corrige markup,
   // lista de controle e proibição de forma.
   { para: '/catalogo', rotulo: 'Catálogo', fim: false, papeis: ['ADMIN'] },

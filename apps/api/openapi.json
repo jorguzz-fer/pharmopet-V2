@@ -176,6 +176,50 @@
         ]
       }
     },
+    "/api/v1/auth/usuarios/{id}": {
+      "patch": {
+        "operationId": "IdentidadeController_alterarUsuario",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AlterarUsuarioDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EuDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Só administrador altera usuário."
+          }
+        },
+        "summary": "Altera um usuário",
+        "tags": [
+          "identidade"
+        ]
+      }
+    },
     "/api/v1/catalogo/insumos": {
       "get": {
         "operationId": "CatalogoController_insumos",
@@ -1838,6 +1882,9 @@
                 "bloqueado": {
                   "type": "boolean"
                 },
+                "desativado": {
+                  "type": "boolean"
+                },
                 "criadoEm": {
                   "type": "string",
                   "format": "date-time",
@@ -1851,6 +1898,7 @@
                 "papel",
                 "crmv",
                 "bloqueado",
+                "desativado",
                 "criadoEm"
               ]
             }
@@ -1905,6 +1953,39 @@
           "papel",
           "senha"
         ]
+      },
+      "AlterarUsuarioDto": {
+        "type": "object",
+        "properties": {
+          "nome": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 160
+          },
+          "papel": {
+            "type": "string",
+            "enum": [
+              "ADMIN",
+              "VETERINARIO",
+              "FARMACIA",
+              "CLINICA"
+            ]
+          },
+          "crmv": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 40
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "desativado": {
+            "type": "boolean"
+          }
+        }
       },
       "ListaDeInsumosDto": {
         "type": "object",

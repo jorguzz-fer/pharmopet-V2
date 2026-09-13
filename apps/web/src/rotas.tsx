@@ -4,6 +4,7 @@ import { Catalogo } from '@/paginas/catalogo/Catalogo';
 import { Clinicas } from '@/paginas/clinicas/Clinicas';
 import { FichaDaClinica } from '@/paginas/clinicas/FichaDaClinica';
 import { NovaClinica } from '@/paginas/clinicas/NovaClinica';
+import { Equipe } from '@/paginas/equipe/Equipe';
 import { Estado } from '@/paginas/estado/Estado';
 import { Login } from '@/paginas/login/Login';
 import { NaoEncontrada } from '@/paginas/NaoEncontrada';
@@ -62,6 +63,7 @@ export const rotas: RouteObject[] = [
           { path: 'clinicas/nova', element: <NovaClinica /> },
           { path: 'clinicas/:id', element: <FichaDaClinica /> },
           { path: 'catalogo', element: <Catalogo /> },
+          { path: 'equipe', element: <Equipe /> },
           { path: 'estado', element: <Estado /> },
           { path: 'sistema', element: <Sistema /> },
           { path: '*', element: <NaoEncontrada /> },
