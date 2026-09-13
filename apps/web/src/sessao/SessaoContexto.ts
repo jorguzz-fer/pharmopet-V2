@@ -46,3 +46,16 @@ export function usePodeCadastrarFicha(): boolean {
 
   return papel === 'ADMIN' || papel === 'VETERINARIO';
 }
+
+/**
+ * Quem prescreve.
+ *
+ * Mais estreito do que `usePodeCadastrarFicha`, de propósito: o administrador
+ * abre ficha de tutor, mas quem assina a receita é quem tem CRMV, e
+ * `POST /receituario/receitas` só aceita `VETERINARIO`. A regra mora aqui
+ * porque agora três telas a consultam — espalhada, uma delas acabaria
+ * oferecendo um botão que a API recusa.
+ */
+export function usePodePrescrever(): boolean {
+  return usePapel() === 'VETERINARIO';
+}

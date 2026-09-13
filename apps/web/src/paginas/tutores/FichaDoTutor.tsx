@@ -1,26 +1,17 @@
-import { useCallback, useState, type FormEvent } from 'react';
+import { useCallback, useState } from 'react';
 import { Link, useParams } from 'react-router';
 import { exigir, type components } from '@pharmopet/api-client';
-import { formatarPeso, lerPesoEmQuilos } from '@pharmopet/shared';
+import { formatarPeso } from '@pharmopet/shared';
 import { api } from '@/api/cliente';
-import { mensagemDeErro, useConsulta } from '@/api/consulta';
+import { useConsulta } from '@/api/consulta';
 import { Botao } from '@/componentes/Botao';
-import { Campo } from '@/componentes/Campo';
 import { Cartao } from '@/componentes/Cartao';
 import { Carregando, Falha, Vazio } from '@/componentes/Estados';
 import { Selo } from '@/componentes/Selo';
-import { usePapel, usePodeCadastrarFicha } from '@/sessao/SessaoContexto';
+import { ESPECIES, NovoPaciente } from '@/paginas/tutores/NovoPaciente';
+import { usePodeCadastrarFicha, usePodePrescrever } from '@/sessao/SessaoContexto';
 
 type Paciente = components['schemas']['PacienteDto'];
-
-const ESPECIES = [
-  { valor: 'CANINO', rotulo: 'Canino' },
-  { valor: 'FELINO', rotulo: 'Felino' },
-  { valor: 'EQUINO', rotulo: 'Equino' },
-  { valor: 'AVE', rotulo: 'Ave' },
-  { valor: 'ROEDOR', rotulo: 'Roedor' },
-  { valor: 'REPTIL', rotulo: 'Réptil' },
-] as const;
 
 /** Ficha do tutor, com os pacientes dele. */
 export function FichaDoTutor() {
@@ -101,7 +92,7 @@ export function FichaDoTutor() {
 function LinhaDePaciente({ paciente }: { paciente: Paciente }) {
   const especie = ESPECIES.find((e) => e.valor === paciente.especie);
   // Só quem prescreve abre receita; para a farmácia o atalho levaria a um 403.
-  const podePrescrever = usePapel() === 'VETERINARIO';
+  const podePrescrever = usePodePrescrever();
 
   return (
     <div className="flex flex-wrap items-center gap-x-4 gap-y-2 rounded-card border border-neutro-200 px-4 py-3">
@@ -128,102 +119,5 @@ function LinhaDePaciente({ paciente }: { paciente: Paciente }) {
         </Link>
       ) : null}
     </div>
-  );
-}
-
-function NovoPaciente({ tutorId, aoCriar }: { tutorId: string; aoCriar: () => void }) {
-  const [nome, setNome] = useState('');
-  const [especie, setEspecie] = useState<Paciente['especie']>('CANINO');
-  const [raca, setRaca] = useState('');
-  const [peso, setPeso] = useState('');
-  const [erro, setErro] = useState<string | null>(null);
-  const [enviando, setEnviando] = useState(false);
-
-  // O peso é conferido enquanto se digita, e não só no envio: descobrir que
-  // "12kg" não serve depois de preencher o resto é o tipo de ida e volta que
-  // faz alguém digitar qualquer coisa para o formulário parar de reclamar.
-  const lido = peso.trim() === '' ? null : lerPesoEmQuilos(peso);
-  const erroDoPeso = lido && !lido.valido ? lido.motivo : undefined;
-
-  async function enviar(evento: FormEvent) {
-    evento.preventDefault();
-    setErro(null);
-    setEnviando(true);
-
-    try {
-      await exigir(
-        api.POST('/api/v1/receituario/pacientes', {
-          body: {
-            tutorId,
-            nome: nome.trim(),
-            especie,
-            ...(raca.trim() ? { raca: raca.trim() } : {}),
-            ...(lido?.valido ? { pesoEmGramas: lido.emGramas } : {}),
-          },
-        }),
-      );
-      aoCriar();
-    } catch (e) {
-      setErro(mensagemDeErro(e));
-    } finally {
-      setEnviando(false);
-    }
-  }
-
-  return (
-    <form onSubmit={enviar} className="flex flex-col gap-4" noValidate>
-      <div className="grid gap-4 sm:grid-cols-2">
-        <Campo
-          rotulo="Nome"
-          required
-          autoFocus
-          value={nome}
-          onChange={(e) => setNome(e.target.value)}
-        />
-
-        <div className="flex flex-col gap-1">
-          <label htmlFor="especie" className="text-sm font-semibold text-neutro-700">
-            Espécie
-          </label>
-          <select
-            id="especie"
-            className="min-h-[var(--altura-controle)] w-full rounded-controle border border-neutro-200 bg-neutro-0 px-3 text-base"
-            value={especie}
-            onChange={(e) => setEspecie(e.target.value as Paciente['especie'])}
-          >
-            {ESPECIES.map((e) => (
-              <option key={e.valor} value={e.valor}>
-                {e.rotulo}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <Campo rotulo="Raça" value={raca} onChange={(e) => setRaca(e.target.value)} />
-
-        <Campo
-          rotulo="Peso (kg)"
-          inputMode="decimal"
-          placeholder="12,5"
-          ajuda="Em quilos. Use vírgula para os gramas."
-          erro={erroDoPeso}
-          value={peso}
-          onChange={(e) => setPeso(e.target.value)}
-        />
-      </div>
-
-      {erro ? (
-        <p
-          role="alert"
-          className="rounded-controle bg-controlado-fundo px-3 py-2 text-sm text-controlado-texto"
-        >
-          {erro}
-        </p>
-      ) : null}
-
-      <Botao type="submit" disabled={enviando || nome.trim() === '' || Boolean(erroDoPeso)}>
-        {enviando ? 'Salvando…' : 'Cadastrar paciente'}
-      </Botao>
-    </form>
   );
 }

@@ -25,6 +25,31 @@ export type PropsDoBotao = ButtonHTMLAttributes<HTMLButtonElement> & {
   children: ReactNode;
 };
 
+/**
+ * A aparência do botão, para quem **não** é um botão.
+ *
+ * Existe por causa de um erro que estava em duas telas: `<Link><Botao/></Link>`
+ * põe um `<button>` dentro de um `<a>`, o que o HTML não permite. O navegador
+ * remenda como quiser, o leitor de tela anuncia "botão" onde há um link — a
+ * pessoa não sabe que vai mudar de página — e o teclado para duas vezes no
+ * mesmo alvo. Quem navega usa `<Link className={aparenciaDeBotao()}>`, que é
+ * um link de verdade com cara de botão.
+ */
+export function aparenciaDeBotao({
+  tom = 'primario',
+  larguraTotal = false,
+}: { tom?: TomDoBotao; larguraTotal?: boolean } = {}): string {
+  return [
+    'inline-flex min-h-[var(--altura-controle)] items-center justify-center gap-2',
+    'rounded-controle px-4 text-base font-semibold',
+    'transition-colors disabled:cursor-not-allowed disabled:opacity-50',
+    porTom[tom],
+    larguraTotal ? 'w-full' : '',
+  ]
+    .filter(Boolean)
+    .join(' ');
+}
+
 export function Botao({
   tom = 'primario',
   larguraTotal = false,
@@ -38,16 +63,7 @@ export function Botao({
       // Sem `type` explícito o botão vira submit dentro de form e dispara
       // envio sem querer. O padrão aqui é o inofensivo.
       type={type}
-      className={[
-        'inline-flex min-h-[var(--altura-controle)] items-center justify-center gap-2',
-        'rounded-controle px-4 text-base font-semibold',
-        'transition-colors disabled:cursor-not-allowed disabled:opacity-50',
-        porTom[tom],
-        larguraTotal ? 'w-full' : '',
-        className,
-      ]
-        .filter(Boolean)
-        .join(' ')}
+      className={[aparenciaDeBotao({ tom, larguraTotal }), className].filter(Boolean).join(' ')}
       {...resto}
     >
       {children}

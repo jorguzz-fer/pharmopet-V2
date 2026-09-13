@@ -79,10 +79,17 @@ describe('lista de clínicas vazia', () => {
 describe('lista de receitas vazia', () => {
   const semReceita = { '/receituario/receitas': { receitas: [] } };
 
-  it('manda o veterinário à ficha do tutor, que é de onde ele prescreve', async () => {
+  /**
+   * O texto mudou junto com o caminho. Enquanto prescrever só começava dentro
+   * da ficha de um tutor, "comece pela ficha de um tutor" era a instrução
+   * certa; agora existe "Nova receita" nesta mesma tela, e mandar a pessoa a
+   * outra aba seria um desvio sem motivo.
+   */
+  it('aponta o veterinário para “Nova receita”, que está nesta tela', async () => {
     montar('/receitas', 'VETERINARIO', semReceita);
 
-    expect(await screen.findByText(/Comece pela ficha de um tutor/)).toBeInTheDocument();
+    expect(await screen.findByText(/Comece por “Nova receita”/)).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Nova receita' })).toBeInTheDocument();
   });
 
   /** A farmácia não tem a aba Tutores: mandá-la lá é mandá-la a lugar nenhum. */
@@ -90,7 +97,9 @@ describe('lista de receitas vazia', () => {
     montar('/receitas', 'FARMACIA', semReceita);
 
     expect(await screen.findByText(/quando um veterinário emitir/)).toBeInTheDocument();
-    expect(screen.queryByText(/Comece pela ficha de um tutor/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Comece por “Nova receita”/)).not.toBeInTheDocument();
+    // E não vê o botão: quem não pode prescrever não deve ser convidado a.
+    expect(screen.queryByRole('link', { name: 'Nova receita' })).not.toBeInTheDocument();
   });
 
   /** O ADMIN vê a aba Tutores, mas quem emite receita é só o VETERINARIO. */
