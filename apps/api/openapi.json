@@ -1358,6 +1358,171 @@
         ]
       }
     },
+    "/api/v1/pedidos": {
+      "post": {
+        "operationId": "PedidosController_enviar",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EnviarPedidoDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PedidoDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Receita não válida, ou destino sem endereço."
+          },
+          "409": {
+            "description": "Esta receita já tem um pedido em andamento."
+          }
+        },
+        "summary": "Manda uma receita emitida para a farmácia",
+        "tags": [
+          "pedidos"
+        ]
+      },
+      "get": {
+        "operationId": "PedidosController_listar",
+        "parameters": [
+          {
+            "name": "estado",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "emAberto",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "enum": [
+                "true",
+                "false"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "receitaId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListaDePedidosDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "A fila da farmácia",
+        "tags": [
+          "pedidos"
+        ]
+      }
+    },
+    "/api/v1/pedidos/{id}": {
+      "get": {
+        "operationId": "PedidosController_achar",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PedidoDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Não existe, ou não é visível para quem perguntou."
+          }
+        },
+        "summary": "Um pedido",
+        "tags": [
+          "pedidos"
+        ]
+      }
+    },
+    "/api/v1/pedidos/{id}/estado": {
+      "post": {
+        "operationId": "PedidosController_mudarEstado",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MudarEstadoDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PedidoDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Transição não permitida, ou falta o motivo."
+          }
+        },
+        "summary": "Move o pedido para o próximo estado",
+        "tags": [
+          "pedidos"
+        ]
+      }
+    },
     "/api/v1/health": {
       "get": {
         "operationId": "HealthController_verificar",
@@ -5030,6 +5195,41 @@
             "type": "integer",
             "minimum": -9007199254740991,
             "maximum": 9007199254740991
+          },
+          "pedido": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "numero": {
+                    "type": "integer",
+                    "minimum": -9007199254740991,
+                    "maximum": 9007199254740991
+                  },
+                  "estado": {
+                    "type": "string",
+                    "enum": [
+                      "EM_ANALISE",
+                      "EM_PRODUCAO",
+                      "PRONTO",
+                      "ENTREGUE",
+                      "CANCELADO"
+                    ]
+                  },
+                  "situacao": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "numero",
+                  "estado",
+                  "situacao"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "required": [
@@ -5047,7 +5247,479 @@
           "pacienteNome",
           "pacienteEspecie",
           "formulacoes",
-          "valorTotalEmCentavos"
+          "valorTotalEmCentavos",
+          "pedido"
+        ]
+      },
+      "EnviarPedidoDto": {
+        "type": "object",
+        "properties": {
+          "receitaId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "destino": {
+            "type": "string",
+            "enum": [
+              "CLINICA",
+              "TUTOR"
+            ]
+          },
+          "observacoes": {
+            "type": "string",
+            "maxLength": 500
+          }
+        },
+        "required": [
+          "receitaId",
+          "destino"
+        ]
+      },
+      "PedidoDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "numero": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "estado": {
+            "type": "string",
+            "enum": [
+              "EM_ANALISE",
+              "EM_PRODUCAO",
+              "PRONTO",
+              "ENTREGUE",
+              "CANCELADO"
+            ]
+          },
+          "destino": {
+            "type": "string",
+            "enum": [
+              "CLINICA",
+              "TUTOR"
+            ]
+          },
+          "enderecoDeEntrega": {
+            "type": "string"
+          },
+          "observacoes": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "motivoDoCancelamento": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "receitaId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "receitaNumero": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "pacienteNome": {
+            "type": "string"
+          },
+          "tutorNome": {
+            "type": "string"
+          },
+          "clinicaNome": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "veterinarioNome": {
+            "type": "string"
+          },
+          "enviadoPorNome": {
+            "type": "string"
+          },
+          "formulacoes": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "forma": {
+                  "type": "string"
+                },
+                "quantidade": {
+                  "type": "integer",
+                  "minimum": -9007199254740991,
+                  "maximum": 9007199254740991
+                },
+                "aroma": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "usoContinuo": {
+                  "type": "boolean"
+                },
+                "itens": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "descricao": {
+                        "type": "string"
+                      },
+                      "doseMg": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "descricao",
+                      "doseMg"
+                    ]
+                  }
+                }
+              },
+              "required": [
+                "forma",
+                "quantidade",
+                "aroma",
+                "usoContinuo",
+                "itens"
+              ]
+            }
+          },
+          "valorTotalEmCentavos": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "criadoEm": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+          },
+          "producaoEm": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "prontoEm": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "entregueEm": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "numero",
+          "estado",
+          "destino",
+          "enderecoDeEntrega",
+          "observacoes",
+          "motivoDoCancelamento",
+          "receitaId",
+          "receitaNumero",
+          "pacienteNome",
+          "tutorNome",
+          "clinicaNome",
+          "veterinarioNome",
+          "enviadoPorNome",
+          "formulacoes",
+          "valorTotalEmCentavos",
+          "criadoEm",
+          "producaoEm",
+          "prontoEm",
+          "entregueEm"
+        ]
+      },
+      "ListaDePedidosDto": {
+        "type": "object",
+        "properties": {
+          "pedidos": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "format": "uuid",
+                  "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                },
+                "numero": {
+                  "type": "integer",
+                  "minimum": -9007199254740991,
+                  "maximum": 9007199254740991
+                },
+                "estado": {
+                  "type": "string",
+                  "enum": [
+                    "EM_ANALISE",
+                    "EM_PRODUCAO",
+                    "PRONTO",
+                    "ENTREGUE",
+                    "CANCELADO"
+                  ]
+                },
+                "destino": {
+                  "type": "string",
+                  "enum": [
+                    "CLINICA",
+                    "TUTOR"
+                  ]
+                },
+                "enderecoDeEntrega": {
+                  "type": "string"
+                },
+                "observacoes": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "motivoDoCancelamento": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "receitaId": {
+                  "type": "string",
+                  "format": "uuid",
+                  "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                },
+                "receitaNumero": {
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "pacienteNome": {
+                  "type": "string"
+                },
+                "tutorNome": {
+                  "type": "string"
+                },
+                "clinicaNome": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "veterinarioNome": {
+                  "type": "string"
+                },
+                "enviadoPorNome": {
+                  "type": "string"
+                },
+                "formulacoes": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "forma": {
+                        "type": "string"
+                      },
+                      "quantidade": {
+                        "type": "integer",
+                        "minimum": -9007199254740991,
+                        "maximum": 9007199254740991
+                      },
+                      "aroma": {
+                        "type": [
+                          "string",
+                          "null"
+                        ]
+                      },
+                      "usoContinuo": {
+                        "type": "boolean"
+                      },
+                      "itens": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "descricao": {
+                              "type": "string"
+                            },
+                            "doseMg": {
+                              "type": "number"
+                            }
+                          },
+                          "required": [
+                            "descricao",
+                            "doseMg"
+                          ]
+                        }
+                      }
+                    },
+                    "required": [
+                      "forma",
+                      "quantidade",
+                      "aroma",
+                      "usoContinuo",
+                      "itens"
+                    ]
+                  }
+                },
+                "valorTotalEmCentavos": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "criadoEm": {
+                  "type": "string",
+                  "format": "date-time",
+                  "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                },
+                "producaoEm": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "format": "date-time",
+                      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "prontoEm": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "format": "date-time",
+                      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "entregueEm": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "format": "date-time",
+                      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "id",
+                "numero",
+                "estado",
+                "destino",
+                "enderecoDeEntrega",
+                "observacoes",
+                "motivoDoCancelamento",
+                "receitaId",
+                "receitaNumero",
+                "pacienteNome",
+                "tutorNome",
+                "clinicaNome",
+                "veterinarioNome",
+                "enviadoPorNome",
+                "formulacoes",
+                "valorTotalEmCentavos",
+                "criadoEm",
+                "producaoEm",
+                "prontoEm",
+                "entregueEm"
+              ]
+            }
+          }
+        },
+        "required": [
+          "pedidos"
+        ]
+      },
+      "MudarEstadoDto": {
+        "type": "object",
+        "properties": {
+          "estado": {
+            "type": "string",
+            "enum": [
+              "EM_ANALISE",
+              "EM_PRODUCAO",
+              "PRONTO",
+              "ENTREGUE",
+              "CANCELADO"
+            ]
+          },
+          "motivo": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 500
+          }
+        },
+        "required": [
+          "estado"
         ]
       },
       "SaudeDto": {

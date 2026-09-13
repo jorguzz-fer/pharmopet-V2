@@ -22,6 +22,7 @@ const abas: { para: string; rotulo: string; fim: boolean; papeis?: Papel[] }[] =
   // A clínica lê a clientela dela, mas não a cadastra: quem abre ficha é quem
   // atende. `usePodeCadastrarFicha` é que esconde o botão de cadastro.
   { para: '/tutores', rotulo: 'Tutores', fim: false, papeis: ['ADMIN', 'VETERINARIO', 'CLINICA'] },
+  { para: '/pedidos', rotulo: 'Pedidos', fim: false },
   // Fora do veterinário: ele vê a clínica pela receita, e uma aba que abre
   // vazia para todo autônomo é aba morta.
   { para: '/clinicas', rotulo: 'Clínicas', fim: false, papeis: ['ADMIN', 'CLINICA', 'FARMACIA'] },

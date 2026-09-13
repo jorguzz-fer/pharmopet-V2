@@ -67,6 +67,7 @@ model Usuario {
   tutores  Tutor[]
   receitas Receita[]
   clinicas ClinicaUsuario[]
+  pedidos  Pedido[]
 
   @@index([papel])
   @@map("usuario")
@@ -120,6 +121,8 @@ enum AcaoAuditada {
   CLINICA_ALTERADA
   VINCULO_CRIADO
   VINCULO_REMOVIDO
+  PEDIDO_ENVIADO
+  PEDIDO_MUDOU_DE_ESTADO
 }
 
 /// O que aconteceu, quem fez e quando.
@@ -508,6 +511,7 @@ model Receita {
   atualizadaEm DateTime @updatedAt @db.Timestamptz(3)
 
   formulacoes Formulacao[]
+  pedidos     Pedido[]
 
   @@index([veterinarioId, criadaEm])
   @@index([pacienteId])
@@ -687,4 +691,70 @@ model ClinicaUsuario {
   @@unique([clinicaId, usuarioId])
   @@index([usuarioId])
   @@map("clinica_usuario")
+}
+
+// ---------------------------------------------------------------------------
+// Pedido — a peça entre prescrever e manipular (ADR 0014).
+//
+// A receita continua imutável: nenhuma transição de pedido escreve nela. O que
+// anda é o pedido, e o histórico de quem o moveu fica na trilha de auditoria.
+// ---------------------------------------------------------------------------
+
+enum EstadoDoPedido {
+  EM_ANALISE
+  EM_PRODUCAO
+  PRONTO
+  ENTREGUE
+  CANCELADO
+}
+
+enum DestinoDaEntrega {
+  CLINICA
+  TUTOR
+}
+
+/// O que a farmácia vai manipular, e para onde vai.
+model Pedido {
+  id String @id @default(uuid()) @db.Uuid
+
+  /// Número legível, da mesma família do da receita: é por ele que a farmácia
+  /// e o tutor se referem ao pedido no WhatsApp.
+  numero Int @unique @default(autoincrement())
+
+  receitaId String  @db.Uuid
+  receita   Receita @relation(fields: [receitaId], references: [id], onDelete: Restrict)
+
+  estado EstadoDoPedido @default(EM_ANALISE)
+
+  /// Quem enviou à farmácia. Restrict: apagar a pessoa apagaria a origem do
+  /// pedido, e um controlado sem origem é o que ninguém consegue explicar
+  /// depois.
+  enviadoPorId String  @db.Uuid
+  enviadoPor   Usuario @relation(fields: [enviadoPorId], references: [id], onDelete: Restrict)
+
+  destino DestinoDaEntrega
+
+  /// O endereço como estava no dia, por extenso.
+  ///
+  /// Congelado, e não lido do cadastro na hora de mostrar: mudar a ficha do
+  /// tutor não pode reescrever para onde a encomenda já seguiu. Mesma
+  /// disciplina do nome e do CNPJ da clínica na receita (ADR 0012).
+  enderecoDeEntrega String
+
+  /// Recado de quem envia para quem manipula.
+  observacoes String?
+
+  /// Por que foi cancelado. Obrigatório no cancelamento, como na receita.
+  motivoDoCancelamento String?
+
+  criadoEm     DateTime  @default(now()) @db.Timestamptz(3)
+  atualizadoEm DateTime  @updatedAt @db.Timestamptz(3)
+  /// Quando entrou em produção, ficou pronto e saiu. Nulos até acontecerem.
+  producaoEm   DateTime? @db.Timestamptz(3)
+  prontoEm     DateTime? @db.Timestamptz(3)
+  entregueEm   DateTime? @db.Timestamptz(3)
+
+  @@index([estado, criadoEm])
+  @@index([receitaId])
+  @@map("pedido")
 }

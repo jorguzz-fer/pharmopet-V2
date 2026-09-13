@@ -511,6 +511,58 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/pedidos": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** A fila da farmácia */
+        get: operations["PedidosController_listar"];
+        put?: never;
+        /** Manda uma receita emitida para a farmácia */
+        post: operations["PedidosController_enviar"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/pedidos/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Um pedido */
+        get: operations["PedidosController_achar"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/pedidos/{id}/estado": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Move o pedido para o próximo estado */
+        post: operations["PedidosController_mudarEstado"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/health": {
         parameters: {
             query?: never;
@@ -1125,6 +1177,98 @@ export interface components {
                 }[];
             }[];
             valorTotalEmCentavos: number;
+            pedido: {
+                numero: number;
+                /** @enum {string} */
+                estado: "EM_ANALISE" | "EM_PRODUCAO" | "PRONTO" | "ENTREGUE" | "CANCELADO";
+                situacao: string;
+            } | null;
+        };
+        EnviarPedidoDto: {
+            /** Format: uuid */
+            receitaId: string;
+            /** @enum {string} */
+            destino: "CLINICA" | "TUTOR";
+            observacoes?: string;
+        };
+        PedidoDto: {
+            /** Format: uuid */
+            id: string;
+            numero: number;
+            /** @enum {string} */
+            estado: "EM_ANALISE" | "EM_PRODUCAO" | "PRONTO" | "ENTREGUE" | "CANCELADO";
+            /** @enum {string} */
+            destino: "CLINICA" | "TUTOR";
+            enderecoDeEntrega: string;
+            observacoes: string | null;
+            motivoDoCancelamento: string | null;
+            /** Format: uuid */
+            receitaId: string;
+            receitaNumero: number | null;
+            pacienteNome: string;
+            tutorNome: string;
+            clinicaNome: string | null;
+            veterinarioNome: string;
+            enviadoPorNome: string;
+            formulacoes: {
+                forma: string;
+                quantidade: number;
+                aroma: string | null;
+                usoContinuo: boolean;
+                itens: {
+                    descricao: string;
+                    doseMg: number;
+                }[];
+            }[];
+            valorTotalEmCentavos: number;
+            /** Format: date-time */
+            criadoEm: string;
+            producaoEm: string | null;
+            prontoEm: string | null;
+            entregueEm: string | null;
+        };
+        ListaDePedidosDto: {
+            pedidos: {
+                /** Format: uuid */
+                id: string;
+                numero: number;
+                /** @enum {string} */
+                estado: "EM_ANALISE" | "EM_PRODUCAO" | "PRONTO" | "ENTREGUE" | "CANCELADO";
+                /** @enum {string} */
+                destino: "CLINICA" | "TUTOR";
+                enderecoDeEntrega: string;
+                observacoes: string | null;
+                motivoDoCancelamento: string | null;
+                /** Format: uuid */
+                receitaId: string;
+                receitaNumero: number | null;
+                pacienteNome: string;
+                tutorNome: string;
+                clinicaNome: string | null;
+                veterinarioNome: string;
+                enviadoPorNome: string;
+                formulacoes: {
+                    forma: string;
+                    quantidade: number;
+                    aroma: string | null;
+                    usoContinuo: boolean;
+                    itens: {
+                        descricao: string;
+                        doseMg: number;
+                    }[];
+                }[];
+                valorTotalEmCentavos: number;
+                /** Format: date-time */
+                criadoEm: string;
+                producaoEm: string | null;
+                prontoEm: string | null;
+                entregueEm: string | null;
+            }[];
+        };
+        MudarEstadoDto: {
+            /** @enum {string} */
+            estado: "EM_ANALISE" | "EM_PRODUCAO" | "PRONTO" | "ENTREGUE" | "CANCELADO";
+            motivo?: string;
         };
         /** @description Sinal de vida da API */
         SaudeDto: {
@@ -2160,6 +2304,126 @@ export interface operations {
         responses: {
             /** @description Link inválido, ou receita ainda não emitida. */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    PedidosController_listar: {
+        parameters: {
+            query?: {
+                estado?: string;
+                emAberto?: "true" | "false";
+                receitaId?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ListaDePedidosDto"];
+                };
+            };
+        };
+    };
+    PedidosController_enviar: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EnviarPedidoDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PedidoDto"];
+                };
+            };
+            /** @description Receita não válida, ou destino sem endereço. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Esta receita já tem um pedido em andamento. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    PedidosController_achar: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PedidoDto"];
+                };
+            };
+            /** @description Não existe, ou não é visível para quem perguntou. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    PedidosController_mudarEstado: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MudarEstadoDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PedidoDto"];
+                };
+            };
+            /** @description Transição não permitida, ou falta o motivo. */
+            400: {
                 headers: {
                     [name: string]: unknown;
                 };

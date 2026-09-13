@@ -12,8 +12,10 @@ import { Carregando, Falha } from '@/componentes/Estados';
 import { Selo, type TomDoSelo } from '@/componentes/Selo';
 import { useSessao } from '@/sessao/SessaoContexto';
 import { Entrega } from './Entrega';
+import { Enviar } from './Enviar';
 
 type ReceitaDto = components['schemas']['ReceitaDto'];
+type Pedido = components['schemas']['PedidoDto'];
 
 const APARENCIA: Record<ReceitaDto['situacao'], { tom: TomDoSelo; rotulo: string }> = {
   rascunho: { tom: 'neutro', rotulo: 'rascunho' },
@@ -26,7 +28,19 @@ const APARENCIA: Record<ReceitaDto['situacao'], { tom: TomDoSelo; rotulo: string
 export function Receita() {
   const { id = '' } = useParams();
   const carregar = useCallback(
-    () => exigir(api.GET('/api/v1/receituario/receitas/{id}', { params: { path: { id } } })),
+    async () => ({
+      receita: await exigir(
+        api.GET('/api/v1/receituario/receitas/{id}', { params: { path: { id } } }),
+      ),
+      // O pedido desta receita, para a tela saber se ela já foi enviada.
+      //
+      // A falha aqui não derruba a tela: o pedido é acessório, e deixá-lo
+      // levar a receita junto faria um problema na fila da farmácia esconder o
+      // documento de quem só queria lê-lo.
+      pedidos: await exigir(api.GET('/api/v1/pedidos', { params: { query: { receitaId: id } } }))
+        .then((lista) => lista.pedidos)
+        .catch((): Pedido[] => []),
+    }),
     [id],
   );
 
@@ -35,10 +49,25 @@ export function Receita() {
   if (estado.situacao === 'carregando') return <Carregando o="a receita" />;
   if (estado.situacao === 'falha') return <Falha motivo={estado.motivo} aoTentar={recarregar} />;
 
-  return <Detalhe receita={estado.dado} aoMudar={recarregar} />;
+  return (
+    <Detalhe
+      receita={estado.dado.receita}
+      // O cancelado não conta: a receita volta a poder ser enviada.
+      pedido={estado.dado.pedidos.find((p) => p.estado !== 'CANCELADO') ?? null}
+      aoMudar={recarregar}
+    />
+  );
 }
 
-function Detalhe({ receita, aoMudar }: { receita: ReceitaDto; aoMudar: () => void }) {
+function Detalhe({
+  receita,
+  pedido,
+  aoMudar,
+}: {
+  receita: ReceitaDto;
+  pedido: Pedido | null;
+  aoMudar: () => void;
+}) {
   const { estado: sessao } = useSessao();
   const eu = sessao.situacao === 'dentro' ? sessao.usuario : null;
   const aparencia = APARENCIA[receita.situacao];
@@ -154,6 +183,15 @@ function Detalhe({ receita, aoMudar }: { receita: ReceitaDto; aoMudar: () => voi
           </span>
         </p>
       </Cartao>
+
+      {receita.situacao === 'valida' || pedido ? (
+        <Enviar
+          receitaId={receita.id}
+          temClinica={receita.clinicaId !== null || receita.clinicaNome !== null}
+          pedido={pedido}
+          aoEnviar={aoMudar}
+        />
+      ) : null}
 
       {receita.tokenPublico !== null ? (
         <Entrega receitaId={receita.id} tokenPublico={receita.tokenPublico} />
