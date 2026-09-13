@@ -38,6 +38,7 @@ import {
   LISTA_OBRIGATORIA,
   ListaDeFormasDto,
   ListaDeInsumosDto,
+  ListaDeRestricoesDto,
   OrcamentoDetalhadoDto,
   OrcamentoDto,
   PrecificarDto,
@@ -180,6 +181,77 @@ export class CatalogoController {
       custoDeReferenciaPorGramaEmMicro: criado.custoDeReferenciaPorGramaEmMicro,
       markupEmCentesimos: criado.markupEmCentesimos,
       estoqueEmMiligramas: criado.estoqueEmMiligramas,
+    };
+  }
+
+  /**
+   * Um insumo com os números comerciais.
+   *
+   * Separado da busca de propósito: a busca alimenta a tela de quem prescreve,
+   * e custo e markup não trafegam até lá. Quem administra precisa deles para
+   * corrigir, e pede um por vez.
+   */
+  @Papeis('ADMIN')
+  @Get('insumos/:id')
+  @ApiOperation({ summary: 'Um insumo, com custo e markup' })
+  @ApiOkResponse({ type: InsumoAdminDto })
+  async insumo(@Param('id') id: string): Promise<InsumoAdminDto> {
+    const insumo = await this.prisma.insumo.findUnique({
+      where: { id },
+      include: { restricoes: { include: { forma: true } } },
+    });
+
+    if (!insumo) throw new NotFoundException('Insumo não encontrado.');
+
+    return {
+      id: insumo.id,
+      codigo: insumo.codigo,
+      descricao: insumo.descricao,
+      controlado: insumo.controlado,
+      listaDeControle: insumo.listaDeControle,
+      estoque: situacaoDoEstoque(insumo.estoqueEmMiligramas),
+      formasProibidas: insumo.restricoes.map((r) => ({
+        formaId: r.forma.id,
+        nome: r.forma.nome,
+        motivo: r.motivo,
+      })),
+      custoPorGramaEmMicro: insumo.custoPorGramaEmMicro,
+      custoDeReferenciaPorGramaEmMicro: insumo.custoDeReferenciaPorGramaEmMicro,
+      markupEmCentesimos: insumo.markupEmCentesimos,
+      estoqueEmMiligramas: insumo.estoqueEmMiligramas,
+    };
+  }
+
+  /**
+   * Todas as proibições, num lugar só.
+   *
+   * A busca de insumo devolve no máximo cinquenta linhas, então juntar as
+   * proibições a partir dela mostraria só as desses cinquenta. Quem administra
+   * precisa da lista inteira — ela é curta, e é o tipo de regra que se revisa
+   * junta.
+   */
+  @Papeis('ADMIN')
+  @Get('restricoes')
+  @ApiOperation({ summary: 'Todas as proibições de insumo por forma' })
+  @ApiOkResponse({ type: ListaDeRestricoesDto })
+  async restricoes(): Promise<ListaDeRestricoesDto> {
+    const registros = await this.prisma.restricaoDeForma.findMany({
+      include: {
+        insumo: { select: { id: true, codigo: true, descricao: true } },
+        forma: { select: { id: true, nome: true } },
+      },
+      orderBy: [{ insumo: { descricao: 'asc' } }, { forma: { nome: 'asc' } }],
+    });
+
+    return {
+      restricoes: registros.map((r) => ({
+        insumoId: r.insumo.id,
+        insumoCodigo: r.insumo.codigo,
+        insumoDescricao: r.insumo.descricao,
+        formaId: r.forma.id,
+        formaNome: r.forma.nome,
+        motivo: r.motivo,
+      })),
     };
   }
 

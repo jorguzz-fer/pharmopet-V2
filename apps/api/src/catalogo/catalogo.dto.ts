@@ -212,6 +212,24 @@ export const criarRestricaoSchema = z.object({
 });
 export class CriarRestricaoDto extends createZodDto(criarRestricaoSchema) {}
 
+/**
+ * Uma proibição vista de fora do insumo.
+ *
+ * Traz os dois lados por extenso porque a administração a lê como regra —
+ * "pancreatina não faz em pasta" — e não como detalhe pendurado numa linha do
+ * catálogo que já estivesse aberta na tela.
+ */
+export const restricaoSchema = z.object({
+  insumoId: z.uuid(),
+  insumoCodigo: z.string(),
+  insumoDescricao: z.string(),
+  formaId: z.uuid(),
+  formaNome: z.string(),
+  motivo: z.string(),
+});
+export const listaDeRestricoesSchema = z.object({ restricoes: z.array(restricaoSchema) });
+export class ListaDeRestricoesDto extends createZodDto(listaDeRestricoesSchema) {}
+
 export const condicoesSchema = z.object({
   taxaDeManipulacaoEmCentavos: z.int().nonnegative(),
   custoDeEmbalagensEmCentavos: z.int().nonnegative(),

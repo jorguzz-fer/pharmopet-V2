@@ -357,6 +357,35 @@
       }
     },
     "/api/v1/catalogo/insumos/{id}": {
+      "get": {
+        "operationId": "CatalogoController_insumo",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InsumoAdminDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Um insumo, com custo e markup",
+        "tags": [
+          "catálogo"
+        ]
+      },
       "patch": {
         "operationId": "CatalogoController_alterarInsumo",
         "parameters": [
@@ -392,6 +421,51 @@
           }
         },
         "summary": "Altera um insumo",
+        "tags": [
+          "catálogo"
+        ]
+      }
+    },
+    "/api/v1/catalogo/restricoes": {
+      "get": {
+        "operationId": "CatalogoController_restricoes",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListaDeRestricoesDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Todas as proibições de insumo por forma",
+        "tags": [
+          "catálogo"
+        ]
+      },
+      "post": {
+        "operationId": "CatalogoController_criarRestricao",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CriarRestricaoDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "summary": "Proíbe um insumo numa forma",
         "tags": [
           "catálogo"
         ]
@@ -433,31 +507,6 @@
           }
         },
         "summary": "Altera uma forma farmacêutica",
-        "tags": [
-          "catálogo"
-        ]
-      }
-    },
-    "/api/v1/catalogo/restricoes": {
-      "post": {
-        "operationId": "CatalogoController_criarRestricao",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CriarRestricaoDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "204": {
-            "description": ""
-          }
-        },
-        "summary": "Proíbe um insumo numa forma",
         "tags": [
           "catálogo"
         ]
@@ -2453,6 +2502,52 @@
           "custoDeReferenciaPorGramaEmMicro",
           "markupEmCentesimos",
           "estoqueEmMiligramas"
+        ]
+      },
+      "ListaDeRestricoesDto": {
+        "type": "object",
+        "properties": {
+          "restricoes": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "insumoId": {
+                  "type": "string",
+                  "format": "uuid",
+                  "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                },
+                "insumoCodigo": {
+                  "type": "string"
+                },
+                "insumoDescricao": {
+                  "type": "string"
+                },
+                "formaId": {
+                  "type": "string",
+                  "format": "uuid",
+                  "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                },
+                "formaNome": {
+                  "type": "string"
+                },
+                "motivo": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "insumoId",
+                "insumoCodigo",
+                "insumoDescricao",
+                "formaId",
+                "formaNome",
+                "motivo"
+              ]
+            }
+          }
+        },
+        "required": [
+          "restricoes"
         ]
       },
       "AlterarInsumoDto": {
