@@ -13,6 +13,7 @@ import { SessaoGuard } from './identidade/sessao.guard';
 import { PedidosModule } from './pedidos/pedidos.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { ReceituarioModule } from './receituario/receituario.module';
+import { RelatoriosModule } from './relatorios/relatorios.module';
 import { validarEnv } from './config/env';
 
 /**
@@ -34,6 +35,7 @@ import { validarEnv } from './config/env';
     CatalogoModule,
     ClinicasModule,
     ReceituarioModule,
+    RelatoriosModule,
     DocumentoModule,
     PedidosModule,
     HealthModule,
