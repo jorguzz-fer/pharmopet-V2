@@ -17,6 +17,7 @@ import { Pedidos } from '@/paginas/pedidos/Pedidos';
 import { NovaReceita } from '@/paginas/receitas/NovaReceita';
 import { Receita } from '@/paginas/receitas/Receita';
 import { Receitas } from '@/paginas/receitas/Receitas';
+import { Relatorios } from '@/paginas/relatorios/Relatorios';
 import { Sistema } from '@/paginas/sistema/Sistema';
 import { FichaDoTutor } from '@/paginas/tutores/FichaDoTutor';
 import { Tutores } from '@/paginas/tutores/Tutores';
@@ -77,6 +78,7 @@ export const rotas: RouteObject[] = [
           { path: 'bulario', element: <Bulario /> },
           { path: 'catalogo', element: <Catalogo /> },
           { path: 'equipe', element: <Equipe /> },
+          { path: 'relatorios', element: <Relatorios /> },
           { path: 'estado', element: <Estado /> },
           { path: 'sistema', element: <Sistema /> },
           { path: '*', element: <NaoEncontrada /> },
