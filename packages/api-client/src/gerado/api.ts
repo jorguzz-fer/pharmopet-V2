@@ -683,6 +683,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/painel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Métricas da tela inicial, conforme o papel */
+        get: operations["PainelController_montar"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/pedidos": {
         parameters: {
             query?: never;
@@ -1428,6 +1445,35 @@ export interface components {
                 estado: "EM_ANALISE" | "EM_PRODUCAO" | "PRONTO" | "ENTREGUE" | "CANCELADO";
                 situacao: string;
             } | null;
+        };
+        PainelDto: {
+            rascunhos: number;
+            emitidasNoMes: number;
+            vencendo: number;
+            valorPrescritoNoMesEmCentavos: number;
+            fila: {
+                /** @enum {string} */
+                estado: "EM_ANALISE" | "EM_PRODUCAO" | "PRONTO";
+                quantidade: number;
+            }[] | null;
+            topVeterinarios: {
+                /** Format: uuid */
+                id: string;
+                nome: string;
+                crmv: string | null;
+                receitas: number;
+            }[] | null;
+            ultimas: {
+                /** Format: uuid */
+                id: string;
+                numero: number | null;
+                pacienteNome: string;
+                tutorNome: string;
+                /** @enum {string} */
+                estado: "RASCUNHO" | "EMITIDA" | "CANCELADA";
+                /** Format: date-time */
+                criadaEm: string;
+            }[];
         };
         EnviarPedidoDto: {
             /** Format: uuid */
@@ -2822,6 +2868,25 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    PainelController_montar: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PainelDto"];
+                };
             };
         };
     };

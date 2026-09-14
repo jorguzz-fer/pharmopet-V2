@@ -12,6 +12,7 @@ import { NaoEncontrada } from '@/paginas/NaoEncontrada';
 import { ReceitaPublica } from '@/paginas/publico/ReceitaPublica';
 import { EsqueciSenha } from '@/paginas/senha/EsqueciSenha';
 import { RedefinirSenha } from '@/paginas/senha/RedefinirSenha';
+import { Painel } from '@/paginas/painel/Painel';
 import { Pedidos } from '@/paginas/pedidos/Pedidos';
 import { NovaReceita } from '@/paginas/receitas/NovaReceita';
 import { Receita } from '@/paginas/receitas/Receita';
@@ -58,7 +59,10 @@ export const rotas: RouteObject[] = [
         children: [
           // A lista de receitas é a primeira tela: é o que a farmácia abre para
           // trabalhar e o que o veterinário abre para continuar de onde parou.
-          { index: true, element: <Receitas /> },
+          // A raiz é o painel (ADR 0017). Era a lista de receitas — um
+          // registro, bom para procurar e inútil para decidir o que fazer
+          // primeiro. A lista continua em `/receitas`, onde já estava.
+          { index: true, element: <Painel /> },
           { path: 'tutores', element: <Tutores /> },
           { path: 'tutores/:id', element: <FichaDoTutor /> },
           { path: 'receitas', element: <Receitas /> },

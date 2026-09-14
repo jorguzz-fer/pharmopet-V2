@@ -18,7 +18,8 @@ import { useSessao } from '@/sessao/SessaoContexto';
  * URL direto.
  */
 const abas: { para: string; rotulo: string; fim: boolean; papeis?: Papel[] }[] = [
-  { para: '/', rotulo: 'Receitas', fim: true },
+  { para: '/', rotulo: 'Painel', fim: true },
+  { para: '/receitas', rotulo: 'Receitas', fim: false },
   // A clínica lê a clientela dela, mas não a cadastra: quem abre ficha é quem
   // atende. `usePodeCadastrarFicha` é que esconde o botão de cadastro.
   { para: '/tutores', rotulo: 'Tutores', fim: false, papeis: ['ADMIN', 'VETERINARIO', 'CLINICA'] },
@@ -66,7 +67,21 @@ export function Layout() {
       <header className="border-b border-neutro-200 bg-neutro-0">
         <div className="mx-auto flex max-w-5xl flex-wrap items-center gap-x-6 gap-y-2 px-4 py-3">
           <Marca />
-          <nav aria-label="Seções" className="flex gap-1">
+          {/*
+            A faixa rola dentro de si, e não empurra a página.
+            `min-w-0` é o que permite isso: sem ele um contêiner flex não
+            encolhe abaixo do conteúdo, a `nav` mantinha a largura das dez
+            abas e era o documento inteiro que passava a rolar de lado no
+            celular. O comentário acima já prometia "faixa que rola" desde a
+            fase 5; a implementação nunca rolou.
+          */}
+          <nav
+            aria-label="Seções"
+            // `basis-full` no celular: a faixa desce para a própria linha e
+            // usa a largura toda para rolar. Disputando a linha com a marca e
+            // com "Sair" ela sobrava com uns 60px — rolável, e inútil.
+            className="flex min-w-0 basis-full gap-1 overflow-x-auto sm:basis-auto sm:flex-1"
+          >
             {visiveis.map((aba) => (
               <NavLink
                 key={aba.para}
@@ -74,7 +89,10 @@ export function Layout() {
                 end={aba.fim}
                 className={({ isActive }) =>
                   [
-                    'flex min-h-[var(--altura-controle)] items-center rounded-controle px-3 text-sm',
+                    // `shrink-0` e `whitespace-nowrap`: dentro de uma faixa
+                    // que rola, a aba não deve encolher nem quebrar o rótulo.
+                    'flex min-h-[var(--altura-controle)] shrink-0 items-center whitespace-nowrap',
+                    'rounded-controle px-3 text-sm',
                     isActive
                       ? 'bg-turquesa-50 font-semibold text-turquesa-900'
                       : 'text-neutro-500 hover:bg-neutro-100',
