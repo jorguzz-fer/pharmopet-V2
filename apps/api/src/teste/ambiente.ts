@@ -1,11 +1,13 @@
 import cookieParser from 'cookie-parser';
 import request from 'supertest';
 import { ZodValidationPipe } from 'nestjs-zod';
+import { HttpAdapterHost } from '@nestjs/core';
 import { Test } from '@nestjs/testing';
 import type { INestApplication } from '@nestjs/common';
 import type { NestExpressApplication } from '@nestjs/platform-express';
 import { AppModule } from '../app.module';
 import { limitesDeCorpo } from '../http/corpo';
+import { IdMalformadoFiltro } from '../http/id-malformado.filtro';
 import { PrismaService } from '../prisma/prisma.service';
 
 /**
@@ -36,6 +38,7 @@ export async function subirAplicacao(): Promise<{ app: INestApplication; prisma:
   app.set('trust proxy', 1);
   app.setGlobalPrefix('api/v1');
   app.useGlobalPipes(new ZodValidationPipe());
+  app.useGlobalFilters(new IdMalformadoFiltro(app.get(HttpAdapterHost).httpAdapter));
   await app.init();
 
   return { app, prisma: app.get(PrismaService) };

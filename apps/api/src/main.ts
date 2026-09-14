@@ -1,5 +1,5 @@
 import 'reflect-metadata';
-import { NestFactory } from '@nestjs/core';
+import { HttpAdapterHost, NestFactory } from '@nestjs/core';
 import { Logger } from '@nestjs/common';
 import type { NestExpressApplication } from '@nestjs/platform-express';
 import { SwaggerModule } from '@nestjs/swagger';
@@ -9,6 +9,7 @@ import cookieParser from 'cookie-parser';
 import { AppModule } from './app.module';
 import { validarEnv } from './config/env';
 import { limitesDeCorpo } from './http/corpo';
+import { IdMalformadoFiltro } from './http/id-malformado.filtro';
 import { criarDocumentoOpenApi } from './openapi/documento';
 
 async function bootstrap(): Promise<void> {
@@ -35,6 +36,10 @@ async function bootstrap(): Promise<void> {
   // Uma só linguagem de schema no projeto: os DTOs nascem de schemas Zod
   // (via createZodDto), que servem tanto à validação quanto ao OpenAPI.
   app.useGlobalPipes(new ZodValidationPipe());
+
+  // Id que não é UUID vira 400, e não 500. Filtro e não pipe por rota: pipe é
+  // coisa que se esquece na rota seguinte.
+  app.useGlobalFilters(new IdMalformadoFiltro(app.get(HttpAdapterHost).httpAdapter));
 
   // Origens vêm do ambiente. Sem nenhuma configurada, o navegador não é
   // liberado — integrações server-to-server não passam por CORS.
