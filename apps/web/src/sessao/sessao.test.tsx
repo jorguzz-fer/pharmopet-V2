@@ -37,16 +37,31 @@ function urlDe(entrada: RequestInfo | URL): string {
   return String(entrada instanceof Request ? entrada.url : entrada);
 }
 
+/** Um painel vazio, na forma que o contrato publica. */
+const PAINEL_VAZIO = {
+  rascunhos: 0,
+  emitidasNoMes: 0,
+  vencendo: 0,
+  valorPrescritoNoMesEmCentavos: 0,
+  fila: null,
+  topVeterinarios: null,
+  ultimas: [],
+};
+
 /**
  * Resposta conforme a rota chamada.
  *
- * A tela inicial lista receitas, então "estar logado" não é mais uma chamada
- * só: devolver o usuário para toda URL faria a lista receber um corpo sem
- * `receitas` e quebrar dentro do componente, escondendo o que o teste queria
- * verificar.
+ * A tela inicial é o painel, então "estar logado" não é uma chamada só:
+ * devolver o usuário para toda URL faria o painel receber um corpo sem os
+ * campos que ele lê e quebrar dentro do componente, escondendo o que o teste
+ * queria verificar. Já aconteceu com a lista de receitas, que era a inicial
+ * antes — e voltou a acontecer quando o painel tomou o lugar dela.
  */
 function comoAApi(entrada: RequestInfo | URL): Response {
-  if (urlDe(entrada).includes('/receituario/receitas')) return json({ receitas: [] });
+  const url = urlDe(entrada);
+
+  if (url.includes('/painel')) return json(PAINEL_VAZIO);
+  if (url.includes('/receituario/receitas')) return json({ receitas: [] });
   return json(USUARIO);
 }
 
@@ -101,7 +116,9 @@ describe('porta das rotas internas', () => {
 
     montar('/');
 
-    expect(await screen.findByRole('heading', { name: 'Receitas' })).toBeInTheDocument();
+    // A raiz virou o painel (ADR 0017); a lista de receitas ficou em
+    // `/receitas`. O cumprimento traz o nome de quem entrou.
+    expect(await screen.findByRole('heading', { name: /Olá, Renata/ })).toBeInTheDocument();
   });
 });
 
@@ -190,7 +207,9 @@ describe('saída', () => {
       .fn<Fetch>()
       .mockImplementationOnce(async (entrada) => comoAApi(entrada))
       .mockImplementation(async (entrada) =>
-        urlDe(entrada).includes('/receituario/') ? comoAApi(entrada) : semConteudo(),
+        // O painel entra junto com o receituário: é o que a tela inicial
+        // carrega, e cair no 204 genérico deixaria o componente sem corpo.
+        /\/(receituario|painel)/.test(urlDe(entrada)) ? comoAApi(entrada) : semConteudo(),
       );
     vi.stubGlobal('fetch', fetchFalso);
 

@@ -1749,6 +1749,28 @@
         ]
       }
     },
+    "/api/v1/painel": {
+      "get": {
+        "operationId": "PainelController_montar",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PainelDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Métricas da tela inicial, conforme o papel",
+        "tags": [
+          "painel"
+        ]
+      }
+    },
     "/api/v1/pedidos": {
       "post": {
         "operationId": "PedidosController_enviar",
@@ -6033,6 +6055,164 @@
           "formulacoes",
           "valorTotalEmCentavos",
           "pedido"
+        ]
+      },
+      "PainelDto": {
+        "type": "object",
+        "properties": {
+          "rascunhos": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "emitidasNoMes": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "vencendo": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "valorPrescritoNoMesEmCentavos": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "fila": {
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "estado": {
+                      "type": "string",
+                      "enum": [
+                        "EM_ANALISE",
+                        "EM_PRODUCAO",
+                        "PRONTO"
+                      ]
+                    },
+                    "quantidade": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9007199254740991
+                    }
+                  },
+                  "required": [
+                    "estado",
+                    "quantidade"
+                  ]
+                }
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "topVeterinarios": {
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "format": "uuid",
+                      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                    },
+                    "nome": {
+                      "type": "string"
+                    },
+                    "crmv": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "receitas": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9007199254740991
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "nome",
+                    "crmv",
+                    "receitas"
+                  ]
+                }
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "ultimas": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "format": "uuid",
+                  "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                },
+                "numero": {
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "pacienteNome": {
+                  "type": "string"
+                },
+                "tutorNome": {
+                  "type": "string"
+                },
+                "estado": {
+                  "type": "string",
+                  "enum": [
+                    "RASCUNHO",
+                    "EMITIDA",
+                    "CANCELADA"
+                  ]
+                },
+                "criadaEm": {
+                  "type": "string",
+                  "format": "date-time",
+                  "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                }
+              },
+              "required": [
+                "id",
+                "numero",
+                "pacienteNome",
+                "tutorNome",
+                "estado",
+                "criadaEm"
+              ]
+            }
+          }
+        },
+        "required": [
+          "rascunhos",
+          "emitidasNoMes",
+          "vencendo",
+          "valorPrescritoNoMesEmCentavos",
+          "fila",
+          "topVeterinarios",
+          "ultimas"
         ]
       },
       "EnviarPedidoDto": {
