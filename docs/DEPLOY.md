@@ -147,6 +147,50 @@ vez. Papéis: `ADMIN`, `VETERINARIO`, `FARMACIA`. Veterinário aceita `--crmv`.
 
 Depois disso, entrando como ADMIN, dá para cadastrar os demais pela aplicação.
 
+### O catálogo sobe vazio — e sem ele não se prescreve nada
+
+Esta é a parte que mais surpreende no primeiro deploy: **a instalação nasce
+sem nenhum insumo e sem nenhuma forma farmacêutica.** A tela de nova receita
+abre, e não há o que escolher.
+
+Não é esquecimento. Os quatro arquivos que alimentam o catálogo trazem o
+**custo e o markup da farmácia**, e preço de compra versionado fica no
+histórico do git para sempre, legível por qualquer pessoa que um dia tenha
+acesso ao repositório. Por isso eles ficam fora, e o importador recebe
+caminhos.
+
+Com os arquivos no container:
+
+```sh
+cd /app/apps/api
+
+node dist/catalogo/importacao/importar.cli.js \
+  --formas /caminho/formas.json \
+  --insumos /caminho/insumos.json \
+  --controlados /caminho/controlados.json \
+  --excecoes /caminho/excecoes.json
+```
+
+Cada arquivo é opcional e independente, e o comando é idempotente: rodar de
+novo atualiza preço e descrição de quem já existe. Antes de importar vale
+passar o `catalogo:conferir` no `insumos.json` — ele diz o que vai entrar e o
+que vai ficar de fora, com código e nome.
+
+### O rodapé do documento sai sem identificar a farmácia
+
+Sem `FARMACIA_NOME`, `FARMACIA_CNPJ`, `FARMACIA_ENDERECO` e
+`FARMACIA_TELEFONE`, o PDF da receita sai **sem o bloco de identificação de
+quem manipula**. Preferimos ausente a inventado — endereço errado num
+documento é pior do que endereço nenhum —, mas é uma ausência que se nota.
+As quatro são variáveis de runtime da API, como as da seção 2.
+
+### A recuperação de senha fica desligada
+
+Sem `RESEND_API_KEY`, `EMAIL_REMETENTE` e `URL_PUBLICA`, a tela de "esqueci a
+senha" responde que a recuperação não está configurada nesta instalação (ADR 0016) — em vez de aceitar o pedido e deixar a pessoa esperando um e-mail que
+nunca sai. Enquanto as três não existirem, quem esquecer a senha depende de um
+administrador.
+
 ---
 
 ## 6. Conferência rápida
@@ -165,3 +209,8 @@ curl -I https://app.seudominio.com.br
 Se o `health` responder e o login não funcionar, olhe nesta ordem:
 `ALLOWED_ORIGINS`, depois a `VITE_API_URL` que foi embutida no bundle, depois o
 domínio (seção 4).
+
+E, já dentro da aplicação como ADMIN, a aba **Catálogo**: se ela estiver
+vazia, a importação da seção 5 não foi feita, e ninguém vai conseguir
+prescrever. É o primeiro lugar a olhar quando "a tela de nova receita não
+deixa escolher nada".
