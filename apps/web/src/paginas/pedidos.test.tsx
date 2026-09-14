@@ -1,7 +1,8 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { RouterProvider, createMemoryRouter } from 'react-router';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { esperaDesde } from '@/paginas/pedidos/Pedidos';
 import { rotas } from '@/rotas';
 import { ProvedorDeSessao } from '@/sessao/ProvedorDeSessao';
 
@@ -120,7 +121,8 @@ describe('fila da farmácia', () => {
 
     montar('/pedidos');
 
-    expect(await screen.findByText(/Nada na fila/)).toBeInTheDocument();
+    expect(await screen.findByText('A fila está vazia')).toBeInTheDocument();
+    expect(screen.getByText(/Pedidos chegam aqui quando um veterinário envia/)).toBeInTheDocument();
   });
 
   it('oferece só o próximo passo, e não a lista inteira de estados', async () => {
@@ -205,5 +207,123 @@ describe('fila da farmácia', () => {
     await screen.findByText('Pedido nº 4');
 
     expect(screen.queryByRole('button', { name: /Cancelar/ })).not.toBeInTheDocument();
+  });
+});
+
+/**
+ * O quadro (ADR 0014).
+ *
+ * O que estes guardam: que cada pedido caia na coluna do seu estado, que os
+ * encerrados fiquem fora das três colunas do trabalho — senão a coluna que só
+ * cresce empurra as que importam — e que o relógio do cartão diga há quanto
+ * tempo aquilo espera, que é o que decide o que sai primeiro da bancada.
+ */
+describe('o quadro', () => {
+  it('põe cada pedido na coluna do seu estado', async () => {
+    const { fetchFalso } = apiFalsa(
+      {
+        '/pedidos': {
+          pedidos: [
+            pedido(),
+            pedido({ id: 'p-2', numero: 5, estado: 'EM_PRODUCAO' }),
+            pedido({ id: 'p-3', numero: 6, estado: 'PRONTO' }),
+          ],
+        },
+      },
+      FARMACIA,
+    );
+    vi.stubGlobal('fetch', fetchFalso);
+
+    montar('/pedidos');
+    await screen.findByText('Pedido nº 4');
+
+    const analise = within(screen.getByRole('region', { name: /Em análise/ }));
+    const producao = within(screen.getByRole('region', { name: /Em produção/ }));
+    const pronto = within(screen.getByRole('region', { name: /Pronto/ }));
+
+    expect(analise.getByText('Pedido nº 4')).toBeInTheDocument();
+    expect(producao.getByText('Pedido nº 5')).toBeInTheDocument();
+    expect(pronto.getByText('Pedido nº 6')).toBeInTheDocument();
+
+    // Nenhum aparece em duas colunas ao mesmo tempo.
+    expect(analise.queryByText('Pedido nº 5')).not.toBeInTheDocument();
+    expect(pronto.queryByText('Pedido nº 4')).not.toBeInTheDocument();
+  });
+
+  it('tira os encerrados das três colunas do trabalho', async () => {
+    const { fetchFalso } = apiFalsa(
+      {
+        '/pedidos': {
+          pedidos: [pedido(), pedido({ id: 'p-9', numero: 9, estado: 'ENTREGUE' })],
+        },
+      },
+      FARMACIA,
+    );
+    vi.stubGlobal('fetch', fetchFalso);
+
+    montar('/pedidos');
+    await screen.findByText('Pedido nº 9');
+
+    for (const coluna of ['Em análise', 'Em produção', 'Pronto']) {
+      const dentro = within(screen.getByRole('region', { name: new RegExp(coluna) }));
+      expect(dentro.queryByText('Pedido nº 9')).not.toBeInTheDocument();
+    }
+
+    expect(
+      within(screen.getByRole('region', { name: 'Encerrados' })).getByText('Pedido nº 9'),
+    ).toBeInTheDocument();
+
+    // E o resumo do topo conta só o que está em aberto.
+    expect(screen.getByText(/1 pedido em aberto/)).toBeInTheDocument();
+  });
+
+  it('conta quantos há em cada coluna', async () => {
+    const { fetchFalso } = apiFalsa(
+      {
+        '/pedidos': {
+          pedidos: [pedido(), pedido({ id: 'p-2', numero: 5 })],
+        },
+      },
+      FARMACIA,
+    );
+    vi.stubGlobal('fetch', fetchFalso);
+
+    montar('/pedidos');
+    await screen.findByText('Pedido nº 4');
+
+    // O contador entra no nome acessível da coluna — quem ouve a tela sabe
+    // quantos há sem percorrer os cartões um a um.
+    expect(screen.getByRole('region', { name: /Em análise\s*2/ })).toBeInTheDocument();
+    expect(screen.getByRole('region', { name: /Pronto\s*0/ })).toBeInTheDocument();
+  });
+});
+
+describe('há quanto tempo espera', () => {
+  const AGORA = new Date('2026-09-14T12:00:00.000Z');
+
+  it('conta em minutos, horas e dias, pela maior unidade que couber', () => {
+    expect(esperaDesde('2026-09-14T11:47:00.000Z', AGORA).rotulo).toBe('13 min');
+    expect(esperaDesde('2026-09-14T06:30:00.000Z', AGORA).rotulo).toBe('5 h');
+    expect(esperaDesde('2026-09-11T09:00:00.000Z', AGORA).rotulo).toBe('3 d');
+  });
+
+  it('vira 1 h no minuto 60, e 1 d na hora 24', () => {
+    expect(esperaDesde('2026-09-14T11:01:00.000Z', AGORA).rotulo).toBe('59 min');
+    expect(esperaDesde('2026-09-14T11:00:00.000Z', AGORA).rotulo).toBe('1 h');
+    expect(esperaDesde('2026-09-13T12:01:00.000Z', AGORA).rotulo).toBe('23 h');
+    expect(esperaDesde('2026-09-13T12:00:00.000Z', AGORA).rotulo).toBe('1 d');
+  });
+
+  it('marca como demais só a partir de um dia', () => {
+    // É o que pinta o relógio de vermelho no cartão. Antes de um dia na fila
+    // não há nada de errado, e destacar tudo é não destacar nada.
+    expect(esperaDesde('2026-09-14T01:00:00.000Z', AGORA).demais).toBe(false);
+    expect(esperaDesde('2026-09-13T11:00:00.000Z', AGORA).demais).toBe(true);
+  });
+
+  it('não conta para trás quando o relógio do servidor está adiantado', () => {
+    // Um pedido criado "no futuro" por dessincronia de relógio mostrava
+    // "-3 min", que não quer dizer nada para quem está na bancada.
+    expect(esperaDesde('2026-09-14T12:03:00.000Z', AGORA).rotulo).toBe('0 min');
   });
 });

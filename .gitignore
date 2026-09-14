@@ -24,3 +24,9 @@ npm-debug.log*
 # Saída do gerador de tema. Nasce dos tokens a cada build, como o dist —
 # versioná-la criaria uma segunda cópia da paleta, livre para divergir.
 apps/web/src/estilos/tema.gerado.css
+
+# O canvas publicado: 2 MB do editor embutido, regerado por seed-canvas a
+# partir dos .dc.html ao lado. As pranchetas ficam versionadas; o empacotado
+# não, como qualquer dist.
+.design/*.html
+!.design/*.dc.html

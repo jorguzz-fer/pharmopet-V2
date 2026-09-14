@@ -13,8 +13,18 @@ const senhaSchema = z
   .min(12, 'A senha precisa de pelo menos 12 caracteres.')
   .max(200, 'Senha longa demais.');
 
+/**
+ * E-mail que alguém digita, com as bordas aparadas antes de validar.
+ *
+ * Colar de outro lugar traz espaço junto, e o teclado do celular gosta de
+ * acrescentar um no fim. Sem o `trim`, isso vira "informe um e-mail válido"
+ * sobre um endereço que a pessoa vê escrito certo na tela — e ela não tem
+ * como adivinhar o que está sobrando.
+ */
+const emailDigitado = z.string().trim().pipe(z.email('Informe um e-mail válido.'));
+
 export const entrarSchema = z.object({
-  email: z.email('Informe um e-mail válido.'),
+  email: emailDigitado,
   senha: z.string().min(1, 'Informe a senha.'),
 });
 export class EntrarDto extends createZodDto(entrarSchema) {}
@@ -79,7 +89,7 @@ export const filtroDeUsuariosSchema = z.object({
 export class FiltroDeUsuariosDto extends createZodDto(filtroDeUsuariosSchema) {}
 
 export const criarUsuarioSchema = z.object({
-  email: z.email('Informe um e-mail válido.'),
+  email: emailDigitado,
   nome: z.string().min(2, 'Informe o nome.').max(160),
   papel: z.enum(['ADMIN', 'VETERINARIO', 'FARMACIA', 'CLINICA']),
   senha: senhaSchema,
@@ -106,3 +116,21 @@ export const alterarUsuarioSchema = z.object({
   desativado: z.boolean().optional(),
 });
 export class AlterarUsuarioDto extends createZodDto(alterarUsuarioSchema) {}
+
+/** O pedido do link. Só o e-mail — nada mais é preciso, e nada mais é dito. */
+export const pedirRedefinicaoSchema = z.object({
+  email: emailDigitado,
+});
+export class PedirRedefinicaoDto extends createZodDto(pedirRedefinicaoSchema) {}
+
+/**
+ * A redefinição em si.
+ *
+ * Sem a senha atual, ao contrário de `trocarSenhaSchema`: quem chega aqui é
+ * justamente quem não a tem. Quem prova a identidade é o token do e-mail.
+ */
+export const redefinirSenhaSchema = z.object({
+  token: z.string().min(1, 'Link inválido.'),
+  senhaNova: senhaSchema,
+});
+export class RedefinirSenhaDto extends createZodDto(redefinirSenhaSchema) {}

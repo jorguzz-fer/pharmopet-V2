@@ -33,6 +33,16 @@
     outline-offset: 2px;
   }
 
+  /* A caixa de marcar e o botão de opção nativos saem no azul do sistema
+     operacional — a única cor da interface que não vinha dos tokens, e a que
+     mais destoava, porque aparece bem ao lado do turquesa. `accent-color` os
+     repinta sem trocar o controle nativo por uma imitação em `div`, que é como
+     se perde teclado, leitor de tela e marcação por arrasto. */
+  input[type='checkbox'],
+  input[type='radio'] {
+    accent-color: var(--color-turquesa-700);
+  }
+
   /* Respeita quem pediu menos movimento no sistema operacional. */
   @media (prefers-reduced-motion: reduce) {
     *,

@@ -7,3 +7,7 @@ pnpm-lock.yaml
 # diferença a cada geração — compararia estilo, não contrato.
 packages/api-client/src/gerado
 apps/api/openapi.json
+
+# Pranchetas do canvas de design. São HTML de mock com estilo em linha, e a
+# formatação que o Prettier impõe a elas não diz nada sobre o código que roda.
+.design

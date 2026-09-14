@@ -63,6 +63,27 @@ export const envSchema = z
     FARMACIA_CNPJ: z.string().trim().min(1).optional(),
     FARMACIA_ENDERECO: z.string().trim().min(1).optional(),
     FARMACIA_TELEFONE: z.string().trim().min(1).optional(),
+
+    /**
+     * Envio de e-mail, para a recuperação de senha.
+     *
+     * As três juntas ou nenhuma: faltando qualquer uma não há como mandar o
+     * link, e a rota de "esqueci a senha" passa a dizer isso — em vez de
+     * aceitar o pedido e deixar a pessoa esperando um e-mail que nunca sai.
+     *
+     * A chave vem do ambiente e nunca do código: é credencial de envio em nome
+     * do domínio da farmácia.
+     */
+    RESEND_API_KEY: z.string().trim().min(1).optional(),
+    /** Remetente, no formato `Nome <endereco@dominio>`. */
+    EMAIL_REMETENTE: z.string().trim().min(1).optional(),
+    /**
+     * Raiz pública do front, para montar o link do e-mail.
+     *
+     * Sem ela o link sairia relativo, e não há navegador que abra isso a
+     * partir de uma caixa de entrada.
+     */
+    URL_PUBLICA: z.string().url().optional(),
   })
   .refine((env) => env.NODE_ENV !== 'production' || env.COOKIE_SEGURO, {
     message:

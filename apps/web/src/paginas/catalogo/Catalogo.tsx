@@ -121,12 +121,15 @@ function ListaDeInsumos({ somenteControlados }: { somenteControlados: boolean })
       {estado.situacao === 'falha' ? <Falha motivo={estado.motivo} aoTentar={recarregar} /> : null}
 
       {estado.situacao === 'ok' && visiveis.length === 0 ? (
-        <Vazio>
+        <Vazio
+          icone={somenteControlados || busca.trim() ? 'busca' : 'catalogo'}
+          titulo={somenteControlados || busca.trim() ? 'Nada encontrado' : 'O catálogo está vazio'}
+        >
           {somenteControlados
             ? 'Nenhum insumo controlado entre os encontrados. Marque um pela aba Insumos.'
             : busca.trim()
               ? 'Nenhum insumo com esse nome ou código.'
-              : 'O catálogo está vazio. Importe o export da farmácia com o comando catalogo:importar.'}
+              : 'Importe o export da farmácia com o comando catalogo:importar.'}
         </Vazio>
       ) : null}
 

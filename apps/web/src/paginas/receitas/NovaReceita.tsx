@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState, type ReactNode } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router';
 import { exigir, type components } from '@pharmopet/api-client';
 import {
@@ -17,6 +17,9 @@ import { Campo } from '@/componentes/Campo';
 import { Cartao } from '@/componentes/Cartao';
 import { Carregando, Falha } from '@/componentes/Estados';
 import { Selo } from '@/componentes/Selo';
+import { PassoDoPaciente } from '@/paginas/receitas/PassoDoPaciente';
+import { PassoDoTutor } from '@/paginas/receitas/PassoDoTutor';
+import { PassosDaReceita, type EscolhasDaReceita } from '@/paginas/receitas/PassosDaReceita';
 
 // O insumo não tem schema próprio no contrato: vive dentro da lista. Indexar
 // daqui mantém o tipo amarrado ao contrato, em vez de recriá-lo à mão.
@@ -54,9 +57,80 @@ const FREQUENCIAS = [
  * cada tecla encheria o banco de receita que ninguém quis.
  */
 export function NovaReceita() {
-  const [params] = useSearchParams();
+  const [params, setParams] = useSearchParams();
   const pacienteId = params.get('paciente') ?? '';
+  const tutorId = params.get('tutor') ?? '';
+
+  /*
+    Só o nome, e só para o trilho. O id continua sendo a verdade, e mora na
+    URL: se isto virasse a fonte do tutor, recarregar a página esvaziaria o
+    wizard — que é exatamente o defeito que a URL existe para evitar.
+  */
+  const [nomeDoTutor, setNomeDoTutor] = useState<string>();
+
+  if (pacienteId) return <Prescricao pacienteId={pacienteId} />;
+
+  if (tutorId) {
+    return (
+      <Passo
+        numero={2}
+        escolhas={{ tutor: nomeDoTutor }}
+        aoVoltar={() => setParams({}, { replace: true })}
+      >
+        <PassoDoPaciente
+          tutorId={tutorId}
+          aoSaberDoTutor={setNomeDoTutor}
+          // `replace` para o botão "voltar" do navegador não devolver a
+          // pessoa ao passo que ela acabou de deixar para trás.
+          aoVoltar={() => setParams({}, { replace: true })}
+          aoEscolher={(p) => setParams({ paciente: p.id })}
+        />
+      </Passo>
+    );
+  }
+
+  return (
+    <Passo numero={1}>
+      <PassoDoTutor aoEscolher={(t) => setParams({ tutor: t.id })} />
+    </Passo>
+  );
+}
+
+/**
+ * A moldura comum dos passos: título, onde estamos, e o conteúdo.
+ *
+ * O indicador aparece nos três primeiros e na tela da receita não — lá o
+ * documento já se anuncia sozinho, e repetir a trilha sobre uma receita
+ * pronta sugeriria que ainda falta algo a preencher.
+ */
+function Passo({
+  numero,
+  escolhas,
+  aoVoltar,
+  children,
+}: {
+  numero: 1 | 2 | 3;
+  escolhas?: EscolhasDaReceita;
+  aoVoltar?: (passo: 1 | 2) => void;
+  children: ReactNode;
+}) {
+  return (
+    <div className="flex flex-col gap-6">
+      <div className="flex flex-col gap-4">
+        <h1 className="font-titulo text-2xl font-extrabold tracking-tight">Nova receita</h1>
+        <div className="rounded-card border border-neutro-200 bg-neutro-0 px-4 py-3 shadow-carta">
+          <PassosDaReceita atual={numero} escolhas={escolhas} aoVoltar={aoVoltar} />
+        </div>
+      </div>
+      {children}
+    </div>
+  );
+}
+
+/** Passo 3: a fórmula, com preço e conferência de dose ao vivo. */
+function Prescricao({ pacienteId }: { pacienteId: string }) {
   const navegar = useNavigate();
+  const [, setParams] = useSearchParams();
 
   const carregarBase = useCallback(
     async () => ({
@@ -73,32 +147,56 @@ export function NovaReceita() {
 
   const { estado, recarregar } = useConsulta(`nova:${pacienteId}`, carregarBase);
 
-  if (!pacienteId) {
-    return <Falha motivo="Escolha um paciente na ficha do tutor para começar a receita." />;
+  if (estado.situacao === 'carregando') {
+    return (
+      <Passo numero={3}>
+        <Carregando o="o paciente" />
+      </Passo>
+    );
   }
-  if (estado.situacao === 'carregando') return <Carregando o="o paciente" />;
-  if (estado.situacao === 'falha') return <Falha motivo={estado.motivo} aoTentar={recarregar} />;
+  if (estado.situacao === 'falha') {
+    return (
+      <Passo numero={3}>
+        <Falha motivo={estado.motivo} aoTentar={recarregar} />
+      </Passo>
+    );
+  }
 
   const { paciente, formas, clinicas } = estado.dado;
 
   if (paciente.pesoEmGramas === null) {
     return (
-      <div className="flex flex-col gap-4">
-        <Falha motivo="Este paciente está sem peso registrado, e a dose é conferida contra o peso." />
-        <Link to={`/tutores/${paciente.tutorId}`} className="text-sm text-turquesa-700 underline">
-          Registrar o peso na ficha
-        </Link>
-      </div>
+      <Passo numero={3}>
+        <div className="flex flex-col gap-4">
+          <Falha motivo="Este paciente está sem peso registrado, e a dose é conferida contra o peso." />
+          <Link to={`/tutores/${paciente.tutorId}`} className="text-sm text-turquesa-700 underline">
+            Registrar o peso na ficha
+          </Link>
+        </div>
+      </Passo>
     );
   }
 
   return (
-    <Montagem
-      paciente={paciente}
-      formas={formas.formas}
-      clinicas={clinicas.clinicas}
-      aoSalvar={(id) => navegar(`/receitas/${id}`)}
-    />
+    <Passo
+      numero={3}
+      escolhas={{ tutor: paciente.tutorNome, paciente: paciente.nome }}
+      /*
+        Voltar ao passo 2 tira só o paciente e mantém o tutor: quem errou o
+        bicho quase sempre errou dentro da mesma ficha, e limpar os dois faria
+        refazer a busca do tutor sem motivo. Voltar ao 1 limpa os dois.
+      */
+      aoVoltar={(passo) =>
+        setParams(passo === 1 ? {} : { tutor: paciente.tutorId }, { replace: true })
+      }
+    >
+      <Montagem
+        paciente={paciente}
+        formas={formas.formas}
+        clinicas={clinicas.clinicas}
+        aoSalvar={(id) => navegar(`/receitas/${id}`)}
+      />
+    </Passo>
   );
 }
 
@@ -226,158 +324,163 @@ function Montagem({
   }
 
   return (
-    <div className="flex flex-col gap-6">
-      <div>
-        <Link
-          to={`/tutores/${paciente.tutorId}`}
-          className="text-sm text-turquesa-700 hover:underline"
-        >
-          ← {paciente.tutorNome}
-        </Link>
-        <h1 className="mt-1 font-titulo text-2xl font-extrabold tracking-tight">
-          Receita para {paciente.nome}
-        </h1>
-        <p className="mt-1 text-sm text-neutro-500">
+    <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_22rem] xl:items-start">
+      <div className="flex flex-col gap-6">
+        <p className="text-sm text-neutro-500">
+          <span className="font-semibold text-neutro-900">{paciente.nome}</span> ·{' '}
           {paciente.especie.toLowerCase()} ·{' '}
-          {paciente.pesoEmGramas === null ? 'sem peso' : formatarPeso(paciente.pesoEmGramas)}
+          {paciente.pesoEmGramas === null ? 'sem peso' : formatarPeso(paciente.pesoEmGramas)} ·{' '}
+          <Link to={`/tutores/${paciente.tutorId}`} className="text-turquesa-700 hover:underline">
+            abrir a ficha
+          </Link>
         </p>
-      </div>
 
-      <EscolhaDaClinica clinicas={clinicas} escolhida={clinicaId} aoEscolher={setClinicaId} />
+        <EscolhaDaClinica clinicas={clinicas} escolhida={clinicaId} aoEscolher={setClinicaId} />
 
-      <Cartao titulo="Fórmula">
-        <div className="flex flex-col gap-5">
-          <div className="flex flex-col gap-1">
-            <label htmlFor="forma" className="text-sm font-semibold text-neutro-700">
-              Forma farmacêutica
-            </label>
-            <select
-              id="forma"
-              className="min-h-[var(--altura-controle)] w-full rounded-controle border border-neutro-200 bg-neutro-0 px-3 text-base"
-              value={formaId}
-              onChange={(e) => {
-                setFormaId(e.target.value);
-                // Trocar de biscoito para cápsula deixaria um sabor pendurado
-                // numa forma que não o aceita, e a API recusaria o salvamento.
-                setAroma('');
-              }}
-            >
-              {formas.map((f) => (
-                <option key={f.id} value={f.id}>
-                  {f.nome}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {pedeAroma ? (
+        <Cartao titulo="Fórmula">
+          <div className="flex flex-col gap-5">
             <div className="flex flex-col gap-1">
-              <label htmlFor="aroma" className="text-sm font-semibold text-neutro-700">
-                Aroma
+              <label htmlFor="forma" className="text-sm font-semibold text-neutro-700">
+                Forma farmacêutica
               </label>
               <select
-                id="aroma"
+                id="forma"
                 className="min-h-[var(--altura-controle)] w-full rounded-controle border border-neutro-200 bg-neutro-0 px-3 text-base"
-                value={aroma}
-                onChange={(e) => setAroma(e.target.value as Aroma | '')}
+                value={formaId}
+                onChange={(e) => {
+                  setFormaId(e.target.value);
+                  // Trocar de biscoito para cápsula deixaria um sabor pendurado
+                  // numa forma que não o aceita, e a API recusaria o salvamento.
+                  setAroma('');
+                }}
               >
-                <option value="">Escolha o sabor</option>
-                {AROMAS.map((a) => (
-                  <option key={a} value={a}>
-                    {rotuloDoAroma(a)}
+                {formas.map((f) => (
+                  <option key={f.id} value={f.id}>
+                    {f.nome}
                   </option>
                 ))}
               </select>
-              <p className="text-xs text-neutro-500">
-                {forma?.nome} é uma forma que o animal come, e a farmácia precisa saber o sabor.
+            </div>
+
+            {pedeAroma ? (
+              <div className="flex flex-col gap-1">
+                <label htmlFor="aroma" className="text-sm font-semibold text-neutro-700">
+                  Aroma
+                </label>
+                <select
+                  id="aroma"
+                  className="min-h-[var(--altura-controle)] w-full rounded-controle border border-neutro-200 bg-neutro-0 px-3 text-base"
+                  value={aroma}
+                  onChange={(e) => setAroma(e.target.value as Aroma | '')}
+                >
+                  <option value="">Escolha o sabor</option>
+                  {AROMAS.map((a) => (
+                    <option key={a} value={a}>
+                      {rotuloDoAroma(a)}
+                    </option>
+                  ))}
+                </select>
+                <p className="text-xs text-neutro-500">
+                  {forma?.nome} é uma forma que o animal come, e a farmácia precisa saber o sabor.
+                </p>
+              </div>
+            ) : null}
+
+            <Ativos itens={itens} aoMudar={setItens} />
+          </div>
+        </Cartao>
+
+        <Cartao titulo="Posologia">
+          <div className="grid gap-4 sm:grid-cols-3">
+            <div className="flex flex-col gap-1">
+              <label htmlFor="frequencia" className="text-sm font-semibold text-neutro-700">
+                Frequência
+              </label>
+              <select
+                id="frequencia"
+                className="min-h-[var(--altura-controle)] w-full rounded-controle border border-neutro-200 bg-neutro-0 px-3 text-base"
+                value={frequenciaHoras}
+                onChange={(e) => setFrequencia(Number(e.target.value) as 24 | 12 | 8 | 6)}
+              >
+                {FREQUENCIAS.map((f) => (
+                  <option key={f.horas} value={f.horas}>
+                    {f.rotulo}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <Campo
+              rotulo="Duração (dias)"
+              inputMode="numeric"
+              value={dias}
+              onChange={(e) => setDias(e.target.value.replace(/\D/g, ''))}
+            />
+
+            <div className="flex flex-col justify-end">
+              <p className="text-sm text-neutro-500">A manipular</p>
+              <p className="font-titulo text-xl font-bold text-neutro-900">
+                {quantidade > 0 ? `${quantidade} unidades` : '—'}
               </p>
             </div>
-          ) : null}
-
-          <Ativos itens={itens} aoMudar={setItens} />
-        </div>
-      </Cartao>
-
-      <Cartao titulo="Posologia">
-        <div className="grid gap-4 sm:grid-cols-3">
-          <div className="flex flex-col gap-1">
-            <label htmlFor="frequencia" className="text-sm font-semibold text-neutro-700">
-              Frequência
-            </label>
-            <select
-              id="frequencia"
-              className="min-h-[var(--altura-controle)] w-full rounded-controle border border-neutro-200 bg-neutro-0 px-3 text-base"
-              value={frequenciaHoras}
-              onChange={(e) => setFrequencia(Number(e.target.value) as 24 | 12 | 8 | 6)}
-            >
-              {FREQUENCIAS.map((f) => (
-                <option key={f.horas} value={f.horas}>
-                  {f.rotulo}
-                </option>
-              ))}
-            </select>
           </div>
 
-          <Campo
-            rotulo="Duração (dias)"
-            inputMode="numeric"
-            value={dias}
-            onChange={(e) => setDias(e.target.value.replace(/\D/g, ''))}
-          />
-
-          <div className="flex flex-col justify-end">
-            <p className="text-sm text-neutro-500">A manipular</p>
-            <p className="font-titulo text-xl font-bold text-neutro-900">
-              {quantidade > 0 ? `${quantidade} unidades` : '—'}
+          <div className="mt-4">
+            <label className="flex items-center gap-2 text-sm text-neutro-700">
+              <input
+                type="checkbox"
+                checked={usoContinuo}
+                onChange={(e) => setUsoContinuo(e.target.checked)}
+                className="size-4 rounded border-neutro-300"
+              />
+              Uso contínuo
+            </label>
+            <p className="mt-1 text-xs text-neutro-500">
+              Marca que o tratamento não termina no último comprimido. Não altera a validade da
+              receita, que segue a lista de controle.
             </p>
           </div>
-        </div>
 
-        <div className="mt-4">
-          <label className="flex items-center gap-2 text-sm text-neutro-700">
-            <input
-              type="checkbox"
-              checked={usoContinuo}
-              onChange={(e) => setUsoContinuo(e.target.checked)}
-              className="size-4 rounded border-neutro-300"
+          <div className="mt-4">
+            <Campo
+              rotulo="Orientação ao tutor"
+              placeholder="Dar com comida, à noite…"
+              value={orientacao}
+              onChange={(e) => setOrientacao(e.target.value)}
             />
-            Uso contínuo
-          </label>
-          <p className="mt-1 text-xs text-neutro-500">
-            Marca que o tratamento não termina no último comprimido. Não altera a validade da
-            receita, que segue a lista de controle.
+          </div>
+        </Cartao>
+      </div>
+
+      {/*
+        O preço e o botão ficam numa coluna à parte, grudada no topo enquanto se
+        rola. Antes moravam no fim da página: quem mexia na dose do terceiro
+        ativo tinha de descer até o fim para ver quanto tinha ficado, ajustar,
+        e descer de novo. O valor é o que mais muda de ideia numa prescrição.
+      */}
+      <div className="flex flex-col gap-4 xl:sticky xl:top-20">
+        <Resumo cotacao={cotacao} temItens={itensProntos.length > 0 && quantidade > 0} />
+
+        {erro ? (
+          <p
+            role="alert"
+            className="rounded-controle bg-controlado-fundo px-3 py-2 text-sm text-controlado-texto"
+          >
+            {erro}
+          </p>
+        ) : null}
+
+        <div className="flex flex-col gap-2">
+          <Botao onClick={salvar} disabled={!podeSalvar} larguraTotal>
+            {salvando ? 'Salvando…' : 'Salvar rascunho'}
+          </Botao>
+          <p className="text-center text-xs text-neutro-500">
+            {faltaClinica
+              ? 'Escolha a clínica para poder salvar.'
+              : 'O rascunho pode ser alterado. A emissão é o passo seguinte, e congela a receita.'}
           </p>
         </div>
-
-        <div className="mt-4">
-          <Campo
-            rotulo="Orientação ao tutor"
-            placeholder="Dar com comida, à noite…"
-            value={orientacao}
-            onChange={(e) => setOrientacao(e.target.value)}
-          />
-        </div>
-      </Cartao>
-
-      <Resumo cotacao={cotacao} temItens={itensProntos.length > 0 && quantidade > 0} />
-
-      {erro ? (
-        <p
-          role="alert"
-          className="rounded-controle bg-controlado-fundo px-3 py-2 text-sm text-controlado-texto"
-        >
-          {erro}
-        </p>
-      ) : null}
-
-      <Botao onClick={salvar} disabled={!podeSalvar} larguraTotal>
-        {salvando ? 'Salvando…' : 'Salvar rascunho'}
-      </Botao>
-      <p className="-mt-4 text-center text-xs text-neutro-500">
-        {faltaClinica
-          ? 'Escolha a clínica para poder salvar.'
-          : 'O rascunho pode ser alterado. A emissão é o passo seguinte, e congela a receita.'}
-      </p>
+      </div>
     </div>
   );
 }

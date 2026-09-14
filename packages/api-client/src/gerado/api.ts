@@ -107,6 +107,108 @@ export interface paths {
         patch: operations["IdentidadeController_alterarUsuario"];
         trace?: never;
     };
+    "/api/v1/auth/senha/esqueci": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Pede o link de redefinição de senha */
+        post: operations["IdentidadeController_pedirRedefinicao"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/senha/redefinir/{token}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Confere se o link de redefinição ainda vale */
+        get: operations["IdentidadeController_conferirToken"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/senha/redefinir": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Redefine a senha usando o link do e-mail */
+        post: operations["IdentidadeController_redefinirSenha"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/bulario": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Busca formulações por doença, ativo ou nome */
+        get: operations["BularioController_listar"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/bulario/linhas": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** As linhas terapêuticas, com quantas formulações cada uma tem */
+        get: operations["BularioController_linhas"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/bulario/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Uma formulação inteira, como o guia a escreve */
+        get: operations["BularioController_achar"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/catalogo/insumos": {
         parameters: {
             query?: never;
@@ -530,6 +632,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/relatorios/prescricoes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** O que foi prescrito num mês, por veterinário e por clínica */
+        get: operations["RelatoriosController_prescricoes"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/relatorios/prescricoes.csv": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** O relatório do mês como planilha */
+        get: operations["RelatoriosController_csv"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/receituario/receitas/{id}/pdf": {
         parameters: {
             query?: never;
@@ -573,6 +709,23 @@ export interface paths {
         };
         /** O PDF da receita, pelo mesmo link */
         get: operations["PublicoController_pdf"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/painel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Métricas da tela inicial, conforme o papel */
+        get: operations["PainelController_montar"];
         put?: never;
         post?: never;
         delete?: never;
@@ -655,7 +808,6 @@ export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
         EntrarDto: {
-            /** Format: email */
             email: string;
             senha: string;
         };
@@ -690,7 +842,6 @@ export interface components {
             }[];
         };
         CriarUsuarioDto: {
-            /** Format: email */
             email: string;
             nome: string;
             /** @enum {string} */
@@ -704,6 +855,48 @@ export interface components {
             papel?: "ADMIN" | "VETERINARIO" | "FARMACIA" | "CLINICA";
             crmv?: string | null;
             desativado?: boolean;
+        };
+        PedirRedefinicaoDto: {
+            email: string;
+        };
+        RedefinirSenhaDto: {
+            token: string;
+            senhaNova: string;
+        };
+        ListaDoBularioDto: {
+            formulacoes: {
+                /** Format: uuid */
+                id: string;
+                numero: string;
+                titulo: string;
+                linhaTerapeutica: string;
+                linhaExclusiva: string | null;
+                formaFarmaceutica: string | null;
+                indicacao: string | null;
+                especies: ("CANINO" | "FELINO" | "EQUINO" | "AVE" | "ROEDOR" | "REPTIL")[];
+            }[];
+            total: number;
+        };
+        LinhasDoBularioDto: {
+            linhas: {
+                nome: string;
+                quantidade: number;
+            }[];
+        };
+        FormulacaoDoBularioDto: {
+            /** Format: uuid */
+            id: string;
+            numero: string;
+            titulo: string;
+            linhaTerapeutica: string;
+            linhaExclusiva: string | null;
+            formaFarmaceutica: string | null;
+            indicacao: string | null;
+            especies: ("CANINO" | "FELINO" | "EQUINO" | "AVE" | "ROEDOR" | "REPTIL")[];
+            diferencial: string | null;
+            composicao: string | null;
+            modoDeUsar: string | null;
+            observacoes: string | null;
         };
         ListaDeInsumosDto: {
             insumos: {
@@ -1248,6 +1441,25 @@ export interface components {
         CancelarReceitaDto: {
             motivo: string;
         };
+        RelatorioDePrescricoesDto: {
+            mes: string;
+            receitas: number;
+            valorEmCentavos: number;
+            porVeterinario: {
+                id: string | null;
+                nome: string;
+                detalhe: string | null;
+                receitas: number;
+                valorEmCentavos: number;
+            }[];
+            porClinica: {
+                id: string | null;
+                nome: string;
+                detalhe: string | null;
+                receitas: number;
+                valorEmCentavos: number;
+            }[];
+        };
         ReceitaPublicaDto: {
             numero: number;
             /** @enum {string} */
@@ -1286,6 +1498,35 @@ export interface components {
                 estado: "EM_ANALISE" | "EM_PRODUCAO" | "PRONTO" | "ENTREGUE" | "CANCELADO";
                 situacao: string;
             } | null;
+        };
+        PainelDto: {
+            rascunhos: number;
+            emitidasNoMes: number;
+            vencendo: number;
+            valorPrescritoNoMesEmCentavos: number;
+            fila: {
+                /** @enum {string} */
+                estado: "EM_ANALISE" | "EM_PRODUCAO" | "PRONTO";
+                quantidade: number;
+            }[] | null;
+            topVeterinarios: {
+                /** Format: uuid */
+                id: string;
+                nome: string;
+                crmv: string | null;
+                receitas: number;
+            }[] | null;
+            ultimas: {
+                /** Format: uuid */
+                id: string;
+                numero: number | null;
+                pacienteNome: string;
+                tutorNome: string;
+                /** @enum {string} */
+                estado: "RASCUNHO" | "EMITIDA" | "CANCELADA";
+                /** Format: date-time */
+                criadaEm: string;
+            }[];
         };
         EnviarPedidoDto: {
             /** Format: uuid */
@@ -1575,6 +1816,133 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    IdentidadeController_pedirRedefinicao: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PedirRedefinicaoDto"];
+            };
+        };
+        responses: {
+            /** @description Pedido recebido. A resposta não diz se a conta existe. */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    IdentidadeController_conferirToken: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                token: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description O link vale. */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    IdentidadeController_redefinirSenha: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RedefinirSenhaDto"];
+            };
+        };
+        responses: {
+            /** @description Senha trocada; é preciso entrar de novo. */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    BularioController_listar: {
+        parameters: {
+            query?: {
+                busca?: string;
+                linhaTerapeutica?: string;
+                especie?: "CANINO" | "FELINO" | "EQUINO" | "AVE" | "ROEDOR" | "REPTIL";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ListaDoBularioDto"];
+                };
+            };
+        };
+    };
+    BularioController_linhas: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LinhasDoBularioDto"];
+                };
+            };
+        };
+    };
+    BularioController_achar: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FormulacaoDoBularioDto"];
+                };
             };
         };
     };
@@ -2489,6 +2857,47 @@ export interface operations {
             };
         };
     };
+    RelatoriosController_prescricoes: {
+        parameters: {
+            query?: {
+                mes?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RelatorioDePrescricoesDto"];
+                };
+            };
+        };
+    };
+    RelatoriosController_csv: {
+        parameters: {
+            query?: {
+                mes?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Planilha com uma linha por veterinário e por clínica. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     DocumentoController_pdf: {
         parameters: {
             query?: never;
@@ -2553,6 +2962,25 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    PainelController_montar: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PainelDto"];
+                };
             };
         };
     };

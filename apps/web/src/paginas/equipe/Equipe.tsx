@@ -79,10 +79,11 @@ export function Equipe() {
 
       {estado.situacao === 'ok' ? (
         estado.dado.usuarios.length === 0 ? (
-          <Vazio>
-            {busca.trim()
-              ? 'Ninguém com esse nome ou e-mail.'
-              : 'Nenhuma conta ainda. Comece por “Nova pessoa”.'}
+          <Vazio
+            icone={busca.trim() ? 'busca' : 'equipe'}
+            titulo={busca.trim() ? 'Nada encontrado' : 'Nenhuma conta ainda'}
+          >
+            {busca.trim() ? 'Ninguém com esse nome ou e-mail.' : 'Comece por “Nova pessoa”.'}
           </Vazio>
         ) : (
           <ul className="flex flex-col gap-2">

@@ -3,7 +3,7 @@ import { Link } from 'react-router';
 import { exigir, type components } from '@pharmopet/api-client';
 import { api } from '@/api/cliente';
 import { useAtrasado, useConsulta } from '@/api/consulta';
-import { Botao } from '@/componentes/Botao';
+import { aparenciaDeBotao } from '@/componentes/Botao';
 import { Campo } from '@/componentes/Campo';
 import { Carregando, Falha, Vazio } from '@/componentes/Estados';
 import { Selo } from '@/componentes/Selo';
@@ -60,8 +60,8 @@ export function Clinicas() {
       <div className="flex flex-wrap items-end justify-between gap-4">
         <h1 className="font-titulo text-2xl font-extrabold tracking-tight">Clínicas</h1>
         {ehAdmin ? (
-          <Link to="/clinicas/nova">
-            <Botao>Nova clínica</Botao>
+          <Link to="/clinicas/nova" className={aparenciaDeBotao()}>
+            Nova clínica
           </Link>
         ) : null}
       </div>
@@ -96,15 +96,18 @@ function Lista({
 }) {
   if (clinicas.length === 0) {
     return (
-      <Vazio>
+      <Vazio
+        icone={buscando ? 'busca' : 'clinicas'}
+        titulo={buscando ? 'Nada encontrado' : 'Nenhuma clínica cadastrada'}
+      >
         {buscando
           ? 'Nenhuma clínica com esse nome ou CNPJ.'
           : // O texto do vazio depende do papel porque ele mandava todo mundo
             // clicar num botão que só o ADMIN enxerga — quem não é ficava
             // procurando na tela a ação que o próprio texto prometia.
             podeCadastrar
-            ? 'Nenhuma clínica cadastrada ainda. Comece por “Nova clínica”.'
-            : 'Nenhuma clínica cadastrada ainda. Quem cadastra clínica parceira é a administração da Pharmopet.'}
+            ? 'Comece por “Nova clínica”.'
+            : 'Quem cadastra clínica parceira é a administração da Pharmopet.'}
       </Vazio>
     );
   }

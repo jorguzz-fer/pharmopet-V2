@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
+import { BularioModule } from './bulario/bulario.module';
 import { CatalogoModule } from './catalogo/catalogo.module';
 import { ClinicasModule } from './clinicas/clinicas.module';
 import { DocumentoModule } from './documento/documento.module';
@@ -9,9 +10,11 @@ import { HealthModule } from './health/health.module';
 import { IdentidadeModule } from './identidade/identidade.module';
 import { PapeisGuard } from './identidade/papeis.guard';
 import { SessaoGuard } from './identidade/sessao.guard';
+import { PainelModule } from './painel/painel.module';
 import { PedidosModule } from './pedidos/pedidos.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { ReceituarioModule } from './receituario/receituario.module';
+import { RelatoriosModule } from './relatorios/relatorios.module';
 import { validarEnv } from './config/env';
 
 /**
@@ -29,10 +32,13 @@ import { validarEnv } from './config/env';
     ThrottlerModule.forRoot([{ name: 'default', ttl: 60_000, limit: 120 }]),
     PrismaModule,
     IdentidadeModule,
+    BularioModule,
     CatalogoModule,
     ClinicasModule,
     ReceituarioModule,
+    RelatoriosModule,
     DocumentoModule,
+    PainelModule,
     PedidosModule,
     HealthModule,
   ],

@@ -1,0 +1,319 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+  <style>
+    body { margin: 0; font-family: 'IBM Plex Sans', system-ui, sans-serif; font-variant-numeric: tabular-nums; -webkit-font-smoothing: antialiased; }
+    a { color: #0B6F6A; text-decoration: none; } a:hover { color: #0A4F4C; }
+    * { box-sizing: border-box; }
+  </style>
+</helmet>
+
+<div style="width: 1440px; height: 1080px; display: flex; flex-direction: column; background: #F7FAFA; color: #17211F; font-size: 15px;">
+
+  <!-- topo do fluxo: sai do app shell, porque montar receita é uma tarefa e não uma seção -->
+  <div style="background: #FFFFFF; border-bottom: 1px solid #DFE7E7; padding: 14px 32px; display: flex; align-items: center; gap: 20px;">
+    <div style="display: flex; align-items: center; gap: 9px;">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+        <path d="M12 2.5c3.6 4 6.5 7 6.5 10.4A6.5 6.5 0 0 1 12 19.4a6.5 6.5 0 0 1-6.5-6.5C5.5 9.5 8.4 6.5 12 2.5z" stroke="#1EB4AE" stroke-width="1.8"></path>
+        <circle cx="10" cy="12.5" r="1.9" fill="#9C90BA"></circle>
+        <circle cx="14.2" cy="12.5" r="1.9" fill="#9C90BA"></circle>
+      </svg>
+      <span style="font-family: 'Manrope', sans-serif; font-size: 16px; font-weight: 800; letter-spacing: -0.02em;">Nova receita</span>
+    </div>
+
+    <div style="margin-left: auto; display: flex; align-items: center; gap: 8px; height: 38px; padding: 0 14px; border-radius: 9px; border: 1px solid #DFE7E7; font-size: 13.5px; font-weight: 600; color: #3E4B4A;">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5E6D6C" stroke-width="1.9" stroke-linecap="round"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg>
+      Descartar
+    </div>
+  </div>
+
+  <!-- trilho dos passos: cada passo concluído mostra o que foi escolhido -->
+  <div style="background: #FFFFFF; border-bottom: 1px solid #DFE7E7; padding: 0 32px 16px 32px;">
+    <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0;">
+
+      <div style="display: flex; flex-direction: column; gap: 8px;">
+        <div style="display: flex; align-items: center; gap: 0;">
+          <span style="width: 26px; height: 26px; flex-shrink: 0; border-radius: 999px; background: #0B6F6A; display: flex; align-items: center; justify-content: center;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path></svg>
+          </span>
+          <span style="flex-grow: 1; height: 2px; background: #0B6F6A;"></span>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 1px; padding-right: 20px;">
+          <span style="font-size: 11.5px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: #0B6F6A;">1 · Tutor</span>
+          <span style="font-size: 13.5px; font-weight: 600;">Marina Prado</span>
+        </div>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 8px;">
+        <div style="display: flex; align-items: center; gap: 0;">
+          <span style="width: 26px; height: 26px; flex-shrink: 0; border-radius: 999px; background: #0B6F6A; display: flex; align-items: center; justify-content: center;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path></svg>
+          </span>
+          <span style="flex-grow: 1; height: 2px; background: #0B6F6A;"></span>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 1px; padding-right: 20px;">
+          <span style="font-size: 11.5px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: #0B6F6A;">2 · Paciente</span>
+          <span style="font-size: 13.5px; font-weight: 600;">Tobias · cão, 6,2 kg</span>
+        </div>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 8px;">
+        <div style="display: flex; align-items: center; gap: 0;">
+          <span style="width: 26px; height: 26px; flex-shrink: 0; border-radius: 999px; background: #FFFFFF; border: 2px solid #0B6F6A; color: #0B6F6A; font-family: 'Manrope', sans-serif; font-size: 12.5px; font-weight: 800; display: flex; align-items: center; justify-content: center;">3</span>
+          <span style="flex-grow: 1; height: 2px; background: #DFE7E7;"></span>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 1px; padding-right: 20px;">
+          <span style="font-size: 11.5px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: #0B6F6A;">3 · Prescrição</span>
+          <span style="font-size: 13.5px; font-weight: 600;">Monte a fórmula</span>
+        </div>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 8px;">
+        <div style="display: flex; align-items: center;">
+          <span style="width: 26px; height: 26px; flex-shrink: 0; border-radius: 999px; background: #FFFFFF; border: 1.5px solid #5E6D6C; color: #5E6D6C; font-family: 'Manrope', sans-serif; font-size: 12.5px; font-weight: 800; display: flex; align-items: center; justify-content: center;">4</span>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 1px;">
+          <span style="font-size: 11.5px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: #5E6D6C;">4 · Revisão</span>
+          <span style="font-size: 13.5px; color: #5E6D6C;">Conferir e emitir</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- corpo -->
+  <div style="flex-grow: 1; min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr) 392px; gap: 24px; padding: 24px 32px 0 32px;">
+
+    <!-- coluna do formulário -->
+    <div style="display: flex; flex-direction: column; gap: 16px; min-width: 0;">
+
+      <!-- fórmula -->
+      <div style="background: #FFFFFF; border: 1px solid #DFE7E7; border-radius: 12px; box-shadow: 0 1px 2px rgba(23,33,31,0.04); overflow: hidden;">
+        <div style="display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 14px 18px; border-bottom: 1px solid #EEF3F3;">
+          <h2 style="margin: 0; font-family: 'Manrope', sans-serif; font-size: 15px; font-weight: 800;">Fórmula</h2>
+          <span style="font-size: 12.5px; color: #5E6D6C;">Dose por administração, em miligramas</span>
+        </div>
+
+        <div style="padding: 16px 18px; display: flex; flex-direction: column; gap: 14px;">
+
+          <!-- ativo 1, com a faixa terapêutica desenhada -->
+          <div style="border: 1px solid #DFE7E7; border-radius: 9px; padding: 14px; display: flex; flex-direction: column; gap: 12px;">
+            <div style="display: flex; align-items: flex-start; gap: 12px;">
+              <div style="min-width: 0; flex-grow: 1; display: flex; flex-direction: column; gap: 4px;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <span style="font-size: 15px; font-weight: 600;">Amitriptilina</span>
+                  <span style="display: inline-flex; align-items: center; gap: 4px; border-radius: 999px; border: 1px solid #F3C9C5; background: #FDECEA; color: #8E1D17; font-size: 11.5px; font-weight: 700; padding: 2px 8px;">
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#8E1D17" stroke-width="2.4" stroke-linecap="round"><path d="M12 8v5"></path><path d="M12 16.5v.01"></path><circle cx="12" cy="12" r="9"></circle></svg>
+                    C1
+                  </span>
+                </div>
+                <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12.5px; color: #5E6D6C;">INS-0412 · antidepressivo tricíclico</span>
+              </div>
+
+              <div style="display: flex; flex-direction: column; gap: 4px; width: 132px; flex-shrink: 0;">
+                <label style="font-size: 12.5px; font-weight: 600; color: #3E4B4A;">Dose (mg)</label>
+                <div style="height: 44px; border-radius: 9px; border: 1px solid #DFE7E7; background: #FFFFFF; display: flex; align-items: center; padding: 0 12px; font-size: 15px; font-weight: 600;">10</div>
+              </div>
+
+              <div style="width: 36px; height: 36px; flex-shrink: 0; margin-top: 22px; border-radius: 9px; border: 1px solid #DFE7E7; display: flex; align-items: center; justify-content: center;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8E1D17" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16"></path><path d="M9.5 7V5.2A1.2 1.2 0 0 1 10.7 4h2.6a1.2 1.2 0 0 1 1.2 1.2V7"></path><path d="M6.5 7 7.4 19a1.6 1.6 0 0 0 1.6 1.5h6a1.6 1.6 0 0 0 1.6-1.5L17.5 7"></path></svg>
+              </div>
+            </div>
+
+            <!-- a faixa: onde a dose caiu para um cão de 6,2 kg -->
+            <div style="display: flex; flex-direction: column; gap: 6px;">
+              <div style="height: 8px; border-radius: 999px; background: #EEF3F3; display: flex; overflow: hidden; position: relative;">
+                <span style="width: 22%; background: #EEF3F3;"></span>
+                <span style="width: 46%; background: #B6DEC9;"></span>
+                <span style="width: 32%; background: #EEF3F3;"></span>
+                <span style="position: absolute; left: 38%; top: -3px; width: 3px; height: 14px; border-radius: 999px; background: #0F7A4A;"></span>
+              </div>
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0F7A4A" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path></svg>
+                <span style="font-size: 12.5px; color: #0B5C37;"><strong style="font-weight: 600;">1,61 mg/kg</strong> — dentro da faixa para cão (1,0 a 2,0 mg/kg)</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- ativo 2 -->
+          <div style="border: 1px solid #DFE7E7; border-radius: 9px; padding: 14px; display: flex; flex-direction: column; gap: 12px;">
+            <div style="display: flex; align-items: flex-start; gap: 12px;">
+              <div style="min-width: 0; flex-grow: 1; display: flex; flex-direction: column; gap: 4px;">
+                <span style="font-size: 15px; font-weight: 600;">Ondansetrona</span>
+                <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12.5px; color: #5E6D6C;">INS-0877 · antiemético</span>
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 4px; width: 132px; flex-shrink: 0;">
+                <label style="font-size: 12.5px; font-weight: 600; color: #3E4B4A;">Dose (mg)</label>
+                <div style="height: 44px; border-radius: 9px; border: 1px solid #EAD6A3; background: #FFFFFF; display: flex; align-items: center; padding: 0 12px; font-size: 15px; font-weight: 600;">6,0</div>
+              </div>
+              <div style="width: 36px; height: 36px; flex-shrink: 0; margin-top: 22px; border-radius: 9px; border: 1px solid #DFE7E7; display: flex; align-items: center; justify-content: center;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8E1D17" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16"></path><path d="M9.5 7V5.2A1.2 1.2 0 0 1 10.7 4h2.6a1.2 1.2 0 0 1 1.2 1.2V7"></path><path d="M6.5 7 7.4 19a1.6 1.6 0 0 0 1.6 1.5h6a1.6 1.6 0 0 0 1.6-1.5L17.5 7"></path></svg>
+              </div>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 6px;">
+              <div style="height: 8px; border-radius: 999px; background: #EEF3F3; display: flex; overflow: hidden; position: relative;">
+                <span style="width: 18%; background: #EEF3F3;"></span>
+                <span style="width: 44%; background: #B6DEC9;"></span>
+                <span style="width: 38%; background: #EEF3F3;"></span>
+                <span style="position: absolute; left: 76%; top: -3px; width: 3px; height: 14px; border-radius: 999px; background: #8A5A00;"></span>
+              </div>
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8A5A00" stroke-width="2.2" stroke-linecap="round"><path d="M12 8v5"></path><path d="M12 16.5v.01"></path><circle cx="12" cy="12" r="9"></circle></svg>
+                <span style="font-size: 12.5px; color: #7A4F00;"><strong style="font-weight: 600;">0,97 mg/kg</strong> — acima da faixa usual (0,22 a 0,60 mg/kg). Confirme se é intencional.</span>
+              </div>
+            </div>
+          </div>
+
+          <div style="display: flex; align-items: center; gap: 10px; height: 44px; border-radius: 9px; border: 1px dashed #C6D2D2; padding: 0 14px; color: #5E6D6C; font-size: 14px;">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#5E6D6C" stroke-width="2" stroke-linecap="round"><path d="M12 5v14"></path><path d="M5 12h14"></path></svg>
+            Adicionar ativo
+          </div>
+        </div>
+      </div>
+
+      <!-- forma e posologia -->
+      <div style="background: #FFFFFF; border: 1px solid #DFE7E7; border-radius: 12px; box-shadow: 0 1px 2px rgba(23,33,31,0.04); overflow: hidden;">
+        <div style="padding: 14px 18px; border-bottom: 1px solid #EEF3F3;">
+          <h2 style="margin: 0; font-family: 'Manrope', sans-serif; font-size: 15px; font-weight: 800;">Forma e posologia</h2>
+        </div>
+
+        <div style="padding: 16px 18px; display: flex; flex-direction: column; gap: 16px;">
+
+          <div style="display: flex; flex-direction: column; gap: 7px;">
+            <label style="font-size: 12.5px; font-weight: 600; color: #3E4B4A;">Forma farmacêutica</label>
+            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+              <span style="display: inline-flex; align-items: center; gap: 7px; height: 40px; padding: 0 14px; border-radius: 999px; border: 1.5px solid #0B6F6A; background: #E8F7F6; color: #0A4F4C; font-size: 14px; font-weight: 600;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0B6F6A" stroke-width="1.8"><rect x="3.2" y="8.5" width="17.6" height="7" rx="3.5"></rect><path d="M12 8.5v7"></path></svg>
+                Cápsulas
+              </span>
+              <span style="display: inline-flex; align-items: center; gap: 7px; height: 40px; padding: 0 14px; border-radius: 999px; border: 1px solid #DFE7E7; background: #FFFFFF; color: #3E4B4A; font-size: 14px;">Suspensão oral</span>
+              <span style="display: inline-flex; align-items: center; gap: 7px; height: 40px; padding: 0 14px; border-radius: 999px; border: 1px solid #DFE7E7; background: #FFFFFF; color: #3E4B4A; font-size: 14px;">Sachê</span>
+              <span style="display: inline-flex; align-items: center; gap: 7px; height: 40px; padding: 0 14px; border-radius: 999px; border: 1px solid #EEF3F3; background: #F7FAFA; color: #5E6D6C; font-size: 14px; text-decoration: line-through;">Biscoito</span>
+              <span style="display: inline-flex; align-items: center; height: 40px; font-size: 12.5px; color: #5E6D6C;">Biscoito não aceita Amitriptilina</span>
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px;">
+            <div style="display: flex; flex-direction: column; gap: 5px;">
+              <label style="font-size: 12.5px; font-weight: 600; color: #3E4B4A;">Frequência</label>
+              <div style="height: 44px; border-radius: 9px; border: 1px solid #DFE7E7; background: #FFFFFF; display: flex; align-items: center; justify-content: space-between; padding: 0 12px; font-size: 15px;">
+                2× ao dia (12h)
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5E6D6C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"></path></svg>
+              </div>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 5px;">
+              <label style="font-size: 12.5px; font-weight: 600; color: #3E4B4A;">Duração (dias)</label>
+              <div style="height: 44px; border-radius: 9px; border: 1px solid #DFE7E7; background: #FFFFFF; display: flex; align-items: center; padding: 0 12px; font-size: 15px;">10</div>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 5px;">
+              <label style="font-size: 12.5px; font-weight: 600; color: #3E4B4A;">Aroma</label>
+              <div style="height: 44px; border-radius: 9px; border: 1px solid #EEF3F3; background: #F7FAFA; display: flex; align-items: center; padding: 0 12px; font-size: 15px; color: #5E6D6C;">Cápsula não leva aroma</div>
+            </div>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 5px;">
+            <label style="font-size: 12.5px; font-weight: 600; color: #3E4B4A;">Orientação ao tutor</label>
+            <div style="min-height: 76px; border-radius: 9px; border: 1px solid #DFE7E7; background: #FFFFFF; padding: 11px 12px; font-size: 15px; line-height: 1.5; color: #3E4B4A;">Dar junto com a comida, de manhã e à noite. Não interromper antes do fim, mesmo com melhora.</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="height: 16px; flex-shrink: 0;"></div>
+    </div>
+
+    <!-- coluna fixa: quanto sai, e o que impede -->
+    <div style="display: flex; flex-direction: column; gap: 16px; min-width: 0;">
+
+      <div style="background: #FFFFFF; border: 1px solid #DFE7E7; border-radius: 12px; box-shadow: 0 1px 2px rgba(23,33,31,0.04); overflow: hidden;">
+        <div style="padding: 14px 18px; border-bottom: 1px solid #EEF3F3; display: flex; align-items: center; justify-content: space-between;">
+          <h2 style="margin: 0; font-family: 'Manrope', sans-serif; font-size: 15px; font-weight: 800;">Orçamento</h2>
+          <span style="font-size: 11.5px; font-weight: 600; color: #5E6D6C;">atualiza sozinho</span>
+        </div>
+
+        <div style="padding: 18px; display: flex; flex-direction: column; gap: 14px;">
+          <div style="display: flex; flex-direction: column; gap: 3px;">
+            <span style="font-family: 'Manrope', sans-serif; font-size: 32px; font-weight: 800; letter-spacing: -0.03em; line-height: 1;">R$ 178,56</span>
+            <span style="font-size: 12.5px; color: #5E6D6C;">20 cápsulas · 10 dias de tratamento</span>
+          </div>
+
+          <div style="height: 1px; background: #EEF3F3;"></div>
+
+          <div style="display: flex; flex-direction: column; gap: 8px;">
+            <div style="display: flex; align-items: center; gap: 10px; font-size: 13px;">
+              <span style="flex-grow: 1; color: #3E4B4A;">Ativos</span>
+              <span style="color: #17211F;">R$ 121,80</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 10px; font-size: 13px;">
+              <span style="flex-grow: 1; color: #3E4B4A;">Cápsula e excipiente</span>
+              <span style="color: #17211F;">R$ 28,60</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 10px; font-size: 13px;">
+              <span style="flex-grow: 1; color: #3E4B4A;">Taxa de manipulação</span>
+              <span style="color: #17211F;">R$ 48,00</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 10px; font-size: 13px;">
+              <span style="flex-grow: 1; color: #0B5C37;">Desconto Vida Animal (10%)</span>
+              <span style="color: #0B5C37;">− R$ 19,84</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- avisos: o que impede vem antes do que só alerta -->
+      <div style="display: flex; flex-direction: column; gap: 10px;">
+
+        <div style="border: 1px solid #EAD6A3; background: #FDF3DF; border-radius: 9px; padding: 12px 14px; display: flex; gap: 10px;">
+          <svg style="flex-shrink: 0; margin-top: 1px;" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#8A5A00" stroke-width="2" stroke-linecap="round"><path d="M12 8v5"></path><path d="M12 16.5v.01"></path><circle cx="12" cy="12" r="9"></circle></svg>
+          <div style="display: flex; flex-direction: column; gap: 2px;">
+            <span style="font-size: 13.5px; font-weight: 600; color: #7A4F00;">Ondansetrona acima da faixa</span>
+            <span style="font-size: 12.5px; line-height: 1.45; color: #7A4F00;">0,97 mg/kg para 6,2 kg. Dá para emitir — a decisão é sua, e fica registrada.</span>
+          </div>
+        </div>
+
+        <div style="border: 1px solid #F3C9C5; background: #FDECEA; border-radius: 9px; padding: 12px 14px; display: flex; gap: 10px;">
+          <svg style="flex-shrink: 0; margin-top: 1px;" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#8E1D17" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.9 2.4 17.4A1.9 1.9 0 0 0 4 20.3h16a1.9 1.9 0 0 0 1.6-2.9L13.7 3.9a1.9 1.9 0 0 0-3.4 0z"></path><path d="M12 9.5v4"></path><path d="M12 17.2v.01"></path></svg>
+          <div style="display: flex; flex-direction: column; gap: 2px;">
+            <span style="font-size: 13.5px; font-weight: 600; color: #8E1D17;">Amitriptilina é C1</span>
+            <span style="font-size: 12.5px; line-height: 1.45; color: #8E1D17;">Sai em receituário de controle especial, em duas vias, e a via original fica retida na farmácia.</span>
+          </div>
+        </div>
+      </div>
+
+      <div style="background: #FFFFFF; border: 1px solid #DFE7E7; border-radius: 12px; box-shadow: 0 1px 2px rgba(23,33,31,0.04); padding: 14px 18px; display: flex; align-items: center; gap: 12px;">
+        <div style="width: 34px; height: 34px; flex-shrink: 0; border-radius: 9px; background: #F2F0F8; display: flex; align-items: center; justify-content: center;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#61548A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21V8l6-4 6 4v13"></path><path d="M15 21V11h6v10"></path><path d="M7 12h2"></path><path d="M7 16h2"></path></svg>
+        </div>
+        <div style="min-width: 0; flex-grow: 1; display: flex; flex-direction: column; gap: 1px;">
+          <span style="font-size: 11.5px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: #5E6D6C;">Clínica</span>
+          <span style="font-size: 14px; font-weight: 600;">Vida Animal</span>
+        </div>
+        <span style="font-size: 13px; font-weight: 600; color: #0B6F6A;">Trocar</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- barra de ação, colada embaixo: o preço nunca sai de vista -->
+  <div style="flex-shrink: 0; background: #FFFFFF; border-top: 1px solid #DFE7E7; padding: 14px 32px; display: flex; align-items: center; gap: 16px; box-shadow: 0 -1px 3px rgba(23,33,31,0.04);">
+    <div style="display: flex; align-items: center; gap: 8px; height: 44px; padding: 0 16px; border-radius: 9px; border: 1px solid #DFE7E7; font-size: 15px; font-weight: 600; color: #3E4B4A;">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#5E6D6C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"></path></svg>
+      Voltar ao paciente
+    </div>
+
+    <div style="margin-left: auto; display: flex; align-items: center; gap: 10px;">
+      <span style="font-size: 13px; color: #5E6D6C;">Rascunho salvo há 4 s</span>
+      <div style="display: flex; align-items: center; gap: 8px; height: 44px; padding: 0 20px; border-radius: 9px; background: #0B6F6A; color: #FFFFFF; font-size: 15px; font-weight: 600;">
+        Revisar e emitir · R$ 178,56
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"></path></svg>
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+</body>
+</html>
