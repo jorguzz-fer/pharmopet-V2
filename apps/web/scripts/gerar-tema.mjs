@@ -8,6 +8,7 @@ import {
   estado,
   fonte,
   raio,
+  sombra,
   tamanhoFonte,
 } from '@pharmopet/design-tokens';
 
@@ -57,6 +58,9 @@ for (const [nome, valor] of Object.entries(espaco)) {
 }
 for (const [nome, valor] of Object.entries(raio)) {
   linhas.push(`  --radius-${nome}: ${valor};`);
+}
+for (const [nome, valor] of Object.entries(sombra)) {
+  linhas.push(`  --shadow-${nome}: ${valor};`);
 }
 linhas.push(`  --altura-controle: ${alturaControle};`);
 

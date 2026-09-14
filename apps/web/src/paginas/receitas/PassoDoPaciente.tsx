@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { exigir, type components } from '@pharmopet/api-client';
 import { formatarPeso } from '@pharmopet/shared';
 import { api } from '@/api/cliente';
@@ -22,10 +22,18 @@ export function PassoDoPaciente({
   tutorId,
   aoEscolher,
   aoVoltar,
+  aoSaberDoTutor,
 }: {
   tutorId: string;
   aoEscolher: (paciente: Paciente) => void;
   aoVoltar: () => void;
+  /**
+   * Avisa o nome do tutor assim que ele chega.
+   *
+   * Quem desenha o trilho dos quatro passos é a página de cima, e ela só tem o
+   * id na URL. Sem isso o passo 1 continuaria dizendo "Tutor ✓" sem dizer qual.
+   */
+  aoSaberDoTutor?: (nome: string) => void;
 }) {
   const [cadastrando, setCadastrando] = useState(false);
 
@@ -45,6 +53,13 @@ export function PassoDoPaciente({
   );
 
   const { estado, recarregar } = useConsulta(`passo-paciente:${tutorId}`, carregar);
+  const nomeCarregado = estado.situacao === 'ok' ? estado.dado.tutor.nome : null;
+
+  // Num efeito, e não no corpo: avisar o pai durante a renderização é escrever
+  // no estado dele enquanto este ainda está renderizando, e o React reclama.
+  useEffect(() => {
+    if (nomeCarregado) aoSaberDoTutor?.(nomeCarregado);
+  }, [nomeCarregado, aoSaberDoTutor]);
 
   if (estado.situacao === 'carregando') return <Carregando o="os pacientes" />;
   if (estado.situacao === 'falha') {

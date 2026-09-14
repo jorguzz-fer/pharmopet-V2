@@ -65,7 +65,9 @@ export function Receitas() {
 
       {estado.situacao === 'ok' ? (
         estado.dado.receitas.length === 0 ? (
-          <Vazio>{vazio(papel)}</Vazio>
+          <Vazio icone="receita" titulo="Nenhuma receita ainda">
+            {vazio(papel)}
+          </Vazio>
         ) : (
           <ul className="flex flex-col gap-2">
             {estado.dado.receitas.map((r) => (

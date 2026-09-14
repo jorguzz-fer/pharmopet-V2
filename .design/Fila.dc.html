@@ -1,0 +1,244 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+  <style>
+    body { margin: 0; font-family: 'IBM Plex Sans', system-ui, sans-serif; font-variant-numeric: tabular-nums; -webkit-font-smoothing: antialiased; }
+    a { color: #0B6F6A; text-decoration: none; } a:hover { color: #0A4F4C; }
+    * { box-sizing: border-box; }
+  </style>
+</helmet>
+
+<div style="width: 1440px; height: 900px; display: flex; background: #F7FAFA; color: #17211F; font-size: 15px;">
+
+  <!-- lateral recolhida: na bancada da farmácia o que importa é a fila -->
+  <div style="width: 64px; flex-shrink: 0; background: #FFFFFF; border-right: 1px solid #DFE7E7; display: flex; flex-direction: column; align-items: center; padding: 18px 0 12px 0; gap: 6px;">
+    <svg style="margin-bottom: 10px;" width="26" height="26" viewBox="0 0 24 24" fill="none">
+      <path d="M12 2.5c3.6 4 6.5 7 6.5 10.4A6.5 6.5 0 0 1 12 19.4a6.5 6.5 0 0 1-6.5-6.5C5.5 9.5 8.4 6.5 12 2.5z" stroke="#1EB4AE" stroke-width="1.8"></path>
+      <circle cx="10" cy="12.5" r="1.9" fill="#9C90BA"></circle>
+      <circle cx="14.2" cy="12.5" r="1.9" fill="#9C90BA"></circle>
+    </svg>
+    <div style="width: 40px; height: 40px; border-radius: 9px; display: flex; align-items: center; justify-content: center;">
+      <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#5E6D6C" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1.5"></rect><rect x="14" y="3" width="7" height="5" rx="1.5"></rect><rect x="14" y="12" width="7" height="9" rx="1.5"></rect><rect x="3" y="16" width="7" height="5" rx="1.5"></rect></svg>
+    </div>
+    <div style="width: 40px; height: 40px; border-radius: 9px; display: flex; align-items: center; justify-content: center;">
+      <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#5E6D6C" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"></path><path d="M14 3v5h5"></path><path d="M9 13h6"></path><path d="M9 17h4"></path></svg>
+    </div>
+    <div style="width: 40px; height: 40px; border-radius: 9px; display: flex; align-items: center; justify-content: center;">
+      <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#5E6D6C" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.2"></circle><path d="M3.5 20a5.5 5.5 0 0 1 11 0"></path><path d="M17 11.5a2.2 2.2 0 1 0 0-4.4 2.2 2.2 0 0 0 0 4.4z"></path><path d="M16.5 20a4.6 4.6 0 0 1 4-4.5"></path></svg>
+    </div>
+    <div style="width: 40px; height: 40px; border-radius: 9px; background: #E8F7F6; display: flex; align-items: center; justify-content: center;">
+      <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#0B6F6A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.5 12 4l9 4.5-9 4.5z"></path><path d="M3 8.5V16l9 4.5L21 16V8.5"></path><path d="M12 13v7.5"></path></svg>
+    </div>
+    <div style="width: 40px; height: 40px; border-radius: 9px; display: flex; align-items: center; justify-content: center;">
+      <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#5E6D6C" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H19v15.5H6.5A2.5 2.5 0 0 0 4 21z"></path><path d="M8 7.5h7"></path><path d="M8 11h5"></path></svg>
+    </div>
+    <div style="margin-top: auto; width: 34px; height: 34px; border-radius: 999px; background: #E2DDEE; color: #61548A; font-family: 'Manrope', sans-serif; font-size: 12.5px; font-weight: 800; display: flex; align-items: center; justify-content: center;">MP</div>
+  </div>
+
+  <div style="flex-grow: 1; min-width: 0; display: flex; flex-direction: column;">
+
+    <div style="display: flex; align-items: center; gap: 20px; padding: 24px 28px 18px 28px;">
+      <div style="display: flex; flex-direction: column; gap: 2px;">
+        <h1 style="margin: 0; font-family: 'Manrope', sans-serif; font-size: 28px; font-weight: 800; letter-spacing: -0.025em;">Fila da farmácia</h1>
+        <span style="font-size: 13px; color: #5E6D6C;">7 pedidos em aberto · o mais antigo está na fila há 2 dias</span>
+      </div>
+
+      <div style="margin-left: auto; display: flex; align-items: center; gap: 10px;">
+        <div style="display: flex; align-items: center; gap: 8px; height: 44px; padding: 0 14px; border-radius: 9px; background: #FFFFFF; border: 1px solid #DFE7E7; font-size: 14px; color: #3E4B4A;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5E6D6C" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.6-3.6"></path></svg>
+          Buscar por nº, paciente ou tutor
+        </div>
+        <div style="display: flex; height: 44px; border-radius: 9px; border: 1px solid #DFE7E7; background: #FFFFFF; overflow: hidden;">
+          <span style="display: inline-flex; align-items: center; padding: 0 14px; background: #0B6F6A; color: #FFFFFF; font-size: 13.5px; font-weight: 600;">Em aberto</span>
+          <span style="display: inline-flex; align-items: center; padding: 0 14px; color: #3E4B4A; font-size: 13.5px;">Tudo</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- o quadro: três colunas, uma por degrau do fluxo -->
+    <div style="flex-grow: 1; min-height: 0; padding: 0 28px 24px 28px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px;">
+
+      <!-- EM ANÁLISE -->
+      <div style="display: flex; flex-direction: column; gap: 12px; min-height: 0;">
+        <div style="display: flex; align-items: center; gap: 9px; padding: 0 2px;">
+          <span style="width: 9px; height: 9px; border-radius: 999px; background: #61548A;"></span>
+          <span style="font-family: 'Manrope', sans-serif; font-size: 14px; font-weight: 800;">Em análise</span>
+          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11.5px; font-weight: 500; color: #5E6D6C; background: #EEF3F3; border-radius: 999px; padding: 2px 8px;">3</span>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 10px;">
+
+          <div style="background: #FFFFFF; border: 1px solid #DFE7E7; border-radius: 12px; box-shadow: 0 1px 2px rgba(23,33,31,0.04); padding: 14px; display: flex; flex-direction: column; gap: 11px;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12.5px; color: #5E6D6C;">nº 148</span>
+              <span style="display: inline-flex; align-items: center; gap: 4px; border-radius: 999px; border: 1px solid #F3C9C5; background: #FDECEA; color: #8E1D17; font-size: 11.5px; font-weight: 700; padding: 2px 8px;">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#8E1D17" stroke-width="2.4" stroke-linecap="round"><path d="M12 8v5"></path><path d="M12 16.5v.01"></path><circle cx="12" cy="12" r="9"></circle></svg>
+                C1
+              </span>
+              <span style="margin-left: auto; display: inline-flex; align-items: center; gap: 4px; font-size: 11.5px; font-weight: 600; color: #8E1D17;">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#8E1D17" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"></circle><path d="M12 7.5V12l3 2"></path></svg>
+                2 d
+              </span>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 2px;">
+              <span style="font-size: 15px; font-weight: 600;">Tobias <span style="font-weight: 400; color: #5E6D6C;">· cão, 6,2 kg</span></span>
+              <span style="font-size: 13px; color: #5E6D6C;">Amitriptilina 10 mg + Ondansetrona 6 mg</span>
+              <span style="font-size: 13px; color: #5E6D6C;">20 cápsulas</span>
+            </div>
+            <div style="height: 1px; background: #EEF3F3;"></div>
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <div style="min-width: 0; flex-grow: 1; display: flex; flex-direction: column;">
+                <span style="font-size: 12.5px; color: #5E6D6C;">Marina Prado · Vida Animal</span>
+                <span style="font-size: 12.5px; color: #5E6D6C;">Entrega na clínica</span>
+              </div>
+              <span style="font-size: 14px; font-weight: 600;">R$ 178,56</span>
+            </div>
+            <div style="display: flex; align-items: center; justify-content: center; gap: 7px; height: 40px; border-radius: 9px; background: #0B6F6A; color: #FFFFFF; font-size: 14px; font-weight: 600;">
+              Pôr em produção
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"></path></svg>
+            </div>
+          </div>
+
+          <div style="background: #FFFFFF; border: 1px solid #DFE7E7; border-radius: 12px; box-shadow: 0 1px 2px rgba(23,33,31,0.04); padding: 14px; display: flex; flex-direction: column; gap: 11px;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12.5px; color: #5E6D6C;">nº 147</span>
+              <span style="margin-left: auto; font-size: 11.5px; color: #5E6D6C;">4 h</span>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 2px;">
+              <span style="font-size: 15px; font-weight: 600;">Aurora <span style="font-weight: 400; color: #5E6D6C;">· gata, 3,8 kg</span></span>
+              <span style="font-size: 13px; color: #5E6D6C;">Maropitant 4 mg</span>
+              <span style="font-size: 13px; color: #5E6D6C;">30 mL de suspensão · morango</span>
+            </div>
+            <div style="height: 1px; background: #EEF3F3;"></div>
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <div style="min-width: 0; flex-grow: 1; display: flex; flex-direction: column;">
+                <span style="font-size: 12.5px; color: #5E6D6C;">Caio Bandeira</span>
+                <span style="font-size: 12.5px; color: #5E6D6C;">Entrega ao tutor</span>
+              </div>
+              <span style="font-size: 14px; font-weight: 600;">R$ 94,00</span>
+            </div>
+            <div style="display: flex; align-items: center; justify-content: center; gap: 7px; height: 40px; border-radius: 9px; background: #FFFFFF; border: 1px solid #DFE7E7; color: #3E4B4A; font-size: 14px; font-weight: 600;">Pôr em produção</div>
+          </div>
+
+          <div style="background: #FFFFFF; border: 1px solid #DFE7E7; border-radius: 12px; box-shadow: 0 1px 2px rgba(23,33,31,0.04); padding: 14px; display: flex; flex-direction: column; gap: 8px;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12.5px; color: #5E6D6C;">nº 146</span>
+              <span style="display: inline-flex; border-radius: 999px; border: 1px solid #EAD6A3; background: #FDF3DF; color: #7A4F00; font-size: 11.5px; font-weight: 700; padding: 2px 8px;">antimicrobiano</span>
+              <span style="margin-left: auto; font-size: 11.5px; color: #5E6D6C;">1 h</span>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 2px;">
+              <span style="font-size: 15px; font-weight: 600;">Simba <span style="font-weight: 400; color: #5E6D6C;">· cão, 24 kg</span></span>
+              <span style="font-size: 13px; color: #5E6D6C;">Enrofloxacino 25 mg</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- EM PRODUÇÃO -->
+      <div style="display: flex; flex-direction: column; gap: 12px; min-height: 0;">
+        <div style="display: flex; align-items: center; gap: 9px; padding: 0 2px;">
+          <span style="width: 9px; height: 9px; border-radius: 999px; background: #8A5A00;"></span>
+          <span style="font-family: 'Manrope', sans-serif; font-size: 14px; font-weight: 800;">Em produção</span>
+          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11.5px; font-weight: 500; color: #5E6D6C; background: #EEF3F3; border-radius: 999px; padding: 2px 8px;">2</span>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 10px;">
+          <div style="background: #FFFFFF; border: 1px solid #DFE7E7; border-radius: 12px; box-shadow: 0 1px 2px rgba(23,33,31,0.04); padding: 14px; display: flex; flex-direction: column; gap: 11px;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12.5px; color: #5E6D6C;">nº 144</span>
+              <span style="margin-left: auto; font-size: 11.5px; color: #5E6D6C;">6 h</span>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 2px;">
+              <span style="font-size: 15px; font-weight: 600;">Frida <span style="font-weight: 400; color: #5E6D6C;">· coelha, 2,4 kg</span></span>
+              <span style="font-size: 13px; color: #5E6D6C;">Meloxicam 0,5 mg</span>
+              <span style="font-size: 13px; color: #5E6D6C;">28 cápsulas</span>
+            </div>
+            <div style="height: 1px; background: #EEF3F3;"></div>
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <div style="min-width: 0; flex-grow: 1; display: flex; flex-direction: column;">
+                <span style="font-size: 12.5px; color: #5E6D6C;">Lúcia Tavares</span>
+                <span style="font-size: 12.5px; color: #5E6D6C;">Entrega ao tutor</span>
+              </div>
+              <span style="font-size: 14px; font-weight: 600;">R$ 148,20</span>
+            </div>
+            <div style="display: flex; align-items: center; justify-content: center; gap: 7px; height: 40px; border-radius: 9px; background: #0B6F6A; color: #FFFFFF; font-size: 14px; font-weight: 600;">
+              Marcar pronto
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"></path></svg>
+            </div>
+          </div>
+
+          <div style="background: #FFFFFF; border: 1px solid #DFE7E7; border-radius: 12px; box-shadow: 0 1px 2px rgba(23,33,31,0.04); padding: 14px; display: flex; flex-direction: column; gap: 8px;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12.5px; color: #5E6D6C;">nº 145</span>
+              <span style="margin-left: auto; font-size: 11.5px; color: #5E6D6C;">1 d</span>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 2px;">
+              <span style="font-size: 15px; font-weight: 600;">Pipoca <span style="font-weight: 400; color: #5E6D6C;">· cadela, 11 kg</span></span>
+              <span style="font-size: 13px; color: #5E6D6C;">Omeprazol 2 mg</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PRONTO -->
+      <div style="display: flex; flex-direction: column; gap: 12px; min-height: 0;">
+        <div style="display: flex; align-items: center; gap: 9px; padding: 0 2px;">
+          <span style="width: 9px; height: 9px; border-radius: 999px; background: #0F7A4A;"></span>
+          <span style="font-family: 'Manrope', sans-serif; font-size: 14px; font-weight: 800;">Pronto</span>
+          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11.5px; font-weight: 500; color: #5E6D6C; background: #EEF3F3; border-radius: 999px; padding: 2px 8px;">2</span>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 10px;">
+          <div style="background: #FFFFFF; border: 1px solid #B6DEC9; border-radius: 12px; box-shadow: 0 1px 2px rgba(23,33,31,0.04); padding: 14px; display: flex; flex-direction: column; gap: 11px;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12.5px; color: #5E6D6C;">nº 139</span>
+              <span style="display: inline-flex; align-items: center; gap: 4px; border-radius: 999px; border: 1px solid #F3C9C5; background: #FDECEA; color: #8E1D17; font-size: 11.5px; font-weight: 700; padding: 2px 8px;">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#8E1D17" stroke-width="2.4" stroke-linecap="round"><path d="M12 8v5"></path><path d="M12 16.5v.01"></path><circle cx="12" cy="12" r="9"></circle></svg>
+                controlado
+              </span>
+              <span style="margin-left: auto; font-size: 11.5px; color: #5E6D6C;">pronto há 3 h</span>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 2px;">
+              <span style="font-size: 15px; font-weight: 600;">Bartô <span style="font-weight: 400; color: #5E6D6C;">· cão, 31 kg</span></span>
+              <span style="font-size: 13px; color: #5E6D6C;">Tramadol 50 mg</span>
+              <span style="font-size: 13px; color: #5E6D6C;">14 cápsulas</span>
+            </div>
+            <div style="height: 1px; background: #EEF3F3;"></div>
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <div style="min-width: 0; flex-grow: 1; display: flex; flex-direction: column;">
+                <span style="font-size: 12.5px; color: #5E6D6C;">Sandra Peçanha · Bicho Bom</span>
+                <span style="font-size: 12.5px; font-weight: 600; color: #0B5C37;">Aguardando retirada na clínica</span>
+              </div>
+              <span style="font-size: 14px; font-weight: 600;">R$ 96,30</span>
+            </div>
+            <div style="display: flex; align-items: center; justify-content: center; gap: 7px; height: 40px; border-radius: 9px; background: #0B6F6A; color: #FFFFFF; font-size: 14px; font-weight: 600;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path></svg>
+              Registrar entrega
+            </div>
+          </div>
+
+          <div style="background: #FFFFFF; border: 1px solid #DFE7E7; border-radius: 12px; box-shadow: 0 1px 2px rgba(23,33,31,0.04); padding: 14px; display: flex; flex-direction: column; gap: 8px;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12.5px; color: #5E6D6C;">nº 141</span>
+              <span style="margin-left: auto; font-size: 11.5px; color: #5E6D6C;">pronto há 1 d</span>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 2px;">
+              <span style="font-size: 15px; font-weight: 600;">Mel <span style="font-weight: 400; color: #5E6D6C;">· gata, 5,4 kg</span></span>
+              <span style="font-size: 13px; color: #5E6D6C;">Amitriptilina 5 mg</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+</body>
+</html>

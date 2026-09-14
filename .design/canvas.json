@@ -1,0 +1,70 @@
+{
+  "artboards": [
+    {
+      "file": "Main.dc.html",
+      "x": 0,
+      "y": 0,
+      "w": 1440,
+      "h": 900,
+      "title": "Painel"
+    },
+    {
+      "file": "NovaReceita.dc.html",
+      "x": 1560,
+      "y": 0,
+      "w": 1440,
+      "h": 1080,
+      "title": "Nova receita — passo 3"
+    },
+    {
+      "file": "Fila.dc.html",
+      "x": 0,
+      "y": 1240,
+      "w": 1440,
+      "h": 900,
+      "title": "Fila da farmácia"
+    },
+    {
+      "file": "Celular.dc.html",
+      "x": 1560,
+      "y": 1240,
+      "w": 390,
+      "h": 844,
+      "title": "Painel no celular"
+    },
+    {
+      "file": "Componentes.dc.html",
+      "x": 2080,
+      "y": 1240,
+      "w": 1040,
+      "h": 1260,
+      "title": "Peças"
+    }
+  ],
+  "annotations": [
+    {
+      "id": "nota-lateral",
+      "x": 0,
+      "y": -150,
+      "w": 520,
+      "text": "Navegação vira lateral no desktop.\nCom dez abas o ADMIN já quebrava em duas linhas, e a faixa horizontal roubava a largura que a tela precisa. No celular ela vira barra inferior — sem gaveta escondida, como o código já queria."
+    },
+    {
+      "id": "nota-wizard",
+      "x": 1560,
+      "y": -150,
+      "w": 520,
+      "text": "O trilho dos passos passa a mostrar o que foi escolhido, e o preço fica colado no rodapé.\nA faixa terapêutica vira desenho: dá para ver onde a dose caiu sem ler o número."
+    },
+    {
+      "id": "nota-fila",
+      "x": 0,
+      "y": 2180,
+      "w": 520,
+      "text": "A fila vira quadro de três colunas — os três degraus do ADR 0014.\nCada cartão traz há quanto tempo espera e a única ação que cabe naquele estado."
+    }
+  ],
+  "launch": {
+    "view": "canvas"
+  }
+}

@@ -1,4 +1,13 @@
-import { cor, estado, fonte, tamanhoFonte, espaco, raio, alturaControle } from './tokens.js';
+import {
+  cor,
+  estado,
+  fonte,
+  tamanhoFonte,
+  espaco,
+  raio,
+  sombra,
+  alturaControle,
+} from './tokens.js';
 
 /**
  * Emite os tokens como custom properties CSS.
@@ -32,6 +41,9 @@ export function cssDosTokens(): string {
   }
   for (const [nome, valor] of Object.entries(raio)) {
     linhas.push(`  --raio-${nome}: ${valor};`);
+  }
+  for (const [nome, valor] of Object.entries(sombra)) {
+    linhas.push(`  --sombra-${nome}: ${valor};`);
   }
   linhas.push(`  --altura-controle: ${alturaControle};`);
 

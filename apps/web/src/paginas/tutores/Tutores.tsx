@@ -81,7 +81,10 @@ export function Tutores() {
 function ListaDeTutores({ tutores, busca }: { tutores: Tutor[]; busca: string }) {
   if (tutores.length === 0) {
     return (
-      <Vazio>
+      <Vazio
+        icone={busca.trim() ? 'busca' : 'tutores'}
+        titulo={busca.trim() ? 'Nada encontrado' : 'Nenhum tutor cadastrado'}
+      >
         {busca.trim()
           ? 'Nenhum tutor com esse nome ou CPF. Confira a digitação, ou cadastre.'
           : 'Nenhum tutor cadastrado ainda. Comece por “Novo tutor”.'}

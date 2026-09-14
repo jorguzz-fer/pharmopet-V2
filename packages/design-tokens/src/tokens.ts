@@ -104,6 +104,27 @@ export const raio = {
 } as const;
 
 /**
+ * Elevação.
+ *
+ * A v2 nasceu sem nenhuma: toda superfície era caixa branca com borda de 1px
+ * sobre fundo quase branco, e o olho não separava figura de fundo. A sombra
+ * aqui é deliberadamente fraca — isto é dado denso, não vitrine —, e vem em
+ * duas camadas porque uma só obriga a escolher entre marcar a borda e marcar a
+ * distância, e a superfície precisa das duas.
+ *
+ * Preta na matiz do neutro-900, e não cinza puro: sombra neutra sobre um fundo
+ * de viés frio puxa para o roxo.
+ */
+export const sombra = {
+  /** Cartão, lista, painel — o repouso. */
+  carta: '0 1px 2px rgba(23, 33, 31, 0.04), 0 1px 3px rgba(23, 33, 31, 0.06)',
+  /** O que se levanta sob o cursor, e o que flutua sobre a página. */
+  alta: '0 4px 6px -2px rgba(23, 33, 31, 0.06), 0 10px 20px -4px rgba(23, 33, 31, 0.10)',
+  /** Barra colada ao rodapé: a sombra sobe, então o deslocamento é negativo. */
+  rodape: '0 -1px 3px rgba(23, 33, 31, 0.05)',
+} as const;
+
+/**
  * Altura mínima de qualquer elemento acionável. 44px é o piso de alvo de
  * toque — o veterinário usa isso com pressa, às vezes no celular.
  */
@@ -116,6 +137,7 @@ export const tokens = {
   tamanhoFonte,
   espaco,
   raio,
+  sombra,
   alturaControle,
 } as const;
 
