@@ -108,4 +108,17 @@ describe('lista de receitas vazia', () => {
 
     expect(await screen.findByText(/Quem prescreve é o veterinário/)).toBeInTheDocument();
   });
+
+  /**
+   * O vazio ganhou título no redesenho, e as frases que já existiam abriam
+   * repetindo a mesma constatação: a tela passou a dizer "Nenhuma receita
+   * ainda." duas vezes seguidas, uma em negrito e outra abaixo. O título
+   * constata; o texto abaixo dele só aconselha.
+   */
+  it('constata o vazio uma vez só, e não duas', async () => {
+    montar('/receitas', 'ADMIN', semReceita);
+    await screen.findByText(/Quem prescreve é o veterinário/);
+
+    expect(screen.getAllByText(/Nenhuma receita ainda/)).toHaveLength(1);
+  });
 });

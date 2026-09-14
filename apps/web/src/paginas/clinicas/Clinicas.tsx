@@ -106,8 +106,8 @@ function Lista({
             // clicar num botão que só o ADMIN enxerga — quem não é ficava
             // procurando na tela a ação que o próprio texto prometia.
             podeCadastrar
-            ? 'Nenhuma clínica cadastrada ainda. Comece por “Nova clínica”.'
-            : 'Nenhuma clínica cadastrada ainda. Quem cadastra clínica parceira é a administração da Pharmopet.'}
+            ? 'Comece por “Nova clínica”.'
+            : 'Quem cadastra clínica parceira é a administração da Pharmopet.'}
       </Vazio>
     );
   }

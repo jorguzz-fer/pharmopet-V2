@@ -129,7 +129,7 @@ function ListaDeInsumos({ somenteControlados }: { somenteControlados: boolean })
             ? 'Nenhum insumo controlado entre os encontrados. Marque um pela aba Insumos.'
             : busca.trim()
               ? 'Nenhum insumo com esse nome ou código.'
-              : 'O catálogo está vazio. Importe o export da farmácia com o comando catalogo:importar.'}
+              : 'Importe o export da farmácia com o comando catalogo:importar.'}
         </Vazio>
       ) : null}
 

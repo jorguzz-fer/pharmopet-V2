@@ -121,7 +121,8 @@ describe('fila da farmácia', () => {
 
     montar('/pedidos');
 
-    expect(await screen.findByText(/Nada na fila/)).toBeInTheDocument();
+    expect(await screen.findByText('A fila está vazia')).toBeInTheDocument();
+    expect(screen.getByText(/Pedidos chegam aqui quando um veterinário envia/)).toBeInTheDocument();
   });
 
   it('oferece só o próximo passo, e não a lista inteira de estados', async () => {

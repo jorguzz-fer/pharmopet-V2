@@ -18,15 +18,21 @@ type Resumida = components['schemas']['ListaDeReceitasDto']['receitas'][number];
  * mandava a farmácia a uma aba que ela não enxerga, e o administrador a uma
  * ação que só o veterinário pode fazer. Vazio que aponta para porta fechada é
  * pior do que vazio mudo.
+ *
+ * Só a segunda metade: o título do `Vazio` já diz que não há receita, e
+ * repetir a constatação antes do conselho fazia a tela dizer "Nenhuma receita
+ * ainda. Nenhuma receita ainda. Quem prescreve é…".
  */
 function vazio(papel: Papel | null): string {
   switch (papel) {
     case 'VETERINARIO':
-      return 'Nenhuma receita ainda. Comece por “Nova receita”.';
+      return 'Comece por “Nova receita”.';
     case 'FARMACIA':
-      return 'Nenhuma receita ainda. Elas aparecem aqui quando um veterinário emitir.';
+      return 'Elas aparecem aqui quando um veterinário emitir.';
     default:
-      return 'Nenhuma receita ainda. Quem prescreve é o veterinário, pela ficha do tutor.';
+      // "Pela ficha do tutor" não: o botão de prescrever também está atrás de
+      // `podePrescrever` lá, então o administrador iria olhar e não acharia.
+      return 'Quem prescreve é o veterinário, com a conta dele.';
   }
 }
 
