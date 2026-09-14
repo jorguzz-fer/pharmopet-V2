@@ -141,8 +141,8 @@ export function Painel() {
               }
             >
               {podePrescrever
-                ? 'Nenhuma receita ainda. Comece por “Nova receita”.'
-                : 'Nenhuma receita ainda.'}
+                ? 'Comece por “Nova receita”.'
+                : 'Quem prescreve é o veterinário, com a conta dele.'}
             </Vazio>
           ) : (
             <ul className="flex flex-col">

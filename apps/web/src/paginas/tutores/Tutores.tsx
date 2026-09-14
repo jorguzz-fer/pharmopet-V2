@@ -87,7 +87,7 @@ function ListaDeTutores({ tutores, busca }: { tutores: Tutor[]; busca: string })
       >
         {busca.trim()
           ? 'Nenhum tutor com esse nome ou CPF. Confira a digitação, ou cadastre.'
-          : 'Nenhum tutor cadastrado ainda. Comece por “Novo tutor”.'}
+          : 'Comece por “Novo tutor”.'}
       </Vazio>
     );
   }

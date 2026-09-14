@@ -105,10 +105,15 @@ export function Pedidos() {
       {estado.situacao === 'ok' ? (
         pedidos.length === 0 ? (
           <Cartao semRespiro>
-            <Vazio icone="pedidos" titulo="A fila está vazia">
+            <Vazio
+              icone="pedidos"
+              // Sem o filtro não é "a fila" que está vazia: é o histórico
+              // inteiro, encerrados incluídos.
+              titulo={soAbertos ? 'A fila está vazia' : 'Nenhum pedido ainda'}
+            >
               {soAbertos
-                ? 'Nada na fila. Quando um veterinário enviar uma receita, ela aparece aqui.'
-                : 'Nenhum pedido ainda.'}
+                ? 'Pedidos chegam aqui quando um veterinário envia uma receita emitida para manipulação.'
+                : 'Nem em aberto, nem encerrado — ninguém enviou receita para manipulação ainda.'}
             </Vazio>
           </Cartao>
         ) : (

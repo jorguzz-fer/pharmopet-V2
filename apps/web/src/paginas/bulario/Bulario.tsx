@@ -127,7 +127,7 @@ export function Bulario() {
           >
             {busca.trim() || linha || especie
               ? 'Nenhuma formulação com esses critérios. Tente um termo mais curto.'
-              : 'O bulário está vazio. Importe os guias com o comando bulario:importar.'}
+              : 'Importe os guias com o comando bulario:importar.'}
           </Vazio>
         ) : (
           <>
