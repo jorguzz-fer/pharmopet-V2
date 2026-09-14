@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { RouterProvider, createMemoryRouter } from 'react-router';
 import { afterEach, describe, expect, it, vi } from 'vitest';
@@ -45,6 +45,10 @@ const TUTOR = {
 const PACIENTE = {
   id: 'p-1',
   tutorId: 't-1',
+  // O contrato devolve o nome do tutor junto, e este fixture não o trazia. O
+  // cabeçalho antigo lia `paciente.tutorNome` e renderizava vazio sem que
+  // nenhum teste reclamasse.
+  tutorNome: 'Joana Prado',
   nome: 'Amora',
   especie: 'CANINO',
   raca: 'SRD',
@@ -242,12 +246,40 @@ describe('voltar', () => {
     vi.stubGlobal('fetch', fetchFalso);
 
     const router = montar('/receitas/nova?paciente=p-1');
-    await userEvent.click(await screen.findByRole('button', { name: /Trocar o paciente/ }));
+    // Pelo próprio trilho: o botão "Trocar o paciente" saiu porque os passos
+    // concluídos agora são clicáveis, e um segundo caminho para a mesma coisa
+    // logo acima do primeiro só fazia a pessoa escolher entre dois iguais.
+    await userEvent.click(await screen.findByRole('button', { name: /2 · Paciente/ }));
 
     // Mantém o tutor: quem errou o bicho quase sempre errou dentro da mesma
     // ficha, e limpar os dois faria refazer a busca do tutor sem motivo.
     expect(router.state.location.search).toBe('?tutor=t-1');
     expect(await screen.findByText('Paciente de Joana Prado')).toBeInTheDocument();
+  });
+
+  it('o trilho mostra quem já foi escolhido', async () => {
+    const { fetchFalso } = apiFalsa();
+    vi.stubGlobal('fetch', fetchFalso);
+
+    montar('/receitas/nova?paciente=p-1');
+    await screen.findByRole('button', { name: 'Salvar rascunho' });
+
+    // Antes o trilho só dizia "Tutor ✓" — quem volta de uma ligação ou de
+    // outra aba precisava descer a página para saber de quem era a receita.
+    const trilho = within(screen.getByRole('list', { name: 'Passos da receita' }));
+
+    expect(trilho.getByText('Joana Prado')).toBeInTheDocument();
+    expect(trilho.getByText('Amora')).toBeInTheDocument();
+  });
+
+  it('voltar ao passo 1 pelo trilho limpa o paciente e o tutor', async () => {
+    const { fetchFalso } = apiFalsa();
+    vi.stubGlobal('fetch', fetchFalso);
+
+    const router = montar('/receitas/nova?paciente=p-1');
+    await userEvent.click(await screen.findByRole('button', { name: /1 · Tutor/ }));
+
+    expect(router.state.location.search).toBe('');
   });
 
   it('trocar o tutor volta ao passo 1 e limpa tudo', async () => {

@@ -262,7 +262,8 @@ describe('quem vê a aba', () => {
     vi.stubGlobal('fetch', fetchFalso);
 
     montar('/');
-    await screen.findByRole('link', { name: 'Relatórios' });
+    const lateral = within(await screen.findByRole('navigation', { name: 'Seções' }));
+    lateral.getByRole('link', { name: 'Relatórios' });
   });
 
   it('a farmácia vê — é quem fecha conta', async () => {
@@ -270,7 +271,8 @@ describe('quem vê a aba', () => {
     vi.stubGlobal('fetch', fetchFalso);
 
     montar('/');
-    await screen.findByRole('link', { name: 'Relatórios' });
+    const lateral = within(await screen.findByRole('navigation', { name: 'Seções' }));
+    lateral.getByRole('link', { name: 'Relatórios' });
   });
 
   it('o veterinário não vê', async () => {
@@ -280,8 +282,12 @@ describe('quem vê a aba', () => {
     montar('/');
     // Espera a navegação existir antes de afirmar que uma aba não está nela —
     // senão o teste passaria por a tela ainda não ter carregado.
-    await screen.findByRole('link', { name: 'Tutores' });
+    const lateral = within(await screen.findByRole('navigation', { name: 'Seções' }));
+    lateral.getByRole('link', { name: 'Tutores' });
 
-    expect(screen.queryByRole('link', { name: 'Relatórios' })).not.toBeInTheDocument();
+    expect(lateral.queryByRole('link', { name: 'Relatórios' })).not.toBeInTheDocument();
+    // E também não pela barra do celular, que mostra outro recorte de abas.
+    const doCelular = within(screen.getByRole('navigation', { name: 'Seções principais' }));
+    expect(doCelular.queryByRole('link', { name: 'Relatórios' })).not.toBeInTheDocument();
   });
 });

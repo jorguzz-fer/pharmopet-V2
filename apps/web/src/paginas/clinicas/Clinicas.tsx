@@ -96,7 +96,10 @@ function Lista({
 }) {
   if (clinicas.length === 0) {
     return (
-      <Vazio>
+      <Vazio
+        icone={buscando ? 'busca' : 'clinicas'}
+        titulo={buscando ? 'Nada encontrado' : 'Nenhuma clínica cadastrada'}
+      >
         {buscando
           ? 'Nenhuma clínica com esse nome ou CNPJ.'
           : // O texto do vazio depende do papel porque ele mandava todo mundo

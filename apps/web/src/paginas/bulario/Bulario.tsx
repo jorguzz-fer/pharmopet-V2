@@ -121,7 +121,10 @@ export function Bulario() {
 
       {estado.situacao === 'ok' ? (
         estado.dado.formulacoes.length === 0 ? (
-          <Vazio>
+          <Vazio
+            icone={busca.trim() || linha || especie ? 'busca' : 'bulario'}
+            titulo={busca.trim() || linha || especie ? 'Nada encontrado' : 'O bulário está vazio'}
+          >
             {busca.trim() || linha || especie
               ? 'Nenhuma formulação com esses critérios. Tente um termo mais curto.'
               : 'O bulário está vazio. Importe os guias com o comando bulario:importar.'}

@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import { RouterProvider, createMemoryRouter } from 'react-router';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { rotas } from '@/rotas';
@@ -96,8 +96,43 @@ describe('a raiz da aplicação', () => {
     montar('/');
     await screen.findByRole('heading', { name: /Olá, Renata/ });
 
-    expect(screen.getByRole('link', { name: 'Painel' })).toHaveAttribute('href', '/');
-    expect(screen.getByRole('link', { name: 'Receitas' })).toHaveAttribute('href', '/receitas');
+    // Escopado à lateral porque a barra inferior do celular repete os mesmos
+    // destinos. No navegador só uma das duas está desenhada — o jsdom não
+    // aplica CSS, então vê as duas, e sem o escopo o teste só diria que há
+    // mais de um link chamado "Painel".
+    const lateral = within(screen.getByRole('navigation', { name: 'Seções' }));
+
+    expect(lateral.getByRole('link', { name: 'Painel' })).toHaveAttribute('href', '/');
+    expect(lateral.getByRole('link', { name: 'Receitas' })).toHaveAttribute('href', '/receitas');
+  });
+
+  it('a barra do celular leva aos mesmos lugares, com nome próprio', async () => {
+    const { fetchFalso } = apiFalsa();
+    vi.stubGlobal('fetch', fetchFalso);
+
+    montar('/');
+    await screen.findByRole('heading', { name: /Olá, Renata/ });
+
+    // Duas navegações com o mesmo nome acessível deixam quem navega por marcos
+    // sem saber qual é qual.
+    const doCelular = within(screen.getByRole('navigation', { name: 'Seções principais' }));
+
+    expect(doCelular.getByRole('link', { name: 'Painel' })).toHaveAttribute('href', '/');
+    expect(doCelular.getByRole('link', { name: 'Pedidos' })).toHaveAttribute('href', '/pedidos');
+  });
+
+  it('mostra quem entrou uma vez só', async () => {
+    const { fetchFalso } = apiFalsa();
+    vi.stubGlobal('fetch', fetchFalso);
+
+    montar('/');
+    await screen.findByRole('heading', { name: /Olá, Renata/ });
+
+    // A moldura já teve o bloco do usuário em dois lugares — rodapé da lateral
+    // e topo do celular —, um escondido por CSS. Leitor de tela que ignore o
+    // `display:none` lia o nome duas vezes.
+    expect(screen.getAllByText('Renata Mattos')).toHaveLength(1);
+    expect(screen.getAllByRole('button', { name: 'Sair' })).toHaveLength(1);
   });
 });
 
