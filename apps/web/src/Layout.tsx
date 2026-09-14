@@ -66,6 +66,9 @@ const ADMINISTRACAO: Aba[] = [
   // O catálogo é da administração da farmácia: é lá que se corrige markup,
   // lista de controle e proibição de forma.
   { para: '/catalogo', rotulo: 'Catálogo', icone: 'catalogo', fim: false, papeis: ['ADMIN'] },
+  // Quem fecha conta com as clínicas. Fora do veterinário de propósito: o
+  // relatório soma o volume de todos, e mostrá-lo a quem prescreve é mostrar
+  // o movimento dos colegas.
   {
     para: '/relatorios',
     rotulo: 'Relatórios',

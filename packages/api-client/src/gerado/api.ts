@@ -632,6 +632,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/relatorios/prescricoes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** O que foi prescrito num mês, por veterinário e por clínica */
+        get: operations["RelatoriosController_prescricoes"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/relatorios/prescricoes.csv": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** O relatório do mês como planilha */
+        get: operations["RelatoriosController_csv"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/receituario/receitas/{id}/pdf": {
         parameters: {
             query?: never;
@@ -1406,6 +1440,25 @@ export interface components {
         };
         CancelarReceitaDto: {
             motivo: string;
+        };
+        RelatorioDePrescricoesDto: {
+            mes: string;
+            receitas: number;
+            valorEmCentavos: number;
+            porVeterinario: {
+                id: string | null;
+                nome: string;
+                detalhe: string | null;
+                receitas: number;
+                valorEmCentavos: number;
+            }[];
+            porClinica: {
+                id: string | null;
+                nome: string;
+                detalhe: string | null;
+                receitas: number;
+                valorEmCentavos: number;
+            }[];
         };
         ReceitaPublicaDto: {
             numero: number;
@@ -2801,6 +2854,47 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ReceitaDto"];
                 };
+            };
+        };
+    };
+    RelatoriosController_prescricoes: {
+        parameters: {
+            query?: {
+                mes?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RelatorioDePrescricoesDto"];
+                };
+            };
+        };
+    };
+    RelatoriosController_csv: {
+        parameters: {
+            query?: {
+                mes?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Planilha com uma linha por veterinário e por clínica. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
